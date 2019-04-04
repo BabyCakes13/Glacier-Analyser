@@ -1,4 +1,6 @@
 import os
+import datetime
+from dateutil.relativedelta import relativedelta
 from pathlib import Path
 CONFIG_FILENAME = "config.ini"
 
@@ -11,6 +13,22 @@ def get_default_io_paths() -> dict:
     }
 
     return paths
+
+
+def get_default_specifications() -> dict:
+    """Return the default date for the configuration file."""
+    today = datetime.datetime.now()
+    past = today - relativedelta(years=100)
+
+    today = today.strftime('%Y-%m-%d')
+    past = past.strftime('%Y-%m-%d')
+
+    specifications = {
+        'from': today,
+        'to': past
+    }
+
+    return specifications
 
 
 def get_default_bands() -> dict:

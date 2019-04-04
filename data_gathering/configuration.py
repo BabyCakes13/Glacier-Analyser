@@ -15,6 +15,7 @@ class SetupConfig:
         """Sets up the config.ini file."""
         self.parser['PATHS'] = strings.get_default_io_paths()
         self.parser['BANDS'] = strings.get_default_bands()
+        self.parser['SPECIFICATIONS'] = strings.get_default_specifications()
 
         with open(strings.get_config_path(), 'w') as file:
             self.parser.write(file)
@@ -40,6 +41,10 @@ class ReadConfig:
     def get_bands_dict(self) -> dict:
         """Returns the BANDS dictionary from configuration file."""
         return dict((self.parser.items('BANDS')))
+
+    def get_attributes_dict(self) -> dict:
+        """Returns the ATTRIBUTES dictionary from configuration file."""
+        return dict((self.parser.items('ATTRIBUTES')))
 
     def get_input_path(self) -> Path:
         """Returns the path to the input directory."""
