@@ -13,7 +13,8 @@ class SetupConfig:
 
     def set_config(self):
         """Sets up the config.ini file."""
-        self.parser['PATHS'] = strings.get_io_paths()
+        self.parser['PATHS'] = strings.get_default_io_paths()
+        self.parser['BANDS'] = strings.get_default_bands()
 
         with open(strings.get_config_path(), 'w') as file:
             self.parser.write(file)
@@ -32,17 +33,31 @@ class ReadConfig:
         self.parser = configparser.ConfigParser()
         self.parser.read(strings.get_config_path())
 
-    def get_io_dict(self) -> dict:
+    def get_paths_dict(self) -> dict:
         """Returns the PATHS dictionary from configuration file."""
         return dict((self.parser.items('PATHS')))
 
+    def get_bands_dict(self) -> dict:
+        """Returns the BANDS dictionary from configuration file."""
+        return dict((self.parser.items('BANDS')))
+
     def get_input_path(self) -> Path:
         """Returns the path to the input directory."""
-        return Path(self.get_io_dict().get('input_path'))
+        return Path(self.get_paths_dict().get('input_path'))
 
     def get_output_path(self) -> Path:
         """Returns the path to the output directory."""
-        return Path(self.get_io_dict().get('output_path'))
+        return Path(self.get_paths_dict().get('output_path'))
+
+    def get_yes_bands(self) -> list:
+        """Returns a list with the selected bands for usage
+        (the ones opted with YES in the config.ini file)."""
+        yes_bands = []
+        for band, band_option in self.get_bands_dict().items():
+            if band_option == 'YES':
+                yes_bands.append(band)
+
+        return yes_bands
 
 
 class ValidateConfig:
