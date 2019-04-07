@@ -1,1 +1,0 @@
-"""This should contain landsat-util library for downloading the images."""
