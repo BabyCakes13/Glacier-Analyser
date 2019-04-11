@@ -21,21 +21,9 @@ class InputBands:
         for file in os.listdir(str(self.input_path)):
             for number in band_numbers:
                 if file.endswith(strings.default_band_endwith(number)):
-                    band_names.append(file)
+                    band_names.append(str(file))
 
         return band_names
-
-    def get_attributes(self) -> dict:
-        """For now, nothing."""
-
-        attributes = {}
-        band_paths = self.get_bands_fullpath()
-
-        for band in band_paths:
-            pass
-            # TODO extract band attributes from each band with gdal
-
-        return attributes
 
     def get_bands_fullpath(self) -> list:
         """Returns a list with full paths to the geotiff images as strings."""
@@ -44,6 +32,6 @@ class InputBands:
 
         # combine thg input path with the name of the geotiff band
         for band in bands:
-            band_paths.append(self.input_path.joinpath(band))
+            band_paths.append(str(self.input_path.joinpath(band)))
 
         return band_paths
