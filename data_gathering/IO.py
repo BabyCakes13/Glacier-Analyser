@@ -12,7 +12,7 @@ class InputBands:
         self.input_path = self.parser.get_input_path()
 
     def get_selected_bands(self) -> list:
-        """Return the list with the full band names for the selected bands from the configuration file.
+        """Return the list with the full band names, as strings for the selected bands from the configuration file.
         If the file does not exist, it will not be added to the list."""
         band_names = []
         band_numbers = self.parser.get_yes_bands()
@@ -38,7 +38,7 @@ class InputBands:
         return attributes
 
     def get_bands_fullpath(self) -> list:
-        """Returns a list with full paths to the geotiff images as Paths."""
+        """Returns a list with full paths to the geotiff images as strings."""
         band_paths = []
         bands = self.get_selected_bands()
 
