@@ -130,7 +130,7 @@ def get_system_messages():
 def error_messages():
 
     errors = [
-        'Creation of VRT has failed.'
+        'Invalid data type for output NDSI.'
     ]
 
     return errors
