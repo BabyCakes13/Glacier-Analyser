@@ -6,12 +6,5 @@ from data_processing import raster_setup
 CONFIG = configuration.SetupConfig()
 PARSER = configuration.ReadConfig()
 
-# setup Input Bands
-io = IO.InputBands()
-
-# metadata buggin'
-# METAL = scene_metadata.SceneMetadata()
-# print(METAL.get_scene_set_attributes())
-# print(METAL.get_scene_set_coordinates())
-
-BANDS = raster_setup.RasterHandler(io.get_bands_fullpath())
+# Calculate the NDSI!!! Hugging works!
+NDSI = raster_setup.NDSI()
