@@ -93,7 +93,7 @@ def get_scene_unset_attributes() -> dict:
         'DATE_ACQUIRED': '',
         'SCENE_CENTER_TIME': '',
         'CLOUD_COVER': '',
-        'IMAGE_QUALITY_OLIV': '',
+        'IMAGE_QUALITY_OLI': '',
         'SUN_ELEVATION': ''
     }
 
@@ -115,3 +115,22 @@ def get_scene_unset_coordinates() -> dict:
     }
 
     return coordinates
+
+
+def get_system_messages():
+
+    messages = [
+        'starting VRT creation...',
+        'ended VRT creation.'
+    ]
+
+    return messages
+
+
+def error_messages():
+
+    errors = [
+        'Invalid data type for output NDSI.'
+    ]
+
+    return errors
