@@ -25,6 +25,11 @@ class NDSI:
         self.create_NDSI(OUT_TIFF_UINT16, gdal.GDT_UInt16)
         self.create_NDSI(OUT_TIFF_UINT8, gdal.GDT_Byte)
 
+    def generateNumpyGradient(self, width, height, min, max):
+        gradient1D = numpy.linspace(min, max, height)
+        gradient2D = numpy.tile(gradient1D.reshape(height, 1), (1, width))
+        return gradient2D
+
     def create_NDSI(self, output_name, data_type) -> pathlib.Path:
         """Returns the full path to the outputted NDSI image."""
         if data_type not in VALID_DATA_TYPES:
