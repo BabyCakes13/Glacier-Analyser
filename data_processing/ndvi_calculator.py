@@ -24,6 +24,7 @@ class NDSI:
 
 #       self.create_NDSI(OUT_TIFF_FLOAT32, gdal.GDT_Float32)
 #       self.create_NDSI(OUT_TIFF_UINT16, gdal.GDT_UInt16)
+
         self.create_NDSI(OUT_TIFF_UINT8, gdal.GDT_Byte)
 
     def calculate_NDSI(self, data_type) -> numpy.ndarray:
