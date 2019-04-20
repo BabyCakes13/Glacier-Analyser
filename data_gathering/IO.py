@@ -3,6 +3,8 @@ import os
 from data_gathering import configuration
 from util import strings
 
+NDSI_BANDS = ["_B3.TIF", "_B6.TIF"]
+
 
 class InputBands:
 
@@ -35,3 +37,15 @@ class InputBands:
             band_paths.append(str(self.input_path.joinpath(band)))
 
         return band_paths
+
+    def get_NDSI_band_paths(self) -> list:
+        """Returns the string full paths to the needed bands for calculating the NDSI."""
+        NDSI_bands_fullpaths = []
+        all_bands_fullpath = self.get_bands_fullpath()
+
+        for band_fullpath in all_bands_fullpath:
+            if any(band in band_fullpath for band in NDSI_BANDS):
+                NDSI_bands_fullpaths.append(band_fullpath)
+
+        return NDSI_bands_fullpaths
+

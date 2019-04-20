@@ -1,17 +1,14 @@
 """Main caller of the application."""
 from data_gathering import IO, configuration, scene_metadata
-from data_processing import raster_setup
+from data_processing import ndvi_calculator
 
 # setup the configuration file
 CONFIG = configuration.SetupConfig()
 PARSER = configuration.ReadConfig()
 
-# setup Input Bands
-io = IO.InputBands()
+# setup the configuration file
+CONFIG = configuration.SetupConfig()
+PARSER = configuration.ReadConfig()
 
-# metadata buggin'
-# METAL = scene_metadata.SceneMetadata()
-# print(METAL.get_scene_set_attributes())
-# print(METAL.get_scene_set_coordinates())
-
-BANDS = raster_setup.RasterHandler(io.get_bands_fullpath())
+# Calculate the NDSI!!! Hugging works!
+NDSI = ndvi_calculator.NDSI()
