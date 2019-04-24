@@ -3,7 +3,8 @@ import os
 from data_gathering import configuration
 from util import strings
 
-NDSI_BANDS = ["_B3.TIF", "_B6.TIF"]
+GREEN_BAND_END = '_B3.TIF'
+SWIR1_BAND_END = '_B6.TIF'
 
 
 class InputBands:
@@ -38,14 +39,17 @@ class InputBands:
 
         return band_paths
 
-    def get_NDSI_band_paths(self) -> list:
-        """Returns the string full paths to the needed bands for calculating the NDSI."""
-        NDSI_bands_fullpaths = []
-        all_bands_fullpath = self.get_bands_fullpath()
+    def get_NDSI_band_paths(self) -> tuple:
+        """Returns the full paths to the green and swir1 bands."""
+        all_tif_bands_fullpath = self.get_bands_fullpath()
+        green_fullpath = None
+        swir1_fullpath = None
 
-        for band_fullpath in all_bands_fullpath:
-            if any(band in band_fullpath for band in NDSI_BANDS):
-                NDSI_bands_fullpaths.append(band_fullpath)
+        for band_fullpath in all_tif_bands_fullpath:
+            if GREEN_BAND_END in band_fullpath:
+                green_fullpath = band_fullpath
+            elif SWIR1_BAND_END in band_fullpath:
+                swir1_fullpath = band_fullpath
 
-        return NDSI_bands_fullpaths
+        return green_fullpath, swir1_fullpath
 
