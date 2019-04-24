@@ -19,7 +19,7 @@ class SetupConfig:
         self.parser['BANDS'] = strings.get_default_bands()
         self.parser['SPECIFICATIONS'] = strings.get_default_specifications()
 
-        with open(strings.get_config_path(), 'w') as file:
+        with open(definitions.CONFIG_PATH, 'w') as file:
             self.parser.write(file)
 
     def validate_config(self):
@@ -34,7 +34,7 @@ class ReadConfig:
     def __init__(self):
         """Initialises the parser for the configuration file."""
         self.parser = configparser.ConfigParser()
-        self.parser.read(strings.get_config_path())
+        self.parser.read(definitions.CONFIG_PATH)
 
     def get_paths_dict(self) -> dict:
         """Returns the PATHS dictionary from configuration file."""
