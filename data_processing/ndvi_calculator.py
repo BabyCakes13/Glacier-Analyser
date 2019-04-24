@@ -6,11 +6,6 @@ import pathlib
 import definitions
 from data_gathering import IO
 
-THRESHOLD = 8000
-OUT_TIFF_UINT8 = str(THRESHOLD) + "_NDSI_INT8.tif"
-OUT_TIFF_UINT16 = str(THRESHOLD) + "_NDSI_INT16.tif"
-OUT_TIFF_FLOAT32 = str(THRESHOLD) + "_NDSI_FLOAT32.tif"
-
 
 class NDSI:
     """Class which handles the creation of the Normalised Difference Snow Index (NDSI) file."""
@@ -24,7 +19,7 @@ class NDSI:
         self.green_band, self.swir1_band = self.setup_NDSI_bands()
         self.rows, self.columns, self.geotransform = self.setup_NDSI_characteristics()
 
-        self.create_NDSI(OUT_TIFF_UINT8, gdal.GDT_Byte)
+        self.create_NDSI(definitions.OUT_TIFF_UINT8, gdal.GDT_Byte)
 
     def calculate_NDSI(self, data_type) -> numpy.ndarray:
         """Calculates the NDSI as numpy array, based on the specified data type.
@@ -56,7 +51,7 @@ class NDSI:
         if data_type == gdal.GDT_UInt16:
             division = numpy.add(division, 0x7FFF)
         if data_type == gdal.GDT_Byte:
-            division[division <= THRESHOLD] = 0
+            division[division <= definitions.THRESHOLD] = 0
 
         return division
 
