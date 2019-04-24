@@ -22,8 +22,6 @@ class NDSI:
         self.green_band, self.swir1_band = self.setup_NDSI_bands()
         self.rows, self.columns, self.geotransform = self.setup_NDSI_characteristics()
 
-#       self.create_NDSI(OUT_TIFF_FLOAT32, gdal.GDT_Float32)
-#       self.create_NDSI(OUT_TIFF_UINT16, gdal.GDT_UInt16)
         self.create_NDSI(OUT_TIFF_UINT8, gdal.GDT_Byte)
 
     def calculate_NDSI(self, data_type) -> numpy.ndarray:
