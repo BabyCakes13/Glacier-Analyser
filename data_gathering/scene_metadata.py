@@ -1,5 +1,6 @@
 import pathlib
 import os
+import definitions
 from util import strings
 from data_gathering import configuration
 
@@ -14,12 +15,10 @@ class SceneMetadata:
 
     def get_metadata_file(self) -> pathlib.Path:
         """Returns the full path to the metadata file."""
-        endwith = strings.default_metadata_endwith()
 
-        # search for metadata file in the input directory
         metadata = False
         for file in os.listdir(str(self.input_path)):
-            if file.endswith(endwith):
+            if file.endswith(definitions.METADATA_END):
                 metadata = file
         if not metadata:
             raise SceneMetadataError("SceneMetadata file was not found.")

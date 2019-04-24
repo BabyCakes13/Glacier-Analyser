@@ -4,9 +4,6 @@ from data_gathering import configuration
 import definitions
 from util import strings
 
-GREEN_BAND_END = '_B3.TIF'
-SWIR1_BAND_END = '_B6.TIF'
-
 
 class InputOutput:
     """Class which handles input output operations."""
@@ -44,9 +41,9 @@ class InputOutput:
         swir1_fullpath = None
 
         for band_fullpath in all_tif_bands_fullpath:
-            if GREEN_BAND_END in band_fullpath:
+            if definitions.GREEN_BAND_END in band_fullpath:
                 green_fullpath = band_fullpath
-            elif SWIR1_BAND_END in band_fullpath:
+            elif definitions.SWIR1_BAND_END in band_fullpath:
                 swir1_fullpath = band_fullpath
 
         return green_fullpath, swir1_fullpath
