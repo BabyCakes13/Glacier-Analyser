@@ -2,6 +2,7 @@ import datetime
 from dateutil.relativedelta import relativedelta
 import os
 import pathlib
+import definitions
 
 CONFIG_FILENAME = "config.ini"
 
@@ -9,10 +10,13 @@ CONFIG_FILENAME = "config.ini"
 def get_default_io_paths() -> dict:
     """Returns the paths dictionary for the configuration file.
     :rtype dict"""
+
     paths = {
-        'input_path': 'D:\Programming\Facultate\Licenta\Input',
-        'output_path': 'D:\Programming\Facultate\Licenta\Input\Output'
+        'INPUT_DIR': definitions.INPUT_DIR,
+        'OUTPUT_DIR': definitions.OUTPUT_DIR
     }
+
+    print(paths)
 
     return paths
 
@@ -58,13 +62,13 @@ def get_default_bands() -> dict:
 def get_project_root() -> pathlib.Path:
     """Returns project root folder.
     :rtype pathlib.Path"""
-    return pathlib.Path(__file__).parent.parent
+    return definitions.ROOT_DIR
 
 
 def get_config_path() -> pathlib.Path:
     """Returns the path to the configuration file.
     :rtype pathlib.Path"""
-    return pathlib.Path(os.path.join(get_project_root(), CONFIG_FILENAME))
+    return definitions.CONFIG_PATH
 
 
 def default_band_endwith(number) -> str:

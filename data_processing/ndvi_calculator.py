@@ -1,8 +1,10 @@
 """Module which contains the class which creates the Normalised Difference Snow Index (NDSI) file."""
 import numpy
+import os
 from osgeo import gdal
 import pathlib
-from data_gathering import configuration, IO
+import definitions
+from data_gathering import IO
 
 THRESHOLD = 8000
 OUT_TIFF_UINT8 = str(THRESHOLD) + "_NDSI_INT8.tif"
@@ -16,7 +18,7 @@ class NDSI:
     def __init__(self):
         """Set the needed parameters for calculating the NDSI file."""
         gdal.UseExceptions()
-        self.IO_parser = IO.InputBands()
+        self.IO_parser = IO.InputOutput()
 
         self.green_tiff, self.swir1_tiff = self.setup_NDSI_tiffs()
         self.green_band, self.swir1_band = self.setup_NDSI_bands()
@@ -60,17 +62,18 @@ class NDSI:
 
     def create_NDSI(self, output_name, data_type) -> pathlib.Path:
         """Create the NDSI tiff image from the result of the NDSI formula.
-        @:return Fullpath to the NDSI tiff image."""
+        @:return Path to the NDSI tiff image."""
         division = self.calculate_NDSI(data_type)
+
         geotiff = gdal.GetDriverByName('GTiff')
-        config_parser = configuration.ReadConfig()
-        output_fullpath = config_parser.get_output_path().joinpath(output_name)
-        output_tiff = geotiff.Create(str(output_fullpath), self.columns, self.rows, 1, data_type)
+
+        output_path = os.path.join(definitions.OUTPUT_DIR, output_name)
+        output_tiff = geotiff.Create(str(output_path), self.columns, self.rows, 1, data_type)
         output_band = output_tiff.GetRasterBand(1)
         output_band.SetNoDataValue(-99)
         output_band.WriteArray(division)
 
-        return output_fullpath
+        return output_path
 
     def setup_NDSI_bands(self) -> tuple:
         """Returns the opened bands necessary for the NDSI formula.
