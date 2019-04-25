@@ -1,17 +1,15 @@
 import datetime
 from dateutil.relativedelta import relativedelta
-import os
-import pathlib
-
-CONFIG_FILENAME = "config.ini"
+import definitions
 
 
 def get_default_io_paths() -> dict:
     """Returns the paths dictionary for the configuration file.
     :rtype dict"""
+
     paths = {
-        'input_path': 'D:\Programming\Facultate\Licenta\Input',
-        'output_path': 'D:\Programming\Facultate\Licenta\Input\Output'
+        'INPUT_DIR': definitions.INPUT_DIR,
+        'OUTPUT_DIR': definitions.OUTPUT_DIR
     }
 
     return paths
@@ -55,29 +53,11 @@ def get_default_bands() -> dict:
     return paths
 
 
-def get_project_root() -> pathlib.Path:
-    """Returns project root folder.
-    :rtype pathlib.Path"""
-    return pathlib.Path(__file__).parent.parent
-
-
-def get_config_path() -> pathlib.Path:
-    """Returns the path to the configuration file.
-    :rtype pathlib.Path"""
-    return pathlib.Path(os.path.join(get_project_root(), CONFIG_FILENAME))
-
-
 def default_band_endwith(number) -> str:
     """Returns the default Landsat band name termination with the correct band number,
     opted for in the configuration file.
     :rtype str"""
     return "_B" + number.upper() + ".TIF"
-
-
-def default_metadata_endwith() -> str:
-    """Returns the default Landsat metadata file name termination.
-    :rtype str"""
-    return "_MTL.txt"
 
 
 def get_scene_unset_attributes() -> dict:
