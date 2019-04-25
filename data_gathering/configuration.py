@@ -1,6 +1,8 @@
 import configparser
+import os
 from pathlib import Path
 from util import strings
+import definitions
 
 
 class SetupConfig:
@@ -17,22 +19,22 @@ class SetupConfig:
         self.parser['BANDS'] = strings.get_default_bands()
         self.parser['SPECIFICATIONS'] = strings.get_default_specifications()
 
-        with open(strings.get_config_path(), 'w') as file:
+        with open(definitions.CONFIG_PATH, 'w') as file:
             self.parser.write(file)
 
     def validate_config(self):
         """Checks if the configuration file is valid."""
-        if strings.get_config_path().exists() is False:
+        if os.path.isfile(definitions.CONFIG_PATH) is False:
             self.set_config()
 
 
 class ReadConfig:
-    """Class used for reading and getting data from the configuration file using a parser."""
+    """Class used for reading data from the configuration file."""
 
     def __init__(self):
         """Initialises the parser for the configuration file."""
         self.parser = configparser.ConfigParser()
-        self.parser.read(strings.get_config_path())
+        self.parser.read(definitions.CONFIG_PATH)
 
     def get_paths_dict(self) -> dict:
         """Returns the PATHS dictionary from configuration file."""
@@ -48,11 +50,11 @@ class ReadConfig:
 
     def get_input_path(self) -> Path:
         """Returns the path to the input directory."""
-        return Path(self.get_paths_dict().get('input_path'))
+        return Path(self.get_paths_dict().get('INPUT_DIR'))
 
     def get_output_path(self) -> Path:
         """Returns the path to the output directory."""
-        return Path(self.get_paths_dict().get('output_path'))
+        return Path(self.get_paths_dict().get('OUTPUT_DIR'))
 
     def get_yes_bands(self) -> list:
         """Returns a list with the selected bands for usage
