@@ -17,7 +17,7 @@ class SetupConfig:
         """Sets up the config.ini file."""
         self.parser['PATHS'] = strings.get_default_io_paths()
         self.parser['BANDS'] = strings.get_default_bands()
-        self.parser['SPECIFICATIONS'] = strings.get_default_specifications()
+        self.parser['SPECIFICATIONS'] = strings.get_default_period()
 
         with open(definitions.CONFIG_PATH, 'w') as file:
             self.parser.write(file)
