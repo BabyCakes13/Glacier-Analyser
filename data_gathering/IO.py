@@ -17,7 +17,7 @@ class InputOutput:
         band_names = []
         band_numbers = self.parser.get_yes_bands()
 
-        for file in os.listdir(definitions.INPUT_DIR):
+        for file in os.listdir(definitions.DEFAULT_INPUT_DIR):
             for number in band_numbers:
                 if file.endswith(strings.default_band_endwith(number)):
                     band_names.append(str(file))
@@ -30,7 +30,7 @@ class InputOutput:
         bands = self.get_selected_bands()
 
         for band in bands:
-            band_paths.append(os.path.join(definitions.INPUT_DIR, band))
+            band_paths.append(os.path.join(definitions.DEFAULT_INPUT_DIR, band))
 
         return band_paths
 

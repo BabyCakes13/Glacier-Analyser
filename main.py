@@ -1,11 +1,8 @@
 #! /usr/bin/python3
 
 """Main caller of the application."""
-from data_gathering import configuration
-from data_processing import ndvi_calculator
+from data_gathering import args
+from util import strings
 
 
-CONFIG = configuration.SetupConfig()
-PARSER = configuration.ReadConfig()
-
-NDSI = ndvi_calculator.NDSI()
+arg = args.ArgsParser()
