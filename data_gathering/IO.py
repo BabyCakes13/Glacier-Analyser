@@ -1,6 +1,5 @@
 """Module which handles input and output data."""
 import os
-from data_gathering import configuration
 import definitions
 
 
@@ -8,7 +7,6 @@ class InputOutput:
     """Class which handles input output operations."""
     def __init__(self, input_path):
         """Setup the parser for reading the configuration file."""
-        self.parser = configuration.ReadConfig()
         self.input = input_path
 
     def get_ndsi_bands_paths(self) -> tuple:
