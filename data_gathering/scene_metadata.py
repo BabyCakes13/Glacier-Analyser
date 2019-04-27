@@ -2,29 +2,24 @@ import pathlib
 import os
 import definitions
 from util import strings
-from data_gathering import configuration
 
 
 class SceneMetadata:
     """Class which deals with the scene MTL metadata file."""
-    def __init__(self):
-        """Initialises the parser for the configuration file."""
-        self.parser = configuration.ReadConfig()
-        self.input_path = self.parser.get_input_path()
-        self.metadata_file = self.get_metadata_file()
+    def __init__(self, input_path):
+        """Sets up the metadata handler."""
+        self.input = input_path
+        self.metadata = self.get_metadata_file()
 
     def get_metadata_file(self) -> pathlib.Path:
         """Returns the full path to the metadata file."""
-
         metadata = False
-        for file in os.listdir(str(self.input_path)):
+        for file in os.listdir(self.input_path):
             if file.endswith(definitions.METADATA_END):
-                metadata = file
-        if not metadata:
-            raise SceneMetadataError("SceneMetadata file was not found.")
+                metadata = os.path.join(self.input, file)
 
-        # get the full metadata file path
-        metadata = self.input_path.joinpath(metadata)
+        if not metadata:
+            raise SceneMetadataError("Metadata file was not found.")
 
         return metadata
 
@@ -32,7 +27,7 @@ class SceneMetadata:
         """Returns a dictionary with the set landsat scene attributes from the MTL file."""
         attributes = strings.get_scene_unset_attributes()
 
-        with open(self.metadata_file, "r") as file:
+        with open(self.metadata, "r") as file:
             for line in file:
                 attributes = set_dictionary(attributes, line, ' = ')
 
@@ -42,7 +37,7 @@ class SceneMetadata:
         """Returns a dictionary with the set landsat scene coordinates from the MTL file."""
         coordinates = strings.get_scene_unset_coordinates()
 
-        with open(self.metadata_file, "r") as file:
+        with open(self.metadata, "r") as file:
             for line in file:
                 coordinates = set_dictionary(coordinates, line, ' = ')
 
