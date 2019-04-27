@@ -21,4 +21,3 @@ OUT_TIFF_UINT16 = str(THRESHOLD) + "_NDSI_INT16.tif"
 OUT_TIFF_FLOAT32 = str(THRESHOLD) + "_NDSI_FLOAT32.tif"
 
 # download
-
