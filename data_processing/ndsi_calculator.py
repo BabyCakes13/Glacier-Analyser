@@ -2,9 +2,6 @@
 import numpy
 import os
 from osgeo import gdal
-import pathlib
-import definitions
-from data_gathering import IO
 import definitions
 
 
@@ -12,10 +9,11 @@ class NDSI:
     """Class which handles the creation of the Normalised Difference Snow Index (NDSI) file."""
 
     def __init__(self, input_path, output_path):
-        """Set the needed parameters for calculating the NDSI file."""
+        """Set the variables needed for computing the ndsi band and actually compute the ndsi band."""
         gdal.UseExceptions()
-        self.output = output_path
+
         self.input = input_path
+        self.output = output_path
 
         self.green_band, self.swir1_band, self.green_tiff, self.swir1_tiff = self.setup_NDSI_images()
         self.rows, self.columns, self.geotransform = self.setup_NDSI_characteristics()
@@ -30,7 +28,6 @@ class NDSI:
         numpy_array_green_asFloat32 = self.green_band.ReadAsArray(0, 0, self.columns, self.rows).astype(numpy.int32)
         numpy_array_swir1_asFloat32 = self.swir1_band.ReadAsArray(0, 0, self.columns, self.rows).astype(numpy.int32)
 
-        # NDSI formula
         numpy.seterr(divide='ignore', invalid='ignore')
 
         numerator = numpy.subtract(
@@ -58,23 +55,23 @@ class NDSI:
 
         return division
 
-    def create_NDSI(self, output_name, data_type):
-        """Create the NDSI tiff image from the result of the NDSI formula."""
-        print("create_NDSI")
-
+    def create_NDSI(self, output_name, data_type) -> gdal.Band:
+        """Create the NDSI tiff image from the result of the formula.
+        @return gdal.Band object which represents the resulting NDSI band."""
         geotiff = gdal.GetDriverByName('GTiff')
-
         output_path = str(os.path.join(self.output, output_name))
         output_tiff = geotiff.Create(output_path, self.columns, self.rows, 1, data_type)
+
         output_band = output_tiff.GetRasterBand(1)
         output_band.SetNoDataValue(-99)
         output_band.WriteArray(self.division)
 
+        return output_band
+
     def setup_NDSI_images(self) -> tuple:
         """Returns the bands and tiffs for the NDSI calculator.
         @:return Tuple with objects of the type gdal.Band and gdal.Dataset."""
-        ndsi_path_parser = IO.InputOutput(self.input)
-        green_path, swir1_path = ndsi_path_parser.get_ndsi_bands_paths()
+        green_path, swir1_path = self.get_ndsi_bands_paths()
 
         green_tiff = gdal.Open(green_path)
         swir1_tiff = gdal.Open(swir1_path)
@@ -91,4 +88,17 @@ class NDSI:
         geotransform = self.green_tiff.GetGeoTransform()
 
         return rows, columns, geotransform
+
+    def get_ndsi_bands_paths(self) -> tuple:
+        """Returns the path to the green and swir1 images."""
+        green_path = None
+        swir1_path = None
+
+        for file in os.listdir(self.input):
+            if file.endswith(definitions.GREEN_BAND_END):
+                green_path = os.path.join(self.input, str(file))
+            if file.endswith(definitions.SWIR1_BAND_END):
+                swir1_path = os.path.join(self.input, str(file))
+
+        return green_path, swir1_path
 
