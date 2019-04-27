@@ -1,3 +1,4 @@
+"""Module which handles scene metadata. Works with .MTL file."""
 import pathlib
 import os
 import definitions
@@ -14,7 +15,7 @@ class SceneMetadata:
     def get_metadata_file(self) -> pathlib.Path:
         """Returns the full path to the metadata file."""
         metadata = False
-        for file in os.listdir(self.input_path):
+        for file in os.listdir(self.input):
             if file.endswith(definitions.METADATA_END):
                 metadata = os.path.join(self.input, file)
 
