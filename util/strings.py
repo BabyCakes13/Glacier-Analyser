@@ -8,14 +8,14 @@ def get_default_io_paths() -> dict:
     :rtype dict"""
 
     paths = {
-        'INPUT_DIR': definitions.INPUT_DIR,
-        'OUTPUT_DIR': definitions.OUTPUT_DIR
+        'DEFAULT_INPUT_DIR': definitions.DEFAULT_INPUT_DIR,
+        'DEFAULT_OUTPUT_DIR': definitions.DEFAULT_OUTPUT_DIR
     }
 
     return paths
 
 
-def get_default_specifications() -> dict:
+def get_default_period() -> dict:
     """Return the default date for the configuration file, calculated as today - 100 years today.
     :rtype dict"""
     today = datetime.datetime.now()
