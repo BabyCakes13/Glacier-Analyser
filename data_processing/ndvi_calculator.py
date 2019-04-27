@@ -21,7 +21,7 @@ class NDSI:
 
         self.create_NDSI(definitions.OUT_TIFF_UINT8, gdal.GDT_Byte)
 
-    def calculate_NDSI(self, data_type) -> numpy.ndarray:
+    def calculate_ndsi(self, data_type) -> numpy.ndarray:
         """Calculates the NDSI as numpy array, based on the specified data type.
         @:return numpy array representing the resulted NDSI numpy array."""
         numpy_array_green_asFloat32 = self.green_band.ReadAsArray(0, 0, self.columns, self.rows).astype(numpy.int32)
@@ -58,7 +58,7 @@ class NDSI:
     def create_NDSI(self, output_name, data_type) -> pathlib.Path:
         """Create the NDSI tiff image from the result of the NDSI formula.
         @:return Path to the NDSI tiff image."""
-        division = self.calculate_NDSI(data_type)
+        division = self.calculate_ndsi(data_type)
 
         geotiff = gdal.GetDriverByName('GTiff')
 
