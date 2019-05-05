@@ -1,5 +1,4 @@
 import datetime
-from dateutil.relativedelta import relativedelta
 import definitions
 
 
@@ -18,8 +17,8 @@ def get_default_io_paths() -> dict:
 def get_default_period() -> dict:
     """Return the default date for the configuration file, calculated as today - 100 years today.
     :rtype dict"""
-    today = datetime.datetime.now()
-    past = today - relativedelta(years=100)
+    today = datetime.datetime.now().strftime('%Y-%m-%d')
+    past = '1900-01-01'
 
     today = today.strftime('%Y-%m-%d')
     past = past.strftime('%Y-%m-%d')
