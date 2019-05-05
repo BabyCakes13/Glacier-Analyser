@@ -1,5 +1,6 @@
 """Module which holds definitions."""
 import os
+import datetime
 
 # paths
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -21,3 +22,9 @@ OUT_TIFF_UINT16 = str(THRESHOLD) + "_NDSI_INT16.tif"
 OUT_TIFF_FLOAT32 = str(THRESHOLD) + "_NDSI_FLOAT32.tif"
 
 # download
+DEFAULT_START_DATE = '1990-01-01'
+DEFAULT_END_DATE = datetime.datetime.now().strftime('%Y-%m-%d')
+DEFAULT_CLOUD_COVERAGE = 5
+DEFAULT_PATH = 204
+DEFAULT_ROW = 33
+DEFAULT_LIMIT = 999
