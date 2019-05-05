@@ -6,8 +6,12 @@ from data_processing import ndsi_calculator
 
 arg = arguments.ArgsParser()
 
-INPUT_PATH = arg.get_input()
-OUTPUT_PATH = arg.get_output()
+# INPUT_PATH = arg.get_input()
+# OUTPUT_PATH = arg.get_output()
 
-ndsi = ndsi_calculator.NDSI(input_path=INPUT_PATH, output_path=OUTPUT_PATH)
+# ndsi = ndsi_calculator.NDSI(input_path=INPUT_PATH, output_path=OUTPUT_PATH)
 
+from data_gathering import download
+import definitions
+downloader = download.Downloader()
+downloader.get_scene_ids()
