@@ -10,8 +10,3 @@ arg = arguments.ArgsParser()
 # OUTPUT_PATH = arg.get_output()
 
 # ndsi = ndsi_calculator.NDSI(input_path=INPUT_PATH, output_path=OUTPUT_PATH)
-
-from data_gathering import download
-import definitions
-downloader = download.Downloader()
-downloader.get_scene_ids()
