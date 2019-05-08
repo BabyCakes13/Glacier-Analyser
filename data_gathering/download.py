@@ -16,6 +16,8 @@ class CSVHandler:
         self.start_row = start_row
         self.end_row = end_row
 
+        self.max_threads = 100
+
         self.txt_file = open(self.glacier_txt, "w")
 
     def open_csv(self):
@@ -27,6 +29,8 @@ class CSVHandler:
         """Method which parses the csv rows and writes the coordinates to the text file."""
         # first row is the row name
 
+        simultaneous_processes = []
+
         for row in csv_reader: # csv_without_first_row:
             coordinates = ( row['lon'], row['lat'] )
             self.txt_file.write(str(coordinates) + '\n')
@@ -36,13 +40,22 @@ class CSVHandler:
             json_query_filename = os.path.join(definitions.FILES_DIR,
                                                "query_" + row['lon'] + "_" + row['lat'] + ".json")
 
-            subprocess.run(["echo", "sat-search", "search", "--bbox",
-                            str(float(row['lon']) - bbox_size),
-                            str(float(row['lat']) - bbox_size),
-                            str(float(row['lon']) + bbox_size),
-                            str(float(row['lat']) + bbox_size),
-                            "--save", json_query_filename
-            ])
+            arglist = ["sat-search", "search", "--bbox",
+                       str(float(row['lon']) - bbox_size),
+                       str(float(row['lat']) - bbox_size),
+                       str(float(row['lon']) + bbox_size),
+                       str(float(row['lat']) + bbox_size),
+                       "--save", json_query_filename]
 
+            if len(simultaneous_processes) >= self.max_threads:
+                simultaneous_processes.pop().wait()
+
+            print( arglist )
+            sp = subprocess.Popen( arglist )
+            simultaneous_processes.append(sp)
+
+            for sp in simultaneous_processes:
+                if sp.poll() == 0:
+                    simultaneous_processes.remove(sp)
 
         self.txt_file.close()
