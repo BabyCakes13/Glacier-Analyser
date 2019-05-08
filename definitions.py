@@ -25,17 +25,12 @@ OUT_TIFF_FLOAT32 = str(THRESHOLD) + "_NDSI_FLOAT32.tif"
 # download
 DEFAULT_START_DATE = '1990-01-01'
 DEFAULT_END_DATE = datetime.datetime.now().strftime('%Y-%m-%d')
-DEFAULT_CLOUD_COVERAGE = 5
-DEFAULT_PATH = 204
-DEFAULT_ROW = 33
-DEFAULT_LIMIT = 999
+DEFAULT_CLOUD_COVERAGE = "5"
+# TODO find the number of rows in the csv file for accurate MAX_ROW possible number.
+MAX_ROW = 150000
+BBOX_SIZE = 0.0000001
 
 # files
 GLACIER_COORDINATES_FILENAME = 'wgi_feb2012'
-JSON_DUMP_FILE = 'search_result.json'
+JSON_QUERY = 'query.json'
 
-# csv
-CSV_LATITUDE_POSITION = 7
-CSV_LONGITUDE_POSITION = 8
-# TODO find the number of rows in the csv file for accurate MAX_ROW possible number.
-MAX_ROW = 150000

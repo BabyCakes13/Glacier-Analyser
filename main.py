@@ -18,7 +18,7 @@ def fDownload(args):
     else:
         outputDir = os.path.join(definitions.FILES_DIR)
 
-    csvhandler = download.CSVHandler(inputCsv, outputDir, args.first, args.last, args.j)
+    csvhandler = download.DataHandler(inputCsv, outputDir, args.first, args.last, args.j)
     csvhandler.open_csv()
 
 def process(args):
