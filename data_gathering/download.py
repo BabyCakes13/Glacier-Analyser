@@ -2,7 +2,7 @@ import csv
 import definitions
 import os
 import itertools
-
+import subprocess
 
 class CSVHandler:
 
@@ -19,19 +19,30 @@ class CSVHandler:
         self.txt_file = open(self.glacier_txt, "w")
 
     def open_csv(self):
-
         with open(self.glacier_csv, 'r', newline='', encoding='ISO-8859-1') as csv_file:
             csv_reader = csv.DictReader(csv_file)
             self.parse_rows(csv_reader)
 
-    # TODO remove \n from end of file.
-    # TODO make parser skip reading redundant rows til it gets to start_row
     def parse_rows(self, csv_reader):
         """Method which parses the csv rows and writes the coordinates to the text file."""
         # first row is the row name
 
         for row in csv_reader: # csv_without_first_row:
-            coordinates = ( row['lat'], row['lon'] )
+            coordinates = ( row['lon'], row['lat'] )
             self.txt_file.write(str(coordinates) + '\n')
+
+            bbox_size = 0.0000001
+
+            json_query_filename = os.path.join(definitions.FILES_DIR,
+                                               "query_" + row['lon'] + "_" + row['lat'] + ".json")
+
+            subprocess.run(["echo", "sat-search", "search", "--bbox",
+                            str(float(row['lon']) - bbox_size),
+                            str(float(row['lat']) - bbox_size),
+                            str(float(row['lon']) + bbox_size),
+                            str(float(row['lat']) + bbox_size),
+                            "--save", json_query_filename
+            ])
+
 
         self.txt_file.close()
