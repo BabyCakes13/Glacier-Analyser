@@ -4,8 +4,10 @@ import datetime
 
 # paths
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+UTIL_DIR = os.path.join(ROOT_DIR, 'util')
 DEFAULT_INPUT_DIR = os.path.join(ROOT_DIR, 'input')
 DEFAULT_OUTPUT_DIR = os.path.join(ROOT_DIR, 'output')
+FILES_DIR = os.path.join(UTIL_DIR, 'files')
 
 
 # bands
@@ -27,4 +29,11 @@ DEFAULT_CLOUD_COVERAGE = 5
 DEFAULT_PATH = 204
 DEFAULT_ROW = 33
 DEFAULT_LIMIT = 999
+
+# files
+GLACIER_COORDINATES_FILENAME = 'wgi_feb2012'
 JSON_DUMP_FILE = 'search_result.json'
+
+# csv
+CSV_LATITUDE_POSITION = 7
+CSV_LONGITUDE_POSITION = 8
