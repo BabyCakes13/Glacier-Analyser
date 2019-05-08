@@ -6,7 +6,7 @@ import subprocess
 
 class CSVHandler:
 
-    def __init__(self, input_csv, output_dir, start_row=0, end_row=definitions.MAX_ROW):
+    def __init__(self, input_csv, output_dir, start_row=0, end_row=definitions.MAX_ROW, threads=10):
 
         self.glacier_csv = input_csv
         self.output_dir = output_dir
@@ -14,7 +14,7 @@ class CSVHandler:
         self.start_row = start_row
         self.end_row = end_row
 
-        self.max_threads = 50
+        self.max_threads = threads
 
         print ( "Input: " + str(input_csv) + " from : ", start_row, " to: ", end_row)
 

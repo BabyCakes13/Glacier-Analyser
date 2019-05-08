@@ -18,7 +18,7 @@ def fDownload(args):
     else:
         outputDir = os.path.join(definitions.FILES_DIR)
 
-    csvhandler = download.CSVHandler(inputCsv, outputDir, args.first, args.last)
+    csvhandler = download.CSVHandler(inputCsv, outputDir, args.first, args.last, args.j)
     csvhandler.open_csv()
 
 def process(args):
@@ -34,6 +34,7 @@ parser_download.add_argument('--input')
 parser_download.add_argument('--output')
 parser_download.add_argument('--first', type=int, default=0)
 parser_download.add_argument('--last', type=int, default=99999999)
+parser_download.add_argument('-j', type=int, default=4)
 parser_download.set_defaults(func=fDownload)
 
 # create the parser for the "process" command
