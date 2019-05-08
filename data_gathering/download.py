@@ -14,7 +14,7 @@ class CSVHandler:
         self.start_row = start_row
         self.end_row = end_row
 
-        self.max_threads = 10
+        self.max_threads = 50
 
         print ( "Input: " + str(input_csv) + " from : ", start_row, " to: ", end_row)
 
