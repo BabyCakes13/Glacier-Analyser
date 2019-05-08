@@ -51,8 +51,8 @@ class CSVHandler:
                             "--save", json_query_filename]
 
             downloadArglist = ["sat-search", "load", json_query_filename,
-                            "--download", "B3", "B6",
-                            "--datadir", dirname]
+                               "--download", "B3", "B6", "MTL", "thumbnail",
+                               "--datadir", dirname]
 
             if len(pQuery) >= self.max_threads:
                 filename, sp = pQuery.pop()
