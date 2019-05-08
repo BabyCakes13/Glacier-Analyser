@@ -37,3 +37,5 @@ JSON_DUMP_FILE = 'search_result.json'
 # csv
 CSV_LATITUDE_POSITION = 7
 CSV_LONGITUDE_POSITION = 8
+# TODO find the number of rows in the csv file for accurate MAX_ROW possible number.
+MAX_ROW = 150000

@@ -6,7 +6,7 @@ import itertools
 
 class CSVHandler:
 
-    def __init__(self, start_row, end_row):
+    def __init__(self, start_row=-0, end_row=definitions.MAX_ROW):
 
         self.glacier_csv = os.path.join(definitions.FILES_DIR, definitions.GLACIER_COORDINATES_FILENAME + '.csv')
         endwith = '_' + str(start_row) + '_' + str(end_row) + '.txt'
@@ -48,6 +48,3 @@ def extract_coordinates(row) -> tuple:
 
     return coordinates
 
-
-csvhandler = CSVHandler(20, 40)
-csvhandler.open_csv()
