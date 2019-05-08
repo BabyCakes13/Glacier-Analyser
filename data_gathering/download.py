@@ -38,7 +38,10 @@ class CSVHandler:
 
             dirname = os.path.join(self.output_dir, id)
             json_query_filename = os.path.join(dirname, "query.json")
-            os.mkdir(dirname)
+            try:
+                os.mkdir(dirname)
+            except FileExistsError:
+                print("Already here !!")
 
             queryArglist = ["sat-search", "search", "--bbox",
                             str(float(row['lon']) - bbox_size),
