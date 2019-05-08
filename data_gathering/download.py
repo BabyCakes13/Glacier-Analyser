@@ -48,6 +48,7 @@ class CSVHandler:
                             str(float(row['lat']) - bbox_size),
                             str(float(row['lon']) + bbox_size),
                             str(float(row['lat']) + bbox_size),
+                            "-p", "eo:cloud_cover<10",
                             "--save", json_query_filename]
 
             downloadArglist = ["sat-search", "load", json_query_filename,
