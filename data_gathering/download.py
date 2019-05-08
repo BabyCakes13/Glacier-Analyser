@@ -20,7 +20,7 @@ class CSVHandler:
 
     def open_csv(self):
 
-        with open(self.glacier_csv, 'r', newline='', encoding='utf-8') as csv_file:
+        with open(self.glacier_csv, 'r', newline='', encoding='ISO-8859-1') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
             self.parse_rows(csv_reader)
 
