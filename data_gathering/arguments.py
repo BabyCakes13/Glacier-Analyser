@@ -1,5 +1,6 @@
 """Argument parser"""
 import argparse
+from data_gathering import download
 import definitions
 
 
@@ -8,94 +9,64 @@ class ArgsParser:
 
     def __init__(self):
         """Sets up the argument parser."""
-        self.parser = argparse.ArgumentParser(description="Provides necessary input/output information.",
-                                              add_help=True)
-        self.add_arguments()
-        self.args = self.parser.parse_args()
+        self.parser = argparse.ArgumentParser(add_help=True)
+        self.subparsers = self.parser.add_subparsers()
 
-    def add_arguments(self):
-        """Adds arguments to the parser."""
+        self.add_download_arguments()
+        self.add_process_arguments()
 
-        self.parser.add_argument('--input',
-                                 help='Path to the input folder which contains the data set.',
-                                 default=definitions.DEFAULT_INPUT_DIR,
-                                 type=str,
-                                 nargs=1,
-                                 dest='input')
-        self.parser.add_argument('--output',
-                                 help='Path to the output folder which will contain the results.',
-                                 default=definitions.DEFAULT_OUTPUT_DIR,
-                                 type=str,
-                                 nargs=1,
-                                 dest='output')
-        self.parser.add_argument('--start',
-                                 help='Start date for image gathering.',
-                                 default=definitions.DEFAULT_START_DATE,
-                                 type=str,
-                                 nargs=1,
-                                 dest='start'
-                                 )
-        self.parser.add_argument('--end',
-                                 help='End date for image gathering.',
-                                 default=definitions.DEFAULT_END_DATE,
-                                 type=str,
-                                 nargs=1,
-                                 dest='end'
-                                 )
-        self.parser.add_argument('--path',
-                                 help='Path for image gathering.',
-                                 default=definitions.DEFAULT_PATH,
-                                 type=str,
-                                 nargs=1,
-                                 dest='path'
-                                 )
-        self.parser.add_argument('--row',
-                                 help='Row for image gathering.',
-                                 default=definitions.DEFAULT_ROW,
-                                 type=str,
-                                 nargs=1,
-                                 dest='row'
-                                 )
-        self.parser.add_argument('--cloud',
-                                 help='Maximum cloud coverage for image gathering.',
-                                 default=definitions.DEFAULT_CLOUD_COVERAGE,
-                                 type=str,
-                                 nargs=1,
-                                 dest='cloud'
-                                 )
-        self.parser.add_argument('--download',
-                                 help='Specify whether to download images or not.',
-                                 action='store_true',
-                                 dest='download')
+    def add_download_arguments(self):
+        """Adds arguments to the download sub parser."""
+        download_parser = self.subparsers.add_parser('download',
+                                                     add_help=True)
+        download_parser.add_argument('--csv',
+                                     help='Path to the csv file.',
+                                     default=definitions.GLACIER_DATASET_PATH,
+                                     type=str,
+                                     dest='csv')
+        download_parser.add_argument('--output',
+                                     help='Path to the output folder which will contain the data set results.',
+                                     default=definitions.FILES_DIR,
+                                     type=str,
+                                     dest='output')
+        download_parser.add_argument('-j',
+                                     help='Number of threads which will search and download.',
+                                     default=definitions.MAX_THREADS,
+                                     type=int,
+                                     dest='j')
+        download_parser.set_defaults(func=set_download_function)
 
-    def get_input(self):
-        """Returns the path to the input folder which contains the data set."""
-        return self.args.input
+    def add_process_arguments(self):
+        """Adds arguments to the process sub parser."""
+        process_parser = self.subparsers.add_parser('process',
+                                                    add_help=True)
+        process_parser.add_argument('--input',
+                                    help='Path to the input folder which contains the data set of TIF images.',
+                                    default=definitions.DEFAULT_INPUT_DIR,
+                                    type=str,
+                                    dest='input')
+        process_parser.add_argument('--output',
+                                    help='Path to the output folder which will contain the data set of TIF images.',
+                                    default=definitions.DEFAULT_OUTPUT_DIR,
+                                    type=str,
+                                    dest='output')
+        process_parser.set_defaults(func=set_process_function)
 
-    def get_output(self):
-        """Returns the path to the output folder which will contain the results."""
-        return self.args.output
 
-    def get_start(self):
-        """Returns the start date of image gathering."""
-        return self.args.start
+def activate_arguments():
+    """Instantiates an argument parser object and activates parsing."""
+    arguments = ArgsParser()
+    args = arguments.parser.parse_args()
+    args.func(args)
 
-    def get_end(self):
-        """Returns the end date of image gathering."""
-        return self.args.end
 
-    def get_path(self):
-        """RReturns the WRS2 path."""
-        return self.args.path
+def set_download_function(args):
+    """The default function for download sub parser."""
+    downloader = download.Downloader(args.csv, args.output, args.j)
+    downloader.start()
 
-    def get_row(self):
-        """Returns the WRS2 row."""
-        return self.args.row
 
-    def get_cloud(self):
-        """Returns the maximum cloud cloud coverage."""
-        return self.args.cloud
-
-    def get_download(self):
-        """Returns True if the argument download was provided."""
-        return self.args.download
+def set_process_function(args):
+    """The default function for process sub parser."""
+    print("PATIENCE, will be done!")
+    print("Arguments: " + args.input + args.output)

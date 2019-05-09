@@ -4,24 +4,21 @@ import subprocess
 import definitions
 
 
-class DataHandler:
+class Downloader:
     """Class which handles searching and downloading landsat files."""
 
-    def __init__(self, input_csv, output_dir, start_row=0, end_row=definitions.MAX_ROW, max_threads=4):
+    def __init__(self, input_csv, download_dir, max_threads=4):
         """Initialises variables needed for the processes."""
         self.glacier_csv = input_csv
-        self.output_dir = output_dir
-
-        self.start_row = start_row
-        self.end_row = end_row
+        self.download_dir = download_dir
 
         self.max_threads = max_threads
         self.process_queue = []
 
-        print ( "Input: " + str(input_csv) + " from : ", start_row, " to: ", end_row)
+        print("Input: " + str(input_csv))
 
-    def open_csv(self):
-        """Opens the csv file."""
+    def start(self):
+        """Opens the csv file and starts the searching and downloading process."""
         with open(self.glacier_csv, 'r', newline='', encoding='ISO-8859-1') as csv_file:
             csv_reader = csv.DictReader(csv_file)
             self.parse_rows(csv_reader)
@@ -78,7 +75,7 @@ class DataHandler:
         for row in csv_reader:
             
             directory_id = row['wgi_glacier_id'] + "_" + row['lon'] + "_" + row['lat']
-            directory_name = os.path.join(self.output_dir, directory_id)
+            directory_name = os.path.join(self.download_dir, directory_id)
             json_query_filename = os.path.join(directory_name, definitions.JSON_QUERY)
 
             try:
