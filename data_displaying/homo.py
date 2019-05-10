@@ -3,37 +3,38 @@ import cv2
 import numpy as np
 import sys
 
-MAX_FEATURES = 2500
-GOOD_MATCH_PERCENT = 0.25
+MAX_FEATURES = 5000
+GOOD_MATCH_PERCENT = 0.05
 
 
-def alignImages(im1Gray, im2Gray):
-    im1 = cv2.cvtColor(im1Gray, cv2.COLOR_GRAY2RGB)
-    im2 = cv2.cvtColor(im2Gray, cv2.COLOR_GRAY2RGB)
+def alignImages(im1_16bit, im2_16bit):
+
+    im1_8bit = (im1_16bit >> 8).astype(np.uint8)
+    im2_8bit = (im2_16bit >> 8).astype(np.uint8)
 
     cv2.namedWindow('ref', cv2.WINDOW_NORMAL)
     cv2.resizeWindow('ref', 1000, 1000)
     cv2.moveWindow('ref', 10,10)
-    cv2.imshow('ref', im2)
+    cv2.imshow('ref', im2_8bit)
 
     cv2.namedWindow('imp', cv2.WINDOW_NORMAL)
     cv2.resizeWindow('imp', 1000, 1000)
     cv2.moveWindow('imp', 10,10)
-    cv2.imshow('imp', im1)
+    cv2.imshow('imp', im1_8bit)
 
     while cv2.waitKey() != 27:
         pass
 
-    print("Im1 are  ", im1.shape)
-    print("Im2 are  ", im2.shape)
+    print("Im1 are  ", im1_8bit.shape)
+    print("Im2 are  ", im2_8bit.shape)
 
-    print("Im1Gray are  ", im1Gray.shape)
-    print("Im2Gray are  ", im2Gray.shape)
+    print("Im1Gray are  ", im1_16bit.shape)
+    print("Im2Gray are  ", im2_16bit.shape)
 
     # Detect ORB features and compute descriptors.
     orb = cv2.ORB_create(MAX_FEATURES)
-    keypoints1, descriptors1 = orb.detectAndCompute(im1, None)
-    keypoints2, descriptors2 = orb.detectAndCompute(im2, None)
+    keypoints1, descriptors1 = orb.detectAndCompute(im1_8bit, None)
+    keypoints2, descriptors2 = orb.detectAndCompute(im2_8bit, None)
 
     # Match features.
     matcher = cv2.DescriptorMatcher_create(cv2.DESCRIPTOR_MATCHER_BRUTEFORCE_HAMMING)
@@ -47,7 +48,7 @@ def alignImages(im1Gray, im2Gray):
     matches = matches[:numGoodMatches]
 
     # Draw top matches
-    imMatches = cv2.drawMatches(im1, keypoints1, im2, keypoints2, matches, None)
+    imMatches = cv2.drawMatches(im1_8bit, keypoints1, im2_8bit, keypoints2, matches, None)
     cv2.imwrite('matches.jpg', imMatches)
 
     cv2.namedWindow('dif', cv2.WINDOW_NORMAL)
@@ -70,16 +71,13 @@ def alignImages(im1Gray, im2Gray):
     h, mask = cv2.findHomography(points1, points2, cv2.RANSAC)
 
     # Use homography
-    height, width, channels = im2.shape
-    im1Reg = cv2.warpPerspective(im1, h, (width, height))
+    height, width = im1_8bit.shape
+    im1Reg = cv2.warpPerspective(im1_8bit, h, (width, height))
 
     cv2.namedWindow('out', cv2.WINDOW_NORMAL)
     cv2.resizeWindow('out', 1000, 1000)
     cv2.moveWindow('out', 10,10)
     cv2.imshow('out', im1Reg)
-
-
-
 
     while cv2.waitKey() != 27:
         pass
@@ -95,13 +93,13 @@ if __name__ == '__main__':
     # Read reference image
     refFilename = sys.argv[1]
     print("Reading reference image : ", refFilename)
-    imReference = cv2.imread(refFilename, cv2.IMREAD_LOAD_GDAL | cv2.IMREAD_GRAYSCALE )
+    imReference = cv2.imread(refFilename, cv2.IMREAD_LOAD_GDAL)
     #imReference = imReference[0:8000, 0:8000]
 
     # Read image to be aligned
     imFilename = sys.argv[2]
     print("Reading image to align : ", imFilename);
-    im = cv2.imread(imFilename, cv2.IMREAD_LOAD_GDAL | cv2.IMREAD_GRAYSCALE )
+    im = cv2.imread(imFilename, cv2.IMREAD_LOAD_GDAL)
     #im = im[0:8000, 0:8000]
 
     print("Aligning images ...")
