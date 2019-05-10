@@ -1,6 +1,7 @@
 """Argument parser"""
 import argparse
 from data_gathering import download
+from data_processing import ndsi_calculator
 import definitions
 
 
@@ -68,5 +69,6 @@ def set_download_function(args):
 
 def set_process_function(args):
     """The default function for process sub parser."""
-    print("PATIENCE, will be done!")
-    print("Arguments: " + args.input + args.output)
+    print("Creating the NDSI in ", args.input)
+    create_ndsi = ndsi_calculator.NDSI(args.input,args.output)
+    print("NDSI done in ", args.output)

@@ -102,3 +102,5 @@ class NDSI:
 
         return green_path, swir1_path
 
+# TODO make it calculate the NDSI for any pair checking the scene name. If I have 4 images
+
