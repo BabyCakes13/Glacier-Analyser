@@ -1,5 +1,6 @@
 import csv
 import os
+import sys
 import subprocess
 import definitions
 
@@ -21,7 +22,11 @@ class Downloader:
         """Opens the csv file and starts the searching and downloading process."""
         with open(self.glacier_csv, 'r', newline='', encoding='ISO-8859-1') as csv_file:
             csv_reader = csv.DictReader(csv_file)
-            self.parse_rows(csv_reader)
+            try:
+                self.parse_rows(csv_reader)
+            except (KeyboardInterrupt, SystemExit):
+                print("Exiting download after keyboard interrupt.")
+                sys.exit()
 
     @staticmethod
     def create_search_arglist(row, json_query_filename):

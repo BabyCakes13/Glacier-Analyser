@@ -32,6 +32,12 @@ class ArgsParser:
                                      default=definitions.FILES_DIR,
                                      type=str,
                                      dest='dir')
+        download_parser.add_argument('--months',
+                                     help='Months for which to download.',
+                                     default=definitions.MONTHS,
+                                     type=int,
+                                     nargs='*',
+                                     dest='months')
         download_parser.add_argument('-j',
                                      help='Number of threads which will search and download.',
                                      default=definitions.MAX_THREADS,
@@ -71,12 +77,18 @@ def activate_arguments():
 def set_download_function(args):
     """The default function for download sub parser."""
     print("Setting up download...", args.csv)
+
     downloader = download.Downloader(args.csv, args.dir, args.j)
     downloader.start()
+
+    print("Finished download.")
 
 
 def set_process_function(args):
     """The default function for process sub parser."""
     print("Setting up process...", args.input)
+    
     ndsi = nc.NDSI_caller(args.input, args.output, args.threshold)
     ndsi.start_gathering()
+
+    print("Finished process.")
