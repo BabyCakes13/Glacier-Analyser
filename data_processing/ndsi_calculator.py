@@ -59,7 +59,7 @@ class NDSI:
     def create_NDSI(self, output_name, data_type) -> gdal.Band:
         """Create the NDSI tiff image from the result of the formula.
         @return gdal.Band object which represents the resulting NDSI band."""
-        print("create NDSI...")
+        print("Create NDSI ", output_name)
         
         geotiff = gdal.GetDriverByName('GTiff')
         output_path = str(os.path.join(self.output_dir, output_name))
@@ -69,7 +69,7 @@ class NDSI:
         output_band.SetNoDataValue(-99)
         output_band.WriteArray(self.division)
 
-        print("done.")
+        print("Done NDSI ", output_path)
 
         return output_band
 
