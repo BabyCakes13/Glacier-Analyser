@@ -78,7 +78,7 @@ def set_download_function(args):
     """The default function for download sub parser."""
     print("Setting up download...", args.csv)
 
-    downloader = download.Downloader(args.csv, args.dir, args.j)
+    downloader = download.Downloader(args.csv, args.dir, args.j, args.months)
     downloader.start()
 
     print("Finished download.")
@@ -87,7 +87,7 @@ def set_download_function(args):
 def set_process_function(args):
     """The default function for process sub parser."""
     print("Setting up process...", args.input)
-    
+
     ndsi = nc.NDSI_caller(args.input, args.output, args.threshold)
     ndsi.start_gathering()
 

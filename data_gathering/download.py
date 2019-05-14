@@ -1,4 +1,5 @@
 import csv
+import json
 import os
 import sys
 import subprocess
@@ -8,11 +9,14 @@ import definitions
 class Downloader:
     """Class which handles searching and downloading landsat files."""
 
-    def __init__(self, input_csv, download_dir, max_threads=4):
+    def __init__(self, input_csv=definitions.GLACIER_DATASET_PATH,
+                 download_dir=definitions.DEFAULT_DOWNLOAD_DIR,
+                 max_threads=definitions.MAX_THREADS,
+                 months=definitions.MONTHS):
         """Initialises variables needed for the processes."""
         self.glacier_csv = input_csv
         self.download_dir = download_dir
-
+        self.months = months
         self.max_threads = max_threads
         self.process_queue = []
 
@@ -41,6 +45,20 @@ class Downloader:
 
         return search_arglist
 
+    def check_months(self, json_query_path, scene_number):
+        """Checks if the month of the scene from the query is valid with the opted month list."""
+        print("JSON: ", json_query_path)
+
+        with open(json_query_path, "r") as json_query:
+            data = json.load(json_query)
+
+        datetime = data["features"][scene_number]['properties']["datetime"]
+        month = int(datetime[5:7])
+
+        if month in self.months:
+            return True
+        return False
+
     @staticmethod
     def create_download_arglist(json_query_filename, dirname):
         """Creates the sat-load argument list."""
@@ -60,10 +78,10 @@ class Downloader:
     def call_processes(self, search_arglist, download_arglist, json_query_filename):
         """Calls and appends sat-search and sat-load processes."""
 
-        print(search_arglist)
+#        print(search_arglist)
         sp = subprocess.call(search_arglist)
 
-        print(download_arglist)
+#        print(download_arglist)
         sp = subprocess.Popen(download_arglist)
 
         self.process_queue.append((json_query_filename, sp))
@@ -82,6 +100,10 @@ class Downloader:
             directory_id = row['wgi_glacier_id'] + "_" + row['lon'] + "_" + row['lat']
             directory_name = os.path.join(self.download_dir, directory_id)
             json_query_filename = os.path.join(directory_name, definitions.JSON_QUERY)
+
+            self.check_months(json_query_filename)
+
+            return 0
 
             try:
                 os.mkdir(directory_name)
