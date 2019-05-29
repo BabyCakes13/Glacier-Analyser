@@ -78,10 +78,10 @@ class Downloader:
     def call_processes(self, search_arglist, download_arglist, json_query_filename):
         """Calls and appends sat-search and sat-load processes."""
 
-#        print(search_arglist)
+        print(search_arglist)
         sp = subprocess.call(search_arglist)
 
-#        print(download_arglist)
+        print(download_arglist)
         sp = subprocess.Popen(download_arglist)
 
         self.process_queue.append((json_query_filename, sp))
@@ -101,9 +101,7 @@ class Downloader:
             directory_name = os.path.join(self.download_dir, directory_id)
             json_query_filename = os.path.join(directory_name, definitions.JSON_QUERY)
 
-            self.check_months(json_query_filename)
-
-            return 0
+            # self.check_months(json_query_filename)
 
             try:
                 os.mkdir(directory_name)
