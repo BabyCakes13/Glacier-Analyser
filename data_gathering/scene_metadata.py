@@ -7,10 +7,9 @@ from util import strings
 
 class SceneMetadata:
     """Class which deals with the scene MTL metadata file."""
-    def __init__(self, input_path):
+    def __init__(self, metadata_path):
         """Sets up the metadata handler."""
-        self.input = input_path
-        self.metadata = self.get_metadata_file()
+        self.metadata = metadata_path
 
     def get_metadata_file(self) -> pathlib.Path:
         """Returns the full path to the metadata file."""
