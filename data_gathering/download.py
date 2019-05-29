@@ -26,11 +26,7 @@ class Downloader:
         """Opens the csv file and starts the searching and downloading process."""
         with open(self.glacier_csv, 'r', newline='', encoding='ISO-8859-1') as csv_file:
             csv_reader = csv.DictReader(csv_file)
-            try:
-                self.parse_rows(csv_reader)
-            except (KeyboardInterrupt, SystemExit):
-                print("Exiting download after keyboard interrupt.")
-                sys.exit()
+            self.parse_rows(csv_reader)
 
     @staticmethod
     def create_search_arglist(row, json_query_filename):
@@ -111,7 +107,11 @@ class Downloader:
             search_arglist = self.create_search_arglist(row, json_query_filename)
             download_arglist = self.create_download_arglist(json_query_filename, directory_name)
 
-            self.check_process_full()
-            self.call_processes(search_arglist, download_arglist, json_query_filename)
-            self.check_process_done()
+            try:
+                self.check_process_full()
+                self.call_processes(search_arglist, download_arglist, json_query_filename)
+                self.check_process_done()
+            except KeyboardInterrupt:
+                print("Keyboard interrupt.")
+                sys.exit(1)
 

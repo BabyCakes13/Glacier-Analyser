@@ -1,7 +1,7 @@
 from __future__ import print_function
 import cv2
 import numpy as np
-import sys
+import os
 
 MAX_FEATURES = 5000
 GOOD_MATCH_PERCENT = 0.25
@@ -17,7 +17,7 @@ class Align:
         self.im_matches = None
         self.im_result = None
 
-    def find_matches(self):
+    def find_matches(self, matches_path):
         # detect ORB features and descriptors
         orb = cv2.ORB_create(MAX_FEATURES)
         keypoints1, descriptors1 = orb.detectAndCompute(self.im1_8bit, None)
@@ -36,7 +36,7 @@ class Align:
 
         # draw the best matches
         self.im_matches = cv2.drawMatches(self.im1_8bit, keypoints1, self.im2_8bit, keypoints2, matches, None)
-        cv2.imwrite('matches.jpg', self.im_matches)
+        cv2.imwrite(matches_path, self.im_matches)
 
         # get good matches location
         points1 = np.zeros((len(matches), 2), dtype=np.float32)
@@ -76,10 +76,10 @@ class Align:
         while cv2.waitKey() != 27:
             pass
 
-        cv2.namedWindow('out', cv2.WINDOW_NORMAL)
-        cv2.resizeWindow('out', 1000, 1000)
-        cv2.moveWindow('out', 10, 10)
-        cv2.imshow('out', self.im_result)
+        cv2.namedWindow('Result', cv2.WINDOW_NORMAL)
+        cv2.resizeWindow('Result', 1000, 1000)
+        cv2.moveWindow('Result', 10, 10)
+        cv2.imshow('Result', self.im_result)
 
         while cv2.waitKey() != 27:
             pass
@@ -87,29 +87,26 @@ class Align:
         cv2.destroyAllWindows()
 
 
-def setup_alignment():
-    reference_filename = sys.argv[1]
+def setup_alignment(reference_filename, tobe_aligned_filename, result_filename, matches_filename, output_dir):
+    print("Started alignment...")
+
+    reference_filename = reference_filename
     print("Reading reference image : ", reference_filename)
     im_reference = cv2.imread(reference_filename, cv2.IMREAD_LOAD_GDAL)
 
-    tobe_aligned_filename = sys.argv[2]
+    tobe_aligned_filename = tobe_aligned_filename
     print("Reading image to align : ", tobe_aligned_filename)
     im_tobe_aligned = cv2.imread(tobe_aligned_filename, cv2.IMREAD_LOAD_GDAL)
 
     print("Aligning images ...")
+    matches_path = os.path.join(output_dir, matches_filename)
     aligner = Align(im_tobe_aligned, im_reference)
-    aligner.find_matches()
-    aligner.setup_windows()
+    aligner.find_matches(matches_path)
+#    aligner.setup_windows()
 
     # Write aligned image to disk.
-    output_filename = sys.argv[3]
-    print("Saving aligned image : ", output_filename);
-    cv2.imwrite(output_filename, aligner.im_result)
+    print("Saving aligned image : ", result_filename)
+    cv2.imwrite(os.path.join(output_dir, result_filename), aligner.im_result)
 
-    # Print estimated homography
-    #    print("Estimated homography : \n", h)
-
-
-if __name__ == "__main__":
-    setup_alignment()
+    print("End alignment. \n")
 

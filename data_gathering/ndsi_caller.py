@@ -3,6 +3,7 @@ import gdal
 import os
 import definitions
 from data_processing import ndsi_calculator as nc
+from data_displaying import alignment
 
 
 class NDSI_caller:
@@ -27,12 +28,22 @@ class NDSI_caller:
                 swir1_scene = self.get_scene_name(swir1_bands_paths[counter], definitions.SWIR1_BAND_END)
 
                 if self.check_pairs(green_scene, swir1_scene):
+                    print("Processing ", green_scene, "...")
+                    result_filename = green_scene + "_" + "aligned.TIF"
+                    matches_filename = green_scene + "_" + "matched.jpg"
+                    alignment.setup_alignment(reference_filename=green_bands_paths[counter],
+                                              tobe_aligned_filename=swir1_bands_paths[counter],
+                                              result_filename=result_filename,
+                                              matches_filename=matches_filename,
+                                              output_dir=self.output_dir)
+
+                    """
                     ndsi = nc.NDSI(green_path=green_bands_paths[counter],
                                    swir1_path=swir1_bands_paths[counter],
                                    output_dir=self.output_dir,
                                    threshold=self.threshold)
                     output_filename = green_scene + "_" + str(self.threshold) + "_NDSI_INT8.tif"
-                    ndsi.create_NDSI(output_filename, gdal.GDT_Byte)
+                    ndsi.create_NDSI(output_filename, gdal.GDT_Byte)"""
         else:
             print("Some bands are missing.")
 
