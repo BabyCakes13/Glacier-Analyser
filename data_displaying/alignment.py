@@ -57,6 +57,9 @@ class Align:
         cv2.moveWindow('Reference', 10, 10)
         cv2.imshow('Reference', self.im2_8bit)
 
+        while cv2.waitKey() != 27:
+            pass
+
         cv2.namedWindow('imp', cv2.WINDOW_NORMAL)
         cv2.resizeWindow('imp', 1000, 1000)
         cv2.moveWindow('imp', 10, 10)
@@ -83,30 +86,30 @@ class Align:
 
         cv2.destroyAllWindows()
 
-if __name__ == '__main__':
-    # Read reference image
-    refFilename = sys.argv[1]
-    print("Reading reference image : ", refFilename)
-    imReference = cv2.imread(refFilename, cv2.IMREAD_LOAD_GDAL)
-    #imReference = imReference[0:8000, 0:8000]
 
-    # Read image to be aligned
-    imFilename = sys.argv[2]
-    print("Reading image to align : ", imFilename);
-    im = cv2.imread(imFilename, cv2.IMREAD_LOAD_GDAL)
-    #im = im[0:8000, 0:8000]
+def setup_alignment():
+    reference_filename = sys.argv[1]
+    print("Reading reference image : ", reference_filename)
+    im_reference = cv2.imread(reference_filename, cv2.IMREAD_LOAD_GDAL)
+
+    tobe_aligned_filename = sys.argv[2]
+    print("Reading image to align : ", tobe_aligned_filename)
+    im_tobe_aligned = cv2.imread(tobe_aligned_filename, cv2.IMREAD_LOAD_GDAL)
 
     print("Aligning images ...")
-    # Registered image will be resotred in imReg.
-    # The estimated homography will be stored in h.
-    aligner = Align(im, imReference)
+    aligner = Align(im_tobe_aligned, im_reference)
     aligner.find_matches()
     aligner.setup_windows()
 
     # Write aligned image to disk.
-    outFilename = sys.argv[3]
-    print("Saving aligned image : ", outFilename);
-    cv2.imwrite(outFilename, aligner.im_result)
+    output_filename = sys.argv[3]
+    print("Saving aligned image : ", output_filename);
+    cv2.imwrite(output_filename, aligner.im_result)
 
     # Print estimated homography
-#    print("Estimated homography : \n", h)
+    #    print("Estimated homography : \n", h)
+
+
+if __name__ == "__main__":
+    setup_alignment()
+
