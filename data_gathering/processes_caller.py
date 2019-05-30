@@ -1,13 +1,12 @@
 """Module for the NDSI caller."""
-import gdal
 import json
 import os
 import definitions
-from data_processing import ndsi_calculator as nc
-from data_displaying import alignment
+from data_processing import alignment
+from data_processing import alignment_validator
 
 
-class NDSI_caller:
+class ProcessCaller:
     """Class for NDSI calculation over a given input directory."""
 
     def __init__(self, input_dir, output_dir, threshold, scene):
@@ -16,6 +15,7 @@ class NDSI_caller:
         self.output_dir = output_dir
         self.threshold = threshold
         self.scene = scene
+        self.homography_csv = os.path.join(self.output_dir, definitions.HOMOGRAPHY_CSV)
 
     def start_gathering(self):
         """Parses the files of the input directory, calculating the NDSI for the paired green and swir1 bands.
@@ -49,7 +49,7 @@ class NDSI_caller:
             else:
                 print("Some bands are missing.")
 
-        self.homography_analyze()
+        self.write_homography_result()
 
     def process_images(self, green_path, swir1_path):
         print("Scene: ", self.scene)
@@ -112,21 +112,9 @@ class NDSI_caller:
             return True
         return False
 
-    def homography_analyze(self):
-        result_json = os.path.join(self.output_dir, "homography_results.json")
-        scene_result = self.generate_scene_item()
+    def write_homography_result(self):
+        writer = alignment_validator.HomographyCSV(glacier_id=self.get_glacier_id(),
+                                                   homography_csv=self.homography_csv)
 
-        with open(result_json, "a") as file:
-            json.dump(scene_result, file, indent=4)
-            file.write('\n')
 
-    def generate_scene_item(self):
-        result = {
-            'glacier_id': self.get_glacier_id(),
-            'max_features': alignment.MAX_FEATURES,
-            'good_match_percent': alignment.GOOD_MATCH_PERCENT,
-            'valid_homographies': alignment.VALID_HOMOGRAPHIES,
-            'processed_homographies': alignment.TOTAL_PROCESSED,
-            'valid/processed': alignment.VALID_HOMOGRAPHIES / alignment.TOTAL_PROCESSED
-        }
-        return result
+

@@ -5,6 +5,8 @@ import os
 
 MAX_FEATURES = 5000
 GOOD_MATCH_PERCENT = 0.1
+ALLOWED_ERROR = 0.01
+ALLOWED_INTEGRAL = 3000
 VALID_HOMOGRAPHIES = 0
 TOTAL_PROCESSED = 0
 
@@ -114,9 +116,9 @@ class Align:
         TOTAL_PROCESSED += 1
 
         identity = np.identity(3)
-        comparison = np.full((3, 3), 0.1)
-        comparison[0, 2] = 3000
-        comparison[1, 2] = 3000
+        comparison = np.full((3, 3), ALLOWED_ERROR)
+        comparison[0, 2] = ALLOWED_INTEGRAL
+        comparison[1, 2] = ALLOWED_INTEGRAL
 
         if self.homography is None:
             return False

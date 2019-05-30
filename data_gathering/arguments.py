@@ -3,7 +3,7 @@ import argparse
 import gdal
 import os
 from data_gathering import download
-from data_gathering import ndsi_caller as nc
+from data_gathering import processes_caller as nc
 import definitions
 
 
@@ -93,7 +93,7 @@ def set_process_function(args):
     """The default function for process sub parser."""
     print("Setting up process...", args.input)
 
-    ndsi = nc.NDSI_caller(args.input, args.output, args.threshold, args.scene)
+    ndsi = nc.ProcessCaller(args.input, args.output, args.threshold, args.scene)
     ndsi.start_gathering()
 
     print("Finished process.")

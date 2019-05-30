@@ -96,6 +96,18 @@ def get_scene_unset_coordinates() -> dict:
     return coordinates
 
 
+def get_default_homography_csv():
+    attributes = ['GLACIER_ID',
+                  'MAX_FEATURES',
+                  'GOOD_MATCH_PERCENT',
+                  'ALLOWED_ERROR',
+                  'ALLOWED_INTEGRAL',
+                  'VALID_HOMOGRAPHIES',
+                  'PROCESSED_HOMOGRAPHIES',
+                  'RATIO']
+    return attributes
+
+
 def get_system_messages():
 
     messages = [

@@ -15,6 +15,7 @@ GLACIER_DATASET_FILENAME = 'wgi_feb2012'
 GLACIER_DATASET_PATH = os.path.join(FILES_DIR, GLACIER_DATASET_FILENAME + '.csv')
 JSON_QUERY = 'query.json'
 DEFAULT_SCENE_NAME = "UNSET"
+HOMOGRAPHY_CSV = 'homography_result.csv'
 
 # bands
 GREEN_BAND_END = '_B3.TIF'
