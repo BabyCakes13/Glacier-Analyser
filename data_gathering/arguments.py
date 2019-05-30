@@ -64,6 +64,11 @@ class ArgsParser:
                                     default=definitions.THRESHOLD,
                                     type=int,
                                     dest='threshold')
+        process_parser.add_argument('--scene',
+                                    help='Scene for processing. If set, will process only this scene,',
+                                    default=definitions.DEFAULT_SCENE_NAME,
+                                    type=str,
+                                    dest='scene')
         process_parser.set_defaults(func=set_process_function)
 
 
@@ -88,7 +93,7 @@ def set_process_function(args):
     """The default function for process sub parser."""
     print("Setting up process...", args.input)
 
-    ndsi = nc.NDSI_caller(args.input, args.output, args.threshold)
+    ndsi = nc.NDSI_caller(args.input, args.output, args.threshold, args.scene)
     ndsi.start_gathering()
 
     print("Finished process.")

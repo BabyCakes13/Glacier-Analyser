@@ -4,7 +4,9 @@ import numpy as np
 import os
 
 MAX_FEATURES = 5000
-GOOD_MATCH_PERCENT = 0.25
+GOOD_MATCH_PERCENT = 0.1
+VALID_HOMOGRAPHIES = 0
+TOTAL_PROCESSED = 0
 
 
 class Align:
@@ -16,12 +18,18 @@ class Align:
 
         self.im_matches = None
         self.im_result = None
+        self.homography = None
 
-    def find_matches(self, matches_path):
+    def find_matches(self, matches_path) -> bool:
+        """Returns whether the homography finding was succesfull or not."""
         # detect ORB features and descriptors
         orb = cv2.ORB_create(MAX_FEATURES)
         keypoints1, descriptors1 = orb.detectAndCompute(self.im1_8bit, None)
         keypoints2, descriptors2 = orb.detectAndCompute(self.im2_8bit, None)
+
+        if (descriptors1 is None) or (descriptors2 is None):
+            print("Descriptor is None. Aborting this image.")
+            return False
 
         # match features
         matcher = cv2.DescriptorMatcher_create(cv2.DESCRIPTOR_MATCHER_BRUTEFORCE_HAMMING)
@@ -46,10 +54,23 @@ class Align:
             points1[i, :] = keypoints1[match.queryIdx].pt
             points2[i, :] = keypoints2[match.trainIdx].pt
 
+#        print("POINTS 1 ", len(points1))
+#        print("POINTS 2 ", len(points2))
+        if (len(points1) < 1) or (len(points2) < 1):
+            print("Not enough feature points were found. Aborting this image.")
+            return False
+
         # find and apply homography
-        homography, mask = cv2.findHomography(points1, points2, cv2.RANSAC)
+        self.homography, mask = cv2.findHomography(points1, points2, cv2.RANSAC)
         height, width = self.im1_8bit.shape
-        self.im_result = cv2.warpPerspective(self.im1_8bit, homography, (width, height))
+
+        if self.homography is None:
+            print("Homography is none. Aborting this image.")
+            return False
+
+        print(self.homography)
+        self.im_result = cv2.warpPerspective(self.im1_8bit, self.homography, (width, height))
+        return True
 
     def setup_windows(self):
         cv2.namedWindow('Reference', cv2.WINDOW_NORMAL)
@@ -86,27 +107,52 @@ class Align:
 
         cv2.destroyAllWindows()
 
+    def validate_homography(self):
+        np.set_printoptions(suppress=True, precision=4)
+        global TOTAL_PROCESSED
+        global VALID_HOMOGRAPHIES
+        TOTAL_PROCESSED += 1
+
+        identity = np.identity(3)
+        comparison = np.full((3, 3), 0.1)
+        comparison[0, 2] = 3000
+        comparison[1, 2] = 3000
+
+        if self.homography is None:
+            return False
+
+        difference = np.absolute(np.subtract(identity, self.homography))
+        print(difference)
+
+        if np.less_equal(difference, comparison).all():
+            VALID_HOMOGRAPHIES += 1
+            return True
+        else:
+            print("Homography is not good.")
+            return False
+
 
 def setup_alignment(reference_filename, tobe_aligned_filename, result_filename, matches_filename, output_dir):
-    print("Started alignment...")
-
+#    print("Started alignment...")
     reference_filename = reference_filename
-    print("Reading reference image : ", reference_filename)
+#    print("Reading reference image : ", reference_filename)
     im_reference = cv2.imread(reference_filename, cv2.IMREAD_LOAD_GDAL)
 
     tobe_aligned_filename = tobe_aligned_filename
-    print("Reading image to align : ", tobe_aligned_filename)
+#    print("Reading image to align : ", tobe_aligned_filename)
     im_tobe_aligned = cv2.imread(tobe_aligned_filename, cv2.IMREAD_LOAD_GDAL)
 
-    print("Aligning images ...")
+#    print("Aligning images ...")
     matches_path = os.path.join(output_dir, matches_filename)
     aligner = Align(im_tobe_aligned, im_reference)
-    aligner.find_matches(matches_path)
+    found = aligner.find_matches(matches_path)
+    valid = aligner.validate_homography()
 #    aligner.setup_windows()
 
     # Write aligned image to disk.
-    print("Saving aligned image : ", result_filename)
-    cv2.imwrite(os.path.join(output_dir, result_filename), aligner.im_result)
-
-    print("End alignment. \n")
+#    print("Saving aligned image : ", result_filename)
+    print("valid ", VALID_HOMOGRAPHIES, " from ", TOTAL_PROCESSED)
+    print("\n")
+    if found and valid:
+        cv2.imwrite(os.path.join(output_dir, result_filename), aligner.im_result)
 
