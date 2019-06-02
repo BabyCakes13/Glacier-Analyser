@@ -14,7 +14,8 @@ DEFAULT_DOWNLOAD_DIR = os.path.join(FILES_DIR, 'download')
 GLACIER_DATASET_FILENAME = 'wgi_feb2012'
 GLACIER_DATASET_PATH = os.path.join(FILES_DIR, GLACIER_DATASET_FILENAME + '.csv')
 JSON_QUERY = 'query.json'
-DEFAULT_SCENE_NAME = "UNSET"
+DEFAULT_SCENE_NAME = None
+DEFAULT_BIG_DIR = None
 HOMOGRAPHY_CSV = 'homography_result.csv'
 
 # bands

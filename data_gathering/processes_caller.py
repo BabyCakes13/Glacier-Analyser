@@ -49,6 +49,7 @@ class ProcessCaller:
             else:
                 print("Some bands are missing.")
 
+        print("Writing homography result.")
         self.write_homography_result()
 
     def process_images(self, green_path, swir1_path):

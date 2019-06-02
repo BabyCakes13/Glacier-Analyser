@@ -9,15 +9,15 @@ class HomographyCSV:
         self.glacier_id = glacier_id
         self.homography_csv = homography_csv
 
+    def start(self):
         self.validate_csv()
         self.generate_csv_item()
         self.add_item_to_csv()
 
-
     def generate_csv_item(self):
         item = [
             self.glacier_id,
-            alignment.GOOD_MATCH_PERCENT,
+            alignment.MAX_FEATURES,
             alignment.GOOD_MATCH_PERCENT,
             alignment.ALLOWED_ERROR,
             alignment.ALLOWED_INTEGRAL,
@@ -25,7 +25,6 @@ class HomographyCSV:
             alignment.TOTAL_PROCESSED,
             alignment.VALID_HOMOGRAPHIES / alignment.TOTAL_PROCESSED
         ]
-        print(item)
         return item
 
     def add_item_to_csv(self):
@@ -34,7 +33,6 @@ class HomographyCSV:
         with open(self.homography_csv, "a") as file:
             writer = csv.writer(file)
             writer.writerow(result)
-            print("Wrote row.")
 
     def validate_csv(self):
         """Verify if the column names exist, write them if not."""
@@ -42,6 +40,7 @@ class HomographyCSV:
             with open(self.homography_csv, "w") as file:
                 writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 writer.writerow(strings.get_default_homography_csv())
+                file.flush()
 
         with open(self.homography_csv, "r+") as file:
             reader = csv.reader(file)

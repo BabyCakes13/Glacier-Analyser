@@ -4,6 +4,7 @@ import gdal
 import os
 from data_gathering import download
 from data_gathering import processes_caller as nc
+from data_gathering import process_alignment
 import definitions
 
 
@@ -69,6 +70,11 @@ class ArgsParser:
                                     default=definitions.DEFAULT_SCENE_NAME,
                                     type=str,
                                     dest='scene')
+        process_parser.add_argument('--bigdir',
+                                    help='Directory which contains all the glacier directories.',
+                                    default=definitions.DEFAULT_SCENE_NAME,
+                                    type=str,
+                                    dest='bigdir')
         process_parser.set_defaults(func=set_process_function)
 
 
@@ -91,9 +97,8 @@ def set_download_function(args):
 
 def set_process_function(args):
     """The default function for process sub parser."""
-    print("Setting up process...", args.input)
+    print("Setting up process...")
 
-    ndsi = nc.ProcessCaller(args.input, args.output, args.threshold, args.scene)
-    ndsi.start_gathering()
-
+    process_align = process_alignment.ProcessAlignment(args.input, args.bigdir, args.output)
+    process_align.start()
     print("Finished process.")

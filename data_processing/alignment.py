@@ -3,10 +3,10 @@ import cv2
 import numpy as np
 import os
 
-MAX_FEATURES = 5000
+MAX_FEATURES = 8000
 GOOD_MATCH_PERCENT = 0.1
-ALLOWED_ERROR = 0.01
-ALLOWED_INTEGRAL = 3000
+ALLOWED_ERROR = 0.001
+ALLOWED_INTEGRAL = 50
 VALID_HOMOGRAPHIES = 0
 TOTAL_PROCESSED = 0
 
@@ -22,7 +22,7 @@ class Align:
         self.im_result = None
         self.homography = None
 
-    def find_matches(self, matches_path) -> bool:
+    def find_matches(self) -> bool:
         """Returns whether the homography finding was succesfull or not."""
         # detect ORB features and descriptors
         orb = cv2.ORB_create(MAX_FEATURES)
@@ -46,7 +46,6 @@ class Align:
 
         # draw the best matches
         self.im_matches = cv2.drawMatches(self.im1_8bit, keypoints1, self.im2_8bit, keypoints2, matches, None)
-        cv2.imwrite(matches_path, self.im_matches)
 
         # get good matches location
         points1 = np.zeros((len(matches), 2), dtype=np.float32)
@@ -70,7 +69,7 @@ class Align:
             print("Homography is none. Aborting this image.")
             return False
 
-        print(self.homography)
+#        print(self.homography)
         self.im_result = cv2.warpPerspective(self.im1_8bit, self.homography, (width, height))
         return True
 
@@ -134,27 +133,26 @@ class Align:
             return False
 
 
-def setup_alignment(reference_filename, tobe_aligned_filename, result_filename, matches_filename, output_dir):
-#    print("Started alignment...")
-    reference_filename = reference_filename
-#    print("Reading reference image : ", reference_filename)
-    im_reference = cv2.imread(reference_filename, cv2.IMREAD_LOAD_GDAL)
+def setup_alignment(reference_filename, tobe_aligned_filename,
+                    result_filename, matches_filename,
+                    aligned_dir, good_matches_dir, bad_matches_dir):
 
-    tobe_aligned_filename = tobe_aligned_filename
-#    print("Reading image to align : ", tobe_aligned_filename)
+    im_reference = cv2.imread(reference_filename, cv2.IMREAD_LOAD_GDAL)
     im_tobe_aligned = cv2.imread(tobe_aligned_filename, cv2.IMREAD_LOAD_GDAL)
 
-#    print("Aligning images ...")
-    matches_path = os.path.join(output_dir, matches_filename)
+    good_matches_path = os.path.join(good_matches_dir, matches_filename)
+    bad_matches_path = os.path.join(bad_matches_dir, matches_filename)
+    aligned_path = os.path.join(aligned_dir, result_filename)
+
     aligner = Align(im_tobe_aligned, im_reference)
-    found = aligner.find_matches(matches_path)
+    found = aligner.find_matches()
     valid = aligner.validate_homography()
 #    aligner.setup_windows()
 
-    # Write aligned image to disk.
-#    print("Saving aligned image : ", result_filename)
-    print("valid ", VALID_HOMOGRAPHIES, " from ", TOTAL_PROCESSED)
-    print("\n")
+    print(VALID_HOMOGRAPHIES, "/", TOTAL_PROCESSED, "\n")
     if found and valid:
-        cv2.imwrite(os.path.join(output_dir, result_filename), aligner.im_result)
+        cv2.imwrite(good_matches_path, aligner.im_matches)
+        cv2.imwrite(aligned_path, aligner.im_result)
+    else:
+        cv2.imwrite(bad_matches_path, aligner.im_matches)
 
