@@ -21,7 +21,6 @@ class SceneData:
         days = self.get_days()
         total_days = 0
         month = 0
-        day = 0
 
         while total_days < days and month <= 12:
             month += 1
@@ -49,11 +48,17 @@ class SceneData:
     def get_satellite(self):
         """Returns the satellite of the scene."""
         satellite = self.scene[0:1]
-        print("Satellite of the scene: ", satellite)
         return satellite
 
     def get_satellite_number(self):
         """Returns the number of the satellite."""
         number = int(self.scene[2:3])
-        print("Year of the scene: ", number)
         return number
+
+    def get_path(self):
+        path = int(self.scene[3:6])
+        return path
+
+    def get_row(self):
+        row = int(self.scene[6:9])
+        return row

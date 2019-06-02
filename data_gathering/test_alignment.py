@@ -22,56 +22,50 @@ class Align:
     def find_matches(self) -> bool:
         """Returns whether the homography finding was succesfull or not."""
         # detect ORB features and descriptors
-        orb = cv2.ORB_create(definitions.MAX_FEATURES)
-        keypoints1, descriptors1 = orb.detectAndCompute(self.im1_8bit, None)
-        keypoints2, descriptors2 = orb.detectAndCompute(self.im2_8bit, None)
-        print("Keypoints 1 ", len(keypoints1))
-        print("Keypoints 2 ", len(keypoints2))
-        print("Descriptor 1 ", descriptors1)
-        print("Descriptors 2 ", descriptors2)
-        if (descriptors1 is None) or (descriptors2 is None):
-            print("Descriptor is None. Aborting this image.")
-            return False
+        # Read the images to be aligned
 
-        # match features
-        matcher = cv2.DescriptorMatcher_create(cv2.DESCRIPTOR_MATCHER_BRUTEFORCE_HAMMING)
-        matches = matcher.match(descriptors1, descriptors2, None)
+        # Find size of image1
+        sz = self.im1_8bit.shape
 
-        # sort matches by score
-        matches.sort(key=lambda x: x.distance, reverse=False)
+        # Define the motion model
+        print("Define motion model...")
+        warp_mode = cv2.MOTION_TRANSLATION
 
-        # remove not good matches
-        numGoodMatches = int(len(matches) * definitions.GOOD_MATCH_PERCENT)
-        matches = matches[:numGoodMatches]
+        # Define 2x3 or 3x3 matrices and initialize the matrix to identity
+        print("Define motion homography")
+        if warp_mode == cv2.MOTION_HOMOGRAPHY:
+            warp_matrix = np.eye(3, 3, dtype=np.float32)
+        else:
+            warp_matrix = np.eye(2, 3, dtype=np.float32)
 
-        # draw the best matches
-        self.im_matches = cv2.drawMatches(self.im1_8bit, keypoints1, self.im2_8bit, keypoints2, matches, None)
+        # Specify the number of iterations.
+        number_of_iterations = 5000
 
-        # get good matches location
-        points1 = np.zeros((len(matches), 2), dtype=np.float32)
-        points2 = np.zeros((len(matches), 2), dtype=np.float32)
+        # Specify the threshold of the increment
+        # in the correlation coefficient between two iterations
+        termination_eps = 1e-10
 
-        for i, match in enumerate(matches):
-            points1[i, :] = keypoints1[match.queryIdx].pt
-            points2[i, :] = keypoints2[match.trainIdx].pt
+        # Define termination criteria
+        print("Define criteria")
+        criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, number_of_iterations, termination_eps)
 
-#        print("POINTS 1 ", len(points1))
-#        print("POINTS 2 ", len(points2))
-        if (len(points1) < 1) or (len(points2) < 1):
-            print("Not enough feature points were found. Aborting this image.")
-            return False
+        print("Run algorithm")
+        # Run the ECC algorithm. The results are stored in warp_matrix.
+        (cc, warp_matrix) = cv2.findTransformECC(self.im1_8bit, self.im2_8bit, warp_matrix, warp_mode, criteria)
 
-        # find and apply homography
-        self.homography, mask = cv2.findHomography(points1, points2, cv2.RANSAC)
-        height, width = self.im1_8bit.shape
+        if warp_mode == cv2.MOTION_HOMOGRAPHY:
+            # Use warpPerspective for Homography
+            print("Wrap perspective 1")
+            self.im_result = cv2.warpPerspective(self.im2_8bit, warp_matrix, (sz[1], sz[0]),
+                                              flags=cv2.INTER_LINEAR + cv2.WARP_INVERSE_MAP)
+        else:
+            print("Wrap perspective 2")
+            # Use warpAffine for Translation, Euclidean and Affine
+            self.im_result = cv2.warpAffine(self.im2_8bit, warp_matrix, (sz[1], sz[0]),
+                                         flags=cv2.INTER_LINEAR + cv2.WARP_INVERSE_MAP);
 
-        if self.homography is None:
-            print("Homography is none. Aborting this image.")
-            return False
-
-#        print(self.homography)
-        self.im_result = cv2.warpPerspective(self.im1_8bit, self.homography, (width, height))
-        return True
+        # Show final results
+        self.setup_windows()
 
     def setup_windows(self):
         cv2.namedWindow('Reference', cv2.WINDOW_NORMAL)
@@ -90,13 +84,13 @@ class Align:
         while cv2.waitKey() != 27:
             pass
 
-        cv2.namedWindow('Differences', cv2.WINDOW_NORMAL)
+        """cv2.namedWindow('Differences', cv2.WINDOW_NORMAL)
         cv2.resizeWindow('Differences', 1000, 2000)
         cv2.moveWindow('Differences', 10, 10)
         cv2.imshow('Differences', self.im_matches)
 
         while cv2.waitKey() != 27:
-            pass
+            pass"""
 
         cv2.namedWindow('Result', cv2.WINDOW_NORMAL)
         cv2.resizeWindow('Result', 1000, 1000)
@@ -140,8 +134,8 @@ def setup_alignment(reference_filename, tobe_aligned_filename,
     im_reference = cv2.imread(reference_filename, cv2.IMREAD_LOAD_GDAL)
     im_tobe_aligned = cv2.imread(tobe_aligned_filename, cv2.IMREAD_LOAD_GDAL)
 
-#    good_matches_path = os.path.join(good_matches_dir, matches_filename)
-#    bad_matches_path = os.path.join(bad_matches_dir, matches_filename)
+    good_matches_path = os.path.join(good_matches_dir, matches_filename)
+    bad_matches_path = os.path.join(bad_matches_dir, matches_filename)
     aligned_path = os.path.join(aligned_dir, result_filename)
 
     aligner = Align(im_tobe_aligned, im_reference)
@@ -151,10 +145,9 @@ def setup_alignment(reference_filename, tobe_aligned_filename,
 
     print(VALID_HOMOGRAPHIES, "/", TOTAL_PROCESSED, "\n")
     if found and valid:
-#        cv2.imwrite(good_matches_path, aligner.im_matches)
+        cv2.imwrite(good_matches_path, aligner.im_matches)
         cv2.imwrite(aligned_path, aligner.im_result)
     else:
-        pass
-#        cv2.imwrite(bad_matches_path, aligner.im_matches)
+        cv2.imwrite(bad_matches_path, aligner.im_matches)
 
 

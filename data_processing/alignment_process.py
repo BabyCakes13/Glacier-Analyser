@@ -4,7 +4,7 @@ import definitions
 from data_gathering import scene_data
 from data_processing import alignment
 from data_processing import alignment_validator
-
+from data_gathering import test_alignment
 
 class ProcessAlignment:
     def __init__(self, little_dir, big_input_dir, output_dir, months):
@@ -19,7 +19,8 @@ class ProcessAlignment:
             print("BIG DIR AHEAD!")
             self.parse_directories()
         else:
-            self.parse_directory(self.little_dir)
+            self.determine_total_PR(self.little_dir)
+#            self.parse_directory(self.little_dir)
 
     def parse_directories(self):
         """Parses all the subdirectories of one directory and applies the processing on found images."""
@@ -28,7 +29,8 @@ class ProcessAlignment:
         for root, dirs, files in os.walk(self.big_input_dir):
             for dir in dirs:
                 dir_fullpath = os.path.join(root, dir)
-                self.parse_directory(dir_fullpath)
+                self.determine_directory_PR(dir_fullpath)
+#                self.parse_directory(dir_fullpath)
 
     def parse_directory(self, current_dir):
         """Applies the changes to the input_dir which contains the images."""
@@ -75,13 +77,13 @@ class ProcessAlignment:
         band_option = band_option.split(".TIF")[0]
         matches_filename = scene + band_option + '.jpg'
 
-        alignment.setup_alignment(reference_filename=reference,
-                                  tobe_aligned_filename=band,
-                                  result_filename=aligned_filename,
-                                  matches_filename=matches_filename,
-                                  aligned_dir=aligned_dir,
-                                  good_matches_dir=good_matches_dir,
-                                  bad_matches_dir=bad_matches_dir)
+        test_alignment.setup_alignment(reference_filename=reference,
+                                       tobe_aligned_filename=band,
+                                       result_filename=aligned_filename,
+                                       matches_filename=matches_filename,
+                                       aligned_dir=aligned_dir,
+                                       good_matches_dir=good_matches_dir,
+                                       bad_matches_dir=bad_matches_dir)
         return True
 
     def make_directories(self, glacier):
@@ -108,6 +110,15 @@ class ProcessAlignment:
         os.mkdir(bad_matches_dir)
 
         return glacier_dir, aligned_dir, good_matches_dir, bad_matches_dir
+
+    def make_directories_test(self, path_row):
+        path_row_dir = os.path.join(self.output_dir, path_row)
+
+        if os.path.exists(path_row):
+            shutil.rmtree(path_row)
+        os.mkdir(path_row)
+
+        return path_row_dir
 
     @staticmethod
     def get_bands(band_option, input_dir):
@@ -136,7 +147,6 @@ class ProcessAlignment:
         month = validator.get_month()
 
         if month in self.months:
-            print("Scene ", scene, " taken in month ", month)
             return True
         return False
 
@@ -146,3 +156,37 @@ class ProcessAlignment:
         writer = alignment_validator.HomographyCSV(glacier_id=glacier,
                                                    homography_csv=self.homography_csv)
         writer.start()
+
+    def determine_directory_PR(self, directory):
+        """Determine the total paths and rows of the directory."""
+        total_PR = []
+
+        for root, dirs, files in os.walk(directory):
+            for file in files:
+                if file.endswith('.TIF'):
+                    file_path = os.path.join(root, file)
+
+                    scene = self.check_scene_exists(file, file_path)
+                    if scene is None:
+                        return False
+
+                    validator = scene_data.SceneData(scene)
+                    path = validator.get_path()
+                    row = validator.get_row()
+                    path_row = (path, row)
+
+                    if path_row not in total_PR:
+                        total_PR.append(path_row)
+
+        print(total_PR)
+
+    def check_scene_exists(self, file, file_path):
+        scene = None
+
+        if file.endswith(definitions.GREEN_BAND_END):
+            scene = self.get_scene_name(file_path, definitions.GREEN_BAND_END)
+        if file.endswith(definitions.SWIR1_BAND_END):
+            scene = self.get_scene_name(file_path, definitions.SWIR1_BAND_END)
+
+        return scene
+
