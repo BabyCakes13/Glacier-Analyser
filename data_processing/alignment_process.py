@@ -48,6 +48,8 @@ class ProcessAlignment:
 
         glacier_dir, aligned_dir, good_matches_dir, bad_matches_dir = self.make_directories(glacier=glacier)
 
+        alignment.TOTAL_PROCESSED = 0
+        alignment.VALID_HOMOGRAPHIES = 0
         for count, option in enumerate(band_options):
             print("Processing for ", option)
             for band in bands[count]:
@@ -62,11 +64,12 @@ class ProcessAlignment:
 
         self.write_homography_result(glacier=glacier)
 
-    def align_to_reference(self, band, band_option, reference, aligned_dir, good_matches_dir, bad_matches_dir):
+    def align_to_reference(self, band, band_option, reference, aligned_dir, good_matches_dir, bad_matches_dir) -> bool:
+        """Checks whether the scene is between the selected months, then aligns it to the directory reference."""
         scene = self.get_scene_name(band, band_option)
 
         if self.check_scene_in_months(scene) is False:
-            return
+            return False
         aligned_filename = scene + band_option
         band_option = band_option.split(".TIF")[0]
         matches_filename = scene + band_option + '.jpg'
@@ -78,6 +81,7 @@ class ProcessAlignment:
                                   aligned_dir=aligned_dir,
                                   good_matches_dir=good_matches_dir,
                                   bad_matches_dir=bad_matches_dir)
+        return True
 
     def make_directories(self, glacier):
         """Creates the directories to store the processed files."""

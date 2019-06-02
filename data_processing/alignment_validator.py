@@ -15,6 +15,11 @@ class HomographyCSV:
         self.add_item_to_csv()
 
     def generate_csv_item(self):
+        if alignment.TOTAL_PROCESSED == 0:
+            ratio = 0
+        else:
+            ratio = alignment.VALID_HOMOGRAPHIES /alignment.TOTAL_PROCESSED
+
         item = [
             self.glacier_id,
             alignment.MAX_FEATURES,
@@ -23,7 +28,7 @@ class HomographyCSV:
             alignment.ALLOWED_INTEGRAL,
             alignment.VALID_HOMOGRAPHIES,
             alignment.TOTAL_PROCESSED,
-            alignment.VALID_HOMOGRAPHIES / alignment.TOTAL_PROCESSED
+            ratio
         ]
         return item
 
