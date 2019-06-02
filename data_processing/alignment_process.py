@@ -7,10 +7,11 @@ from data_processing import alignment_validator
 
 
 class ProcessAlignment:
-    def __init__(self, little_dir, big_input_dir, output_dir):
+    def __init__(self, little_dir, big_input_dir, output_dir, months):
         self.little_dir = little_dir
         self.big_input_dir = big_input_dir
         self.output_dir = output_dir
+        self.months = months
         self.homography_csv = os.path.join(self.output_dir, definitions.HOMOGRAPHY_CSV)
 
     def start(self):
@@ -129,13 +130,12 @@ class ProcessAlignment:
 
         return str(scene)
 
-    @staticmethod
-    def check_scene_in_months(scene) -> bool:
+    def check_scene_in_months(self, scene) -> bool:
         """Checks whether the scene is taken in a valid month or not."""
         validator = scene_data.SceneData(scene)
         month = validator.get_month()
 
-        if month in definitions.VALID_MONTHS:
+        if month in self.months:
             print("Scene ", scene, " taken in month ", month)
             return True
         return False

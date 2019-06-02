@@ -1,9 +1,8 @@
 """Module for the NDSI caller."""
-import json
 import os
 import definitions
-from data_processing import alignment
 from data_processing import alignment_validator
+from data_processing import ndsi_calculator as nc
 
 
 class ProcessCaller:
@@ -20,56 +19,26 @@ class ProcessCaller:
     def start_gathering(self):
         """Parses the files of the input directory, calculating the NDSI for the paired green and swir1 bands.
         Outputs the result in the specified output directory."""
-        self.get_glacier_id()
-        if self.scene != "UNSET":
-            print("Align scene started...")
-            green_path = os.path.join(self.input_dir, self.scene + definitions.GREEN_BAND_END)
-            swir1_path = os.path.join(self.input_dir, self.scene + definitions.SWIR1_BAND_END)
+        print("NDSI started...", self.input_dir)
+        green_bands_paths, green_bands_number = self.get_dir_bands_paths(definitions.GREEN_BAND_END)
+        swir1_bands_paths, swir1_bands_number = self.get_dir_bands_paths(definitions.SWIR1_BAND_END)
 
-            self.process_images(green_path=green_path,
-                                swir1_path=swir1_path)
-            print("Align scene finished.")
-
-        else:
-            print("Align directory started...", self.input_dir)
-            green_bands_paths, green_bands_number = self.get_dir_bands_paths(definitions.GREEN_BAND_END)
-            swir1_bands_paths, swir1_bands_number = self.get_dir_bands_paths(definitions.SWIR1_BAND_END)
-
-            if green_bands_number == swir1_bands_number:
-                for counter in range(0, green_bands_number):
-                    green_scene = self.get_scene_name(green_bands_paths[counter], definitions.GREEN_BAND_END)
-                    swir1_scene = self.get_scene_name(swir1_bands_paths[counter], definitions.SWIR1_BAND_END)
-
-                    if self.check_pairs(green_scene, swir1_scene):
-                        self.scene = green_scene
-                        self.process_images(green_path=green_bands_paths[counter],
-                                            swir1_path=swir1_bands_paths[counter])
-                print("Align directory finished.")
-
-            else:
-                print("Some bands are missing.")
-
-        print("Writing homography result.")
-        self.write_homography_result()
+        for counter in range(0, green_bands_number):
+            green_scene = self.get_scene_name(green_bands_paths[counter], definitions.GREEN_BAND_END)
+            swir1_scene = self.get_scene_name(swir1_bands_paths[counter], definitions.SWIR1_BAND_END)
+            if self.check_pairs(green_scene, swir1_scene):
+                self.scene = green_scene
+                self.process_images(green_path=green_bands_paths[counter],
+                                    swir1_path=swir1_bands_paths[counter])
 
     def process_images(self, green_path, swir1_path):
-        print("Scene: ", self.scene)
-        result_filename = self.scene + "_" + "aligned.TIF"
-        matches_filename = self.scene + "_" + "matched.jpg"
 
-        alignment.setup_alignment(reference_filename=green_path,
-                                  tobe_aligned_filename=swir1_path,
-                                  result_filename=result_filename,
-                                  matches_filename=matches_filename,
-                                  output_dir=self.output_dir)
-        """
-        ndsi = nc.NDSI(green_path=green_bands_paths[counter],
-        swir1_path=swir1_bands_paths[counter],
-        output_dir=self.output_dir,
-        threshold=self.threshold)
+        ndsi = nc.NDSI(green_path=green_path,
+                       swir1_path=swir1_path,
+                       output_dir=self.output_dir,
+                       threshold=self.threshold)
         output_filename = green_scene + "_" + str(self.threshold) + "_NDSI_INT8.tif"
         ndsi.create_NDSI(output_filename, gdal.GDT_Byte)
-        """
 
     def count_bands(self, band_option):
         """Counts the number of bands from the input directory which end with the specified option."""

@@ -72,6 +72,12 @@ class ArgsParser:
                                     default=definitions.DEFAULT_SCENE_NAME,
                                     type=str,
                                     dest='bigdir')
+        process_parser.add_argument('--months',
+                                    help='Months for which to download.',
+                                    default=definitions.VALID_MONTHS,
+                                    type=int,
+                                    nargs='*',
+                                    dest='months')
         process_parser.set_defaults(func=set_process_function)
 
 
@@ -96,6 +102,6 @@ def set_process_function(args):
     """The default function for process sub parser."""
     print("Setting up process...")
 
-    process_align = alignment_process.ProcessAlignment(args.input, args.bigdir, args.output)
+    process_align = alignment_process.ProcessAlignment(args.input, args.bigdir, args.output, args.months)
     process_align.start()
     print("Finished process.")
