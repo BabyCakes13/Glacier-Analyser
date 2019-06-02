@@ -1,7 +1,7 @@
-import datetime
 import shutil
 import os
 import definitions
+from data_gathering import scene_data
 from data_processing import alignment
 from data_processing import alignment_validator
 
@@ -64,6 +64,9 @@ class ProcessAlignment:
 
     def align_to_reference(self, band, band_option, reference, aligned_dir, good_matches_dir, bad_matches_dir):
         scene = self.get_scene_name(band, band_option)
+
+        if self.check_scene_in_months(scene) is False:
+            return
         aligned_filename = scene + band_option
         band_option = band_option.split(".TIF")[0]
         matches_filename = scene + band_option + '.jpg'
@@ -121,6 +124,17 @@ class ProcessAlignment:
         scene = split[0]
 
         return str(scene)
+
+    @staticmethod
+    def check_scene_in_months(scene) -> bool:
+        """Checks whether the scene is taken in a valid month or not."""
+        validator = scene_data.SceneData(scene)
+        month = validator.get_month()
+
+        if month in definitions.VALID_MONTHS:
+            print("Scene ", scene, " taken in month ", month)
+            return True
+        return False
 
     def write_homography_result(self, glacier):
         """Write the alignment results of the input directory to the csv file."""

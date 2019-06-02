@@ -37,4 +37,4 @@ DEFAULT_END_DATE = datetime.datetime.now().strftime('%Y-%m-%d')
 DEFAULT_CLOUD_COVERAGE = "5"
 BBOX_SIZE = 0.0000001
 MAX_THREADS = 4
-MONTHS = [6, 7, 8]
+VALID_MONTHS = [6, 7, 8]

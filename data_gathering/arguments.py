@@ -1,10 +1,7 @@
 """Argument parser"""
 import argparse
-import gdal
-import os
 from data_gathering import download
-from data_gathering import processes_caller as nc
-from data_gathering import process_alignment
+from data_processing import alignment_process
 import definitions
 
 
@@ -35,7 +32,7 @@ class ArgsParser:
                                      dest='dir')
         download_parser.add_argument('--months',
                                      help='Months for which to download.',
-                                     default=definitions.MONTHS,
+                                     default=definitions.VALID_MONTHS,
                                      type=int,
                                      nargs='*',
                                      dest='months')
@@ -99,6 +96,6 @@ def set_process_function(args):
     """The default function for process sub parser."""
     print("Setting up process...")
 
-    process_align = process_alignment.ProcessAlignment(args.input, args.bigdir, args.output)
+    process_align = alignment_process.ProcessAlignment(args.input, args.bigdir, args.output)
     process_align.start()
     print("Finished process.")

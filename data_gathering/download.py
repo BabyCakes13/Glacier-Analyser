@@ -12,7 +12,7 @@ class Downloader:
     def __init__(self, input_csv=definitions.GLACIER_DATASET_PATH,
                  download_dir=definitions.DEFAULT_DOWNLOAD_DIR,
                  max_threads=definitions.MAX_THREADS,
-                 months=definitions.MONTHS):
+                 months=definitions.VALID_MONTHS):
         """Initialises variables needed for the processes."""
         self.glacier_csv = input_csv
         self.download_dir = download_dir
