@@ -1,8 +1,8 @@
 import csv
 import os
+import definitions
 from data_processing import alignment
 from util import strings
-
 
 class HomographyCSV:
     def __init__(self, glacier_id, homography_csv):
@@ -22,10 +22,10 @@ class HomographyCSV:
 
         item = [
             self.glacier_id,
-            alignment.MAX_FEATURES,
-            alignment.GOOD_MATCH_PERCENT,
-            alignment.ALLOWED_ERROR,
-            alignment.ALLOWED_INTEGRAL,
+            definitions.MAX_FEATURES,
+            definitions.GOOD_MATCH_PERCENT,
+            definitions.ALLOWED_ERROR,
+            definitions.ALLOWED_INTEGRAL,
             alignment.VALID_HOMOGRAPHIES,
             alignment.TOTAL_PROCESSED,
             ratio

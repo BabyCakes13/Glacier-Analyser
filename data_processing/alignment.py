@@ -2,11 +2,8 @@ from __future__ import print_function
 import cv2
 import numpy as np
 import os
+import definitions
 
-MAX_FEATURES = 8000
-GOOD_MATCH_PERCENT = 0.2
-ALLOWED_ERROR = 0.001
-ALLOWED_INTEGRAL = 50
 VALID_HOMOGRAPHIES = 0
 TOTAL_PROCESSED = 0
 
@@ -25,7 +22,7 @@ class Align:
     def find_matches(self) -> bool:
         """Returns whether the homography finding was succesfull or not."""
         # detect ORB features and descriptors
-        orb = cv2.ORB_create(MAX_FEATURES)
+        orb = cv2.ORB_create(definitions.MAX_FEATURES)
         keypoints1, descriptors1 = orb.detectAndCompute(self.im1_8bit, None)
         keypoints2, descriptors2 = orb.detectAndCompute(self.im2_8bit, None)
 
@@ -41,7 +38,7 @@ class Align:
         matches.sort(key=lambda x: x.distance, reverse=False)
 
         # remove not good matches
-        numGoodMatches = int(len(matches) * GOOD_MATCH_PERCENT)
+        numGoodMatches = int(len(matches) * definitions.GOOD_MATCH_PERCENT)
         matches = matches[:numGoodMatches]
 
         # draw the best matches
@@ -115,9 +112,9 @@ class Align:
         TOTAL_PROCESSED += 1
 
         identity = np.identity(3)
-        comparison = np.full((3, 3), ALLOWED_ERROR)
-        comparison[0, 2] = ALLOWED_INTEGRAL
-        comparison[1, 2] = ALLOWED_INTEGRAL
+        comparison = np.full((3, 3), definitions.ALLOWED_ERROR)
+        comparison[0, 2] = definitions.ALLOWED_INTEGRAL
+        comparison[1, 2] = definitions.ALLOWED_INTEGRAL
 
         if self.homography is None:
             return False
@@ -155,4 +152,5 @@ def setup_alignment(reference_filename, tobe_aligned_filename,
         cv2.imwrite(aligned_path, aligner.im_result)
     else:
         cv2.imwrite(bad_matches_path, aligner.im_matches)
+
 
