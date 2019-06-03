@@ -1,9 +1,10 @@
 import shutil
 import os
 import definitions
+from collections import defaultdict
 from data_gathering import scene_data
 from data_preparing import path_row_grouping as prg
-from data_processing import alignment
+from data_processing import alignment_algorithm
 from data_processing import alignment_validator
 from data_gathering import test_alignment
 
@@ -16,14 +17,14 @@ class ProcessAlignment:
 
         self.months = months
         self.homography_csv = os.path.join(self.output_dir, definitions.HOMOGRAPHY_CSV)
+        self.path_row_handler = None
 
     def start(self):
+        """Checks the type of the input directory and calls the aligner."""
         if self.big_input_dir != definitions.DEFAULT_BIG_DIR:
             self.parse_directories()
         else:
-            path_row_handler = prg.PRGroup(self.little_dir)
-            path_row_handler.determine_total_PR()
-#            self.parse_directory(self.little_dir)
+            self.parse_directory(self.little_dir)
 
     def parse_directories(self):
         """Parses all the subdirectories of one directory and applies the processing on found images."""
@@ -32,95 +33,121 @@ class ProcessAlignment:
         for root, dirs, files in os.walk(self.big_input_dir):
             for dir in dirs:
                 dir_fullpath = os.path.join(root, dir)
-                path_row_handler = prg.PRGroup(dir_fullpath)
-                path_row_handler.determine_total_PR()
-    #                self.parse_directory(dir_fullpath)
+                self.parse_directory(dir_fullpath)
 
     def parse_directory(self, current_dir):
         """Applies the changes to the input_dir which contains the images."""
         # get glacier id to make glacier specific folder
         root, glacier = os.path.split(current_dir)
+        glacier_dir = self.make_glacier_dir(glacier=glacier)
+        bands, band_options = self.prepare_bands(current_dir)
 
-        # get the B3 and B6 band lists and their reference images
+        # group to path row directory
+        path_row_handler = prg.PathRowGrouping(input_dir=current_dir, output_dir=glacier_dir)
+        total_PR_dir = path_row_handler.determine_total_PR()
+
+        alignment_algorithm.TOTAL_PROCESSED = 0
+        alignment_algorithm.VALID_HOMOGRAPHIES = 0
+
+        self.group_bands(current_dir=current_dir, total_PR_dir=total_PR_dir)
+        # for B3 then B6
+        """ for count, option in enumerate(band_options):
+          # iterate over all band lists
+          for band in bands[count]:
+            scene = self.get_scene_name(band)
+            scene_data_handler = scene_data.SceneData(scene)
+            path = scene_data_handler.get_path()
+            row = scene_data_handler.get_row()
+            outpur_dir = self.assign_directory(path=path, row=row, total_PR_dir=total_PR_dir)
+
+            self.align_to_reference(band=band,
+                                      band_option=option,
+                                      reference=references[count],
+                                      aligned_dir=outpur_dir)
+
+        self.write_homography_result(glacier=glacier) """
+
+    def prepare_bands(self, current_dir):
+        """Gathers all the B3 and B6 bands from the current directory in a list of band lists.
+        Returns the list of lists of green and swir1 bands, and the band endwith options."""
         green_bands = self.get_bands(definitions.GREEN_BAND_END, current_dir)
-        green_reference = green_bands[0]
         swir1_bands = self.get_bands(definitions.SWIR1_BAND_END, current_dir)
-        swir1_reference = swir1_bands[0]
 
         band_options = (definitions.GREEN_BAND_END, definitions.SWIR1_BAND_END)
-        references = (green_reference, swir1_reference)
         bands = (green_bands, swir1_bands)
 
-        glacier_dir, aligned_dir, good_matches_dir, bad_matches_dir = self.make_directories(glacier=glacier)
+        return bands, band_options
 
-        alignment.TOTAL_PROCESSED = 0
-        alignment.VALID_HOMOGRAPHIES = 0
-        for count, option in enumerate(band_options):
-            print("Processing for ", option)
-            for band in bands[count]:
-                print("BAND     \t", band)
-                print("REFERENCE\t", references[count])
-                self.align_to_reference(band=band,
-                                        band_option=option,
-                                        reference=references[count],
-                                        aligned_dir=aligned_dir,
-                                        good_matches_dir=good_matches_dir,
-                                        bad_matches_dir=bad_matches_dir)
+    def group_bands(self, current_dir, total_PR_dir):
+        """Groups all the bands into their path/row map."""
+        total_PR_lists = defaultdict(list)
 
-        self.write_homography_result(glacier=glacier)
+        for file in os.listdir(current_dir):
+            if file.endswith((definitions.GREEN_BAND_END, definitions.SWIR1_BAND_END)):
+                scene = self.get_scene_name(file)
+                scene_data_handler = scene_data.SceneData(scene)
 
-    def align_to_reference(self, band, band_option, reference, aligned_dir, good_matches_dir, bad_matches_dir) -> bool:
+                path = scene_data_handler.get_path()
+                row = scene_data_handler.get_row()
+                path_row = (path, row)
+                print("File's path and row: ", path_row)
+
+                total_PR_lists[path_row].append(file)
+
+            for key, value in total_PR_dir.items():
+                print(key, ": ", value)
+
+    def align_to_reference(self, band, band_option, reference, aligned_dir) -> bool:
         """Checks whether the scene is between the selected months, then aligns it to the directory reference."""
-        scene = self.get_scene_name(band, band_option)
+        scene = self.get_scene_name(band)
 
         if self.check_scene_in_months(scene) is False:
             return False
         aligned_filename = scene + band_option
-        band_option = band_option.split(".TIF")[0]
-        matches_filename = scene + band_option + '.jpg'
 
-        test_alignment.setup_alignment(reference_filename=reference,
-                                       tobe_aligned_filename=band,
-                                       result_filename=aligned_filename,
-                                       matches_filename=matches_filename,
-                                       aligned_dir=aligned_dir,
-                                       good_matches_dir=good_matches_dir,
-                                       bad_matches_dir=bad_matches_dir)
+        alignment_algorithm.setup_alignment(reference_filename=reference,
+                                            tobe_aligned_filename=band,
+                                            result_filename=aligned_filename,
+                                            aligned_dir=aligned_dir)
         return True
 
-    def make_directories(self, glacier):
-        """Creates the directories to store the processed files."""
+    def make_glacier_dir(self, glacier):
         glacier_dir = os.path.join(self.output_dir, glacier)
-        aligned_dir = os.path.join(glacier_dir, 'ALIGNED')
-        good_matches_dir = os.path.join(glacier_dir, 'GOOD_MATCHES')
-        bad_matches_dir = os.path.join(glacier_dir, 'BAD_MATCHES')
 
         if os.path.exists(glacier_dir):
             shutil.rmtree(glacier_dir)
         os.mkdir(glacier_dir)
 
-        if os.path.exists(aligned_dir):
-            shutil.rmtree(aligned_dir)
-        os.mkdir(aligned_dir)
+        return glacier_dir
 
-        if os.path.exists(good_matches_dir):
-            shutil.rmtree(good_matches_dir)
-        os.mkdir(good_matches_dir)
+    def check_scene_in_months(self, scene) -> bool:
+        """Checks whether the scene is taken in a valid month or not."""
+        validator = scene_data.SceneData(scene)
+        month = validator.get_month()
 
-        if os.path.exists(bad_matches_dir):
-            shutil.rmtree(bad_matches_dir)
-        os.mkdir(bad_matches_dir)
+        if month in self.months:
+            return True
+        return False
 
-        return glacier_dir, aligned_dir, good_matches_dir, bad_matches_dir
+    def write_homography_result(self, glacier):
+        """Write the alignment results of the input directory to the csv file."""
+        writer = alignment_validator.HomographyCSV(glacier_id=glacier,
+                                                   homography_csv=self.homography_csv)
+        writer.start()
 
-    def make_directories_test(self, path_row):
-        path_row_dir = os.path.join(self.output_dir, path_row)
+    @staticmethod
+    def assign_directory(path, row, total_PR_dir):
+        """Assigns the scene to the correct path and row output directory."""
+        path_row = (path, row)
+        output_directory = None
 
-        if os.path.exists(path_row):
-            shutil.rmtree(path_row)
-        os.mkdir(path_row)
+        for path_row_key, path_row_dir in total_PR_dir.items():
+            if path_row == path_row_key:
+                output_directory = path_row_dir
+                break
 
-        return path_row_dir
+        print(output_directory)
+        return output_directory
 
     @staticmethod
     def get_bands(band_option, input_dir):
@@ -135,27 +162,18 @@ class ProcessAlignment:
         return bands
 
     @staticmethod
-    def get_scene_name(band_path, band_endwith):
+    def get_scene_name(band_path):
         """Returns the scene name."""
         input_dir, band = os.path.split(band_path)
-        split = band.split(band_endwith)
+
+        if band.endswith(definitions.GREEN_BAND_END):
+            split = band.split(definitions.GREEN_BAND_END)
+        else:
+            split = band.split(definitions.SWIR1_BAND_END)
         scene = split[0]
 
         return str(scene)
 
-    def check_scene_in_months(self, scene) -> bool:
-        """Checks whether the scene is taken in a valid month or not."""
-        validator = scene_data.SceneData(scene)
-        month = validator.get_month()
+# TODO scale down image 10x so that the aligner finds better matches, calculate homography and all transformations on that, then at the last step, apply the transformation on the big image
 
-        if month in self.months:
-            return True
-        return False
-
-    def write_homography_result(self, glacier):
-        """Write the alignment results of the input directory to the csv file."""
-        print(self.homography_csv)
-        writer = alignment_validator.HomographyCSV(glacier_id=glacier,
-                                                   homography_csv=self.homography_csv)
-        writer.start()
 

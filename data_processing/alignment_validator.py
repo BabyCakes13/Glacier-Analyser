@@ -1,7 +1,7 @@
 import csv
 import os
 import definitions
-from data_processing import alignment
+from data_processing import alignment_algorithm
 from util import strings
 
 class HomographyCSV:
@@ -15,10 +15,10 @@ class HomographyCSV:
         self.add_item_to_csv()
 
     def generate_csv_item(self):
-        if alignment.TOTAL_PROCESSED == 0:
+        if alignment_algorithm.TOTAL_PROCESSED == 0:
             ratio = 0
         else:
-            ratio = alignment.VALID_HOMOGRAPHIES /alignment.TOTAL_PROCESSED
+            ratio = alignment_algorithm.VALID_HOMOGRAPHIES / alignment_algorithm.TOTAL_PROCESSED
 
         item = [
             self.glacier_id,
@@ -26,8 +26,8 @@ class HomographyCSV:
             definitions.GOOD_MATCH_PERCENT,
             definitions.ALLOWED_ERROR,
             definitions.ALLOWED_INTEGRAL,
-            alignment.VALID_HOMOGRAPHIES,
-            alignment.TOTAL_PROCESSED,
+            alignment_algorithm.VALID_HOMOGRAPHIES,
+            alignment_algorithm.TOTAL_PROCESSED,
             ratio
         ]
         return item

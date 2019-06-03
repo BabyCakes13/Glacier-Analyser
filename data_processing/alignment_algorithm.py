@@ -69,7 +69,6 @@ class Align:
             print("Homography is none. Aborting this image.")
             return False
 
-#        print(self.homography)
         self.im_result = cv2.warpPerspective(self.im1_8bit, self.homography, (width, height))
         return True
 
@@ -133,15 +132,13 @@ class Align:
             return False
 
 
-def setup_alignment(reference_filename, tobe_aligned_filename,
-                    result_filename, matches_filename,
-                    aligned_dir, good_matches_dir, bad_matches_dir):
+def setup_alignment(reference_filename, tobe_aligned_filename, result_filename, aligned_dir):
+    print("Reference filepath: ", result_filename)
+    print("To be aligned filepath: ", tobe_aligned_filename)
 
     im_reference = cv2.imread(reference_filename, cv2.IMREAD_LOAD_GDAL)
     im_tobe_aligned = cv2.imread(tobe_aligned_filename, cv2.IMREAD_LOAD_GDAL)
 
-#    good_matches_path = os.path.join(good_matches_dir, matches_filename)
-#    bad_matches_path = os.path.join(bad_matches_dir, matches_filename)
     aligned_path = os.path.join(aligned_dir, result_filename)
 
     aligner = Align(im_tobe_aligned, im_reference)
@@ -151,10 +148,6 @@ def setup_alignment(reference_filename, tobe_aligned_filename,
 
     print(VALID_HOMOGRAPHIES, "/", TOTAL_PROCESSED, "\n")
     if found and valid:
-#        cv2.imwrite(good_matches_path, aligner.im_matches)
         cv2.imwrite(aligned_path, aligner.im_result)
-    else:
-        pass
-#        cv2.imwrite(bad_matches_path, aligner.im_matches)
 
 

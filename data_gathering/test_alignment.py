@@ -19,7 +19,7 @@ class Align:
         self.im_result = None
         self.homography = None
 
-    def find_matches(self) -> bool:
+    def find_matches(self):
         """Returns whether the homography finding was succesfull or not."""
         # detect ORB features and descriptors
         # Read the images to be aligned
@@ -29,7 +29,7 @@ class Align:
 
         # Define the motion model
         print("Define motion model...")
-        warp_mode = cv2.MOTION_TRANSLATION
+        warp_mode = cv2.MOTION_HOMOGRAPHY
 
         # Define 2x3 or 3x3 matrices and initialize the matrix to identity
         print("Define motion homography")
@@ -53,8 +53,10 @@ class Align:
         # Run the ECC algorithm. The results are stored in warp_matrix.
         (cc, warp_matrix) = cv2.findTransformECC(self.im1_8bit, self.im2_8bit, warp_matrix, warp_mode, criteria)
 
+        print("Wrap matrix ", warp_matrix)
+
         if warp_mode == cv2.MOTION_HOMOGRAPHY:
-            # Use warpPerspective for Homography
+            # Use warpPerspective for homography
             print("Wrap perspective 1")
             self.im_result = cv2.warpPerspective(self.im2_8bit, warp_matrix, (sz[1], sz[0]),
                                               flags=cv2.INTER_LINEAR + cv2.WARP_INVERSE_MAP)
@@ -127,15 +129,11 @@ class Align:
             return False
 
 
-def setup_alignment(reference_filename, tobe_aligned_filename,
-                    result_filename, matches_filename,
-                    aligned_dir, good_matches_dir, bad_matches_dir):
+def setup_alignment(reference_filename, tobe_aligned_filename, result_filename, aligned_dir):
 
     im_reference = cv2.imread(reference_filename, cv2.IMREAD_LOAD_GDAL)
     im_tobe_aligned = cv2.imread(tobe_aligned_filename, cv2.IMREAD_LOAD_GDAL)
 
-    good_matches_path = os.path.join(good_matches_dir, matches_filename)
-    bad_matches_path = os.path.join(bad_matches_dir, matches_filename)
     aligned_path = os.path.join(aligned_dir, result_filename)
 
     aligner = Align(im_tobe_aligned, im_reference)
@@ -145,9 +143,7 @@ def setup_alignment(reference_filename, tobe_aligned_filename,
 
     print(VALID_HOMOGRAPHIES, "/", TOTAL_PROCESSED, "\n")
     if found and valid:
-        cv2.imwrite(good_matches_path, aligner.im_matches)
         cv2.imwrite(aligned_path, aligner.im_result)
-    else:
-        cv2.imwrite(bad_matches_path, aligner.im_matches)
+
 
 
