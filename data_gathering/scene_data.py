@@ -52,13 +52,13 @@ class SceneData:
 
     def get_satellite_number(self):
         """Returns the number of the satellite."""
-        number = int(self.scene[2:3])
+        number = self.scene[2:3]
         return number
 
     def get_path(self):
-        path = int(self.scene[3:6])
+        path = self.scene[3:6]
         return path
 
     def get_row(self):
-        row = int(self.scene[6:9])
+        row = self.scene[6:9]
         return row

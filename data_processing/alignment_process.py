@@ -37,49 +37,80 @@ class ProcessAlignment:
 
     def parse_directory(self, current_dir):
         """Applies the changes to the input_dir which contains the images."""
-        # get glacier id to make glacier specific folder
+        # get glacier id to make glacier output folder
         root, glacier = os.path.split(current_dir)
         glacier_dir = self.make_glacier_dir(glacier=glacier)
-        bands, band_options = self.prepare_bands(current_dir)
 
-        # group to path row directory
-        path_row_handler = prg.PathRowGrouping(input_dir=current_dir, output_dir=glacier_dir)
-        total_PR_dir = path_row_handler.determine_total_PR()
+        processed_output_dir = os.path.join(self.output_dir, glacier)
+        path_row_handler = prg.PathRowGrouping(input_dir=current_dir, output_dir=processed_output_dir)
+        total_PR_output_dir = path_row_handler.determine_total_PR()
+        path_row_dir_map = self.group_bands_to_path_row(current_dir=current_dir)
 
+        # for each path_row option
+        for path_row, path_row_files in path_row_dir_map.items():
+            print("----------------------- ", path_row, "----------------------- ")
+            B3_and_B6_lists = self.separate_bands_on_type(path_row_files)
+
+            # for B3 then B6 lists
+            for band_list in B3_and_B6_lists:
+                # reference image to which the rest from the list will be aligned to
+                reference_image = band_list[0]
+                self.process_list(band_list=band_list,
+                                  reference=reference_image,
+                                  processed_output_dir=total_PR_output_dir)
+
+        self.write_homography_result(glacier=glacier)
+
+    def process_list(self, band_list, reference, processed_output_dir):
+        """Applies the alignment process to the list of bands."""
         alignment_algorithm.TOTAL_PROCESSED = 0
         alignment_algorithm.VALID_HOMOGRAPHIES = 0
 
-        self.group_bands(current_dir=current_dir, total_PR_dir=total_PR_dir)
-        # for B3 then B6
-        """ for count, option in enumerate(band_options):
-          # iterate over all band lists
-          for band in bands[count]:
+        # for each band except the reference
+        for band in band_list[1:]:
             scene = self.get_scene_name(band)
             scene_data_handler = scene_data.SceneData(scene)
+
             path = scene_data_handler.get_path()
             row = scene_data_handler.get_row()
-            outpur_dir = self.assign_directory(path=path, row=row, total_PR_dir=total_PR_dir)
+            outpur_dir = self.assign_directory(path=path, row=row, total_PR_dir=processed_output_dir)
 
-            self.align_to_reference(band=band,
-                                      band_option=option,
-                                      reference=references[count],
-                                      aligned_dir=outpur_dir)
+            self.align_to_reference(scene=scene, reference=reference, image=band, processed_output_dir=outpur_dir)
 
-        self.write_homography_result(glacier=glacier) """
+    def align_to_reference(self, scene, reference, image, processed_output_dir) -> bool:
+        """Checks whether the scene is between the selected months, then aligns it to the directory reference."""
+        if self.check_scene_in_months(scene) is False:
+            return False
 
-    def prepare_bands(self, current_dir):
+        alignment_algorithm.setup_alignment(reference_filename=reference,
+                                            image_filename=image,
+                                            result_filename=image,
+                                            processed_output_dir=processed_output_dir)
+        return True
+
+    def separate_bands_on_type(self, bands_list):
         """Gathers all the B3 and B6 bands from the current directory in a list of band lists.
         Returns the list of lists of green and swir1 bands, and the band endwith options."""
-        green_bands = self.get_bands(definitions.GREEN_BAND_END, current_dir)
-        swir1_bands = self.get_bands(definitions.SWIR1_BAND_END, current_dir)
+        green_bands = self.get_bands_endwith(bands_list, definitions.GREEN_BAND_END)
+        swir1_bands = self.get_bands_endwith(bands_list, definitions.SWIR1_BAND_END)
 
-        band_options = (definitions.GREEN_BAND_END, definitions.SWIR1_BAND_END)
         bands = (green_bands, swir1_bands)
 
-        return bands, band_options
+        return bands
 
-    def group_bands(self, current_dir, total_PR_dir):
-        """Groups all the bands into their path/row map."""
+    def get_bands_endwith(self, bands_list, endwith):
+        """Gets a list of B3 and B6 bands and separates them in two lists of B3 and B6 bands."""
+        band_endwith = []
+        for band in bands_list:
+            if band.endswith(endwith):
+                band_endwith.append(band)
+
+        return band_endwith
+
+    def group_bands_to_path_row(self, current_dir):
+        """Groups all the bands into their path/row map.
+        Each path_row touple will contain a list with all the filepaths of the bands which are from that path_row."""
+        # find all the path_rows to create the output directories
         total_PR_lists = defaultdict(list)
 
         for file in os.listdir(current_dir):
@@ -90,26 +121,10 @@ class ProcessAlignment:
                 path = scene_data_handler.get_path()
                 row = scene_data_handler.get_row()
                 path_row = (path, row)
-                print("File's path and row: ", path_row)
 
-                total_PR_lists[path_row].append(file)
+                total_PR_lists[path_row].append(os.path.join(current_dir, file))
 
-            for key, value in total_PR_dir.items():
-                print(key, ": ", value)
-
-    def align_to_reference(self, band, band_option, reference, aligned_dir) -> bool:
-        """Checks whether the scene is between the selected months, then aligns it to the directory reference."""
-        scene = self.get_scene_name(band)
-
-        if self.check_scene_in_months(scene) is False:
-            return False
-        aligned_filename = scene + band_option
-
-        alignment_algorithm.setup_alignment(reference_filename=reference,
-                                            tobe_aligned_filename=band,
-                                            result_filename=aligned_filename,
-                                            aligned_dir=aligned_dir)
-        return True
+        return total_PR_lists
 
     def make_glacier_dir(self, glacier):
         glacier_dir = os.path.join(self.output_dir, glacier)
@@ -146,20 +161,7 @@ class ProcessAlignment:
                 output_directory = path_row_dir
                 break
 
-        print(output_directory)
         return output_directory
-
-    @staticmethod
-    def get_bands(band_option, input_dir):
-        """Parses through the files of the given directory and selects a list with the bands which was opted for."""
-        bands = []
-
-        for root, dirs, files in os.walk(input_dir):
-            for file in files:
-                if file.endswith(band_option):
-                    bands.append(os.path.join(root, file))
-
-        return bands
 
     @staticmethod
     def get_scene_name(band_path):

@@ -25,10 +25,12 @@ class Align:
         orb = cv2.ORB_create(definitions.MAX_FEATURES)
         keypoints1, descriptors1 = orb.detectAndCompute(self.im1_8bit, None)
         keypoints2, descriptors2 = orb.detectAndCompute(self.im2_8bit, None)
+        """
         print("Keypoints 1 ", len(keypoints1))
         print("Keypoints 2 ", len(keypoints2))
         print("Descriptor 1 ", descriptors1)
         print("Descriptors 2 ", descriptors2)
+        """
         if (descriptors1 is None) or (descriptors2 is None):
             print("Descriptor is None. Aborting this image.")
             return False
@@ -132,14 +134,15 @@ class Align:
             return False
 
 
-def setup_alignment(reference_filename, tobe_aligned_filename, result_filename, aligned_dir):
+def setup_alignment(reference_filename, image_filename, result_filename, processed_output_dir):
     print("Reference filepath: ", result_filename)
-    print("To be aligned filepath: ", tobe_aligned_filename)
+    print("To be aligned filepath: ", image_filename)
+    print("Output filepath: ", processed_output_dir)
 
     im_reference = cv2.imread(reference_filename, cv2.IMREAD_LOAD_GDAL)
-    im_tobe_aligned = cv2.imread(tobe_aligned_filename, cv2.IMREAD_LOAD_GDAL)
+    im_tobe_aligned = cv2.imread(image_filename, cv2.IMREAD_LOAD_GDAL)
 
-    aligned_path = os.path.join(aligned_dir, result_filename)
+    aligned_path = os.path.join(processed_output_dir, result_filename)
 
     aligner = Align(im_tobe_aligned, im_reference)
     found = aligner.find_matches()
@@ -148,6 +151,7 @@ def setup_alignment(reference_filename, tobe_aligned_filename, result_filename, 
 
     print(VALID_HOMOGRAPHIES, "/", TOTAL_PROCESSED, "\n")
     if found and valid:
+        print(aligned_path)
         cv2.imwrite(aligned_path, aligner.im_result)
 
 

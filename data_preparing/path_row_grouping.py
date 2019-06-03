@@ -25,7 +25,6 @@ class PathRowGrouping:
                         PR_dir = self.make_PR_directory(path_row)
                         total_PR_dirs[path_row] = PR_dir
 
-        print(total_PR_dirs)
         return total_PR_dirs
 
     def determine_PR(self,file, file_path):
