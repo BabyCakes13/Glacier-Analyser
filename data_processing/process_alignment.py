@@ -88,7 +88,7 @@ class ProcessAlignment:
             print("Scene not in months.")
             return False"""
 
-        alignment_ECC.setup_alignment(reference_filename=reference,
+        alignment_ORB.setup_alignment(reference_filename=reference,
                                       image_filename=image,
                                       result_filename=image,
                                       processed_output_dir=process_alignment)

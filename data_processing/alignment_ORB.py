@@ -1,7 +1,7 @@
 from __future__ import print_function
+import cv2
 import numpy as np
 import os
-import cv2
 import definitions
 
 VALID_HOMOGRAPHIES = 0
@@ -9,174 +9,110 @@ TOTAL_PROCESSED = 0
 
 
 class Align:
-    def __init__(self, im1_16bit, im2_16bit):
-        self.im1_16bit = im1_16bit
-        self.im2_16bit = im2_16bit
+    def __init__(self, reference_8bit, current_image8bit):
 
-        self.im1_8bit = (self.im1_16bit >> 8).astype(np.uint8)
-        self.im2_8bit = (self.im2_16bit >> 8).astype(np.uint8)
+        self.reference_8bit = reference_8bit
+        self.current_image_8bit = cv2.normalize(current_image8bit, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8UC2)
 
-        self.im_matches = None
-        self.im_result = None
-        self.homography = None
+        self.result_8bit = None
+        self.matches = None
 
-    def find_matches(self) -> bool:
+    def find_matches(self):
         """Returns whether the homography finding was succesfull or not."""
-        # detect ORB features and descriptors
+        # transform from scientific notation to decimal for easy check
+        np.set_printoptions(suppress=True, precision=4)
 
         orb = cv2.ORB_create(definitions.MAX_FEATURES)
-        keypoints1, descriptors1 = orb.detectAndCompute(self.im1_8bit, None)
-        keypoints2, descriptors2 = orb.detectAndCompute(self.im2_8bit, None)
 
-        print("Keypoints 1 ", len(keypoints1))
-        print("Keypoints 2 ", len(keypoints2))
-        print("Descriptor 1 ", descriptors1)
-        print("Descriptors 2 ", descriptors2)
+        keypoints1, descriptors1 = orb.detectAndCompute(self.reference_8bit, None)
+        keypoints2, descriptors2 = orb.detectAndCompute(self.current_image_8bit, None)
 
-        if (descriptors1 is None) or (descriptors2 is None):
-            print("Descriptor is None. Aborting this image.")
-            return False
+#        print("Keypoints 1 length ", len(keypoints1))
+#        print("Keypoints 2 length ", len(keypoints2))
+#        print("Descriptor 1 ", descriptors1)
+#        print("Descriptor 2 ", descriptors2)
 
-        # match features
         matcher = cv2.DescriptorMatcher_create(cv2.DESCRIPTOR_MATCHER_BRUTEFORCE_HAMMING)
         matches = matcher.match(descriptors1, descriptors2, None)
-
-        # sort matches by score
+        # best matches first
         matches.sort(key=lambda x: x.distance, reverse=False)
-
-        # remove not good matches
+        # remove matches with low score
         numGoodMatches = int(len(matches) * definitions.GOOD_MATCH_PERCENT)
         matches = matches[:numGoodMatches]
-
         # draw the best matches
-        self.im_matches = cv2.drawMatches(self.im1_8bit, keypoints1, self.im2_8bit, keypoints2, matches, None)
+        self.matches = cv2.drawMatches(self.reference_8bit, keypoints1, self.current_image_8bit,
+                                       keypoints2, matches, None)
+#        self.display_image('MATCHES', self.matches)
 
-        # get good matches location
+        # prepare the arras which hold the matches location
         points1 = np.zeros((len(matches), 2), dtype=np.float32)
         points2 = np.zeros((len(matches), 2), dtype=np.float32)
-
+        # fill points from the matcher
         for i, match in enumerate(matches):
             points1[i, :] = keypoints1[match.queryIdx].pt
             points2[i, :] = keypoints2[match.trainIdx].pt
 
-#        print("POINTS 1 ", len(points1))
-#        print("POINTS 2 ", len(points2))
-        if (len(points1) < 1) or (len(points2) < 1):
-            print("Not enough feature points were found. Aborting this image.")
-            return False
+        # find homography
+        homography, mask = cv2.findHomography(points1, points2, cv2.RANSAC)
 
-        # find and apply homography
-        self.homography, mask = cv2.findHomography(points1, points2, cv2.RANSAC)
-        height, width = self.im2_8bit.shape
+        print("Homography \n", homography)
 
-        if self.homography is None:
-            print("Homography is none. Aborting this image.")
-            return False
-
-        self.im_result = cv2.warpPerspective(self.im2_8bit, self.homography, (width, height))
-        return True
-
-    def setup_windows(self):
-        cv2.namedWindow('Reference', cv2.WINDOW_NORMAL)
-        cv2.resizeWindow('Reference', 1000, 1000)
-        cv2.moveWindow('Reference', 10, 10)
-        cv2.imshow('Reference', self.im1_8bit)
-
-        while cv2.waitKey() != 27:
-            pass
-
-        cv2.namedWindow('imp', cv2.WINDOW_NORMAL)
-        cv2.resizeWindow('imp', 1000, 1000)
-        cv2.moveWindow('imp', 10, 10)
-        cv2.imshow('imp', self.im2_8bit)
-
-        while cv2.waitKey() != 27:
-            pass
-
-        cv2.namedWindow('Differences', cv2.WINDOW_NORMAL)
-        cv2.resizeWindow('Differences', 1000, 2000)
-        cv2.moveWindow('Differences', 10, 10)
-        cv2.imshow('Differences', self.im_matches)
-
-        while cv2.waitKey() != 27:
-            pass
-
-        cv2.namedWindow('Result', cv2.WINDOW_NORMAL)
-        cv2.resizeWindow('Result', 1000, 1000)
-        cv2.moveWindow('Result', 10, 10)
-        cv2.imshow('Result', self.im_result)
-
-        while cv2.waitKey() != 27:
-            pass
-
-        cv2.destroyAllWindows()
-
-    def scale_down(self, image, percent):
-        """Scales the image down."""
-        height, width = image.shape
-        scaled_height = self.percentage(percent, height)
-        scaled_width = self.percentage(percent, width)
-
-        result = cv2.resize(image, (scaled_width, scaled_height))
-        return result
-#        cv2.imshow("Show by CV2", result)
-#        cv2.waitKey(0)
+        # generate result
+        height, width = self.reference_8bit.shape
+        self.result_8bit = cv2.warpPerspective(self.reference_8bit, homography, (width, height))
 
     @staticmethod
-    def percentage(percent, whole):
-        """Find what is percent from whole."""
-        return (percent * whole) // 100
+    def display_image(window_name, image):
+        """Display the image in a window."""
+        cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+        cv2.resizeWindow(window_name, 1000, 1000)
+        cv2.moveWindow(window_name, 10, 10)
+        cv2.imshow(window_name, image)
 
-    def validate_homography(self):
-        np.set_printoptions(suppress=True, precision=4)
-        global TOTAL_PROCESSED
-        global VALID_HOMOGRAPHIES
-        TOTAL_PROCESSED += 1
+        while cv2.waitKey() != 27:
+            pass
 
-        identity = np.identity(3)
-        comparison = np.full((3, 3), definitions.ALLOWED_ERROR)
-        comparison[0, 2] = definitions.ALLOWED_INTEGRAL
-        comparison[1, 2] = definitions.ALLOWED_INTEGRAL
 
-        if self.homography is None:
-            return False
+def percentage(percent, image) -> tuple:
+    """Find what is percent from whole."""
+    height, width = image.shape
+    height = (percent * height) // 100
+    width = (percent * width) // 100
 
-        difference = np.absolute(np.subtract(identity, self.homography))
-        print(difference)
-
-        if np.less_equal(difference, comparison).all():
-            VALID_HOMOGRAPHIES += 1
-            return True
-        else:
-            print("Homography is not good.")
-            return False
+    return width, height
 
 
 def setup_alignment(reference_filename, image_filename, result_filename, processed_output_dir):
-    im_reference = cv2.imread(reference_filename, cv2.IMREAD_LOAD_GDAL)
-    im_tobe_aligned = cv2.imread(image_filename, cv2.IMREAD_LOAD_GDAL)
+
+    # prepare the images for alignment
+    normalised_reference_8bit, current_image_8bit, \
+    scaled_normalised_reference_8bit, scaled_current_image_8bit = resize_depth(reference_filename, image_filename)
 
     aligned_path = os.path.join(processed_output_dir, result_filename)
+    aligner = Align(scaled_normalised_reference_8bit, scaled_current_image_8bit)
+    aligner.find_matches()
 
-    print("Aligned path: ", aligned_path)
+    aligner.display_image("Rerefence", aligner.reference_8bit)
+    aligner.display_image("Current Image", aligner.current_image_8bit)
+    aligner.display_image("Result", aligner.result_8bit)
 
-    aligner = Align(im_reference, im_tobe_aligned)
-    found = aligner.find_matches()
-    valid = aligner.validate_homography()
-    aligner.setup_windows()
-
-    print(VALID_HOMOGRAPHIES, "/", TOTAL_PROCESSED, "\n")
-    if found and valid:
-        print(aligned_path)
-        cv2.imwrite(aligned_path, aligner.im_result)
-
-# FOR WHATEVER REASON, THE REFERENCE IMAGE IS 0, so it find nothing, all's black
-# imread returns NULL if the filepath cannot be read - corruption or something
-# it doesn't load it correctly, imread, size.width < 0 and size.height < 0
-#os.environ['OPENCV_IO_MAX_IMAGE_PIXELS'] = str(2**64)
-# https://stackoverflow.com/questions/24552590/opencv-sift-surf-orb-drawmatch-function-is-not-working-well
-# am schimbat ordinea in self.im_matches = cv2.drawMatches(self.im1_8bit, keypoints1, self.im2_8bit, keypoints2, matches, None), si acum e iar ok
-# PROBLEM 2 - unele imagini sunt corupte, si au height and width 0. like /net/deepthought/artefacts/satelite_download_68cce0f77a26eb7177a5ec47c40b3f6eaa54acb1/CA2N001CD044_-129.811_57.855/LC81392252018178LGN00_B3.TIF
+    cv2.destroyAllWindows()
 
 
+def resize_depth(reference_filename, image_filename):
+    """Resize the depth of the images from 16 to 8 pixels.
+    Normalise reference.
+    Scale images."""
+    reference_16bit = cv2.imread(reference_filename, cv2.IMREAD_LOAD_GDAL)
+    current_image_16bit = cv2.imread(image_filename, cv2.IMREAD_LOAD_GDAL)
+
+    reference_8bit = (reference_16bit >> 8).astype(np.uint8)
+    current_image_8bit = (current_image_16bit >> 8).astype(np.uint8)
+
+    normalised_reference_8bit = cv2.normalize(reference_8bit, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8UC2)
+
+    scaled_normalised_reference_8bit = cv2.resize(normalised_reference_8bit, percentage(20, normalised_reference_8bit))
+    scaled_current_image_8bit = cv2.resize(current_image_8bit, percentage(20, current_image_8bit))
+
+    return normalised_reference_8bit, current_image_8bit, scaled_normalised_reference_8bit, scaled_current_image_8bit
 
