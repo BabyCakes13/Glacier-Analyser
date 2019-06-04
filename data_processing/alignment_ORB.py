@@ -42,7 +42,7 @@ class Align:
         # draw the best matches
         self.matches = cv2.drawMatches(self.reference_8bit, keypoints1, self.current_image_8bit,
                                        keypoints2, matches, None)
-#        self.display_image('MATCHES', self.matches)
+        self.display_image('MATCHES', self.matches)
 
         # prepare the arras which hold the matches location
         points1 = np.zeros((len(matches), 2), dtype=np.float32)
