@@ -2,6 +2,7 @@ from __future__ import print_function
 import cv2
 import numpy as np
 import os
+import time
 import definitions
 
 VALID_HOMOGRAPHIES = 0
@@ -44,7 +45,7 @@ class Align:
 
         # Define the motion model
         print("Define motion model...")
-        warp_mode = cv2.MOTION_TRANSLATION
+        warp_mode = cv2.MOTION_AFFINE
 
         # Define 2x3 or 3x3 matrices and initialize the matrix to identity
         print("Define motion homography")
@@ -95,7 +96,7 @@ class Align:
         cv2.namedWindow('Current Image', cv2.WINDOW_NORMAL)
         cv2.resizeWindow('Current Image', 1000, 1000)
         cv2.moveWindow('Current Image', 10, 10)
-        cv2.imshow('CurrentImage', self.scaled_image_8bit)
+        cv2.imshow('Current Image', self.scaled_image_8bit)
 
         while cv2.waitKey() != 27:
             pass
@@ -145,24 +146,23 @@ def percentage(percent, image) -> tuple:
 
 
 def setup_alignment(reference_filename, image_filename, result_filename, processed_output_dir):
-    print("Rreference image is: \n", reference_filename)
-    print("To be aligned image is: \n", image_filename)
+    # print("Rreference image is: \n", reference_filename)
+    # print("To be aligned image is: \n", image_filename)
 
-    im_reference = cv2.imread(reference_filename, cv2.IMREAD_LOAD_GDAL)
-    im_tobe_aligned = cv2.imread(image_filename, cv2.IMREAD_LOAD_GDAL)
+    reference = cv2.imread(reference_filename, cv2.IMREAD_LOAD_GDAL)
+    current_image = cv2.imread(image_filename, cv2.IMREAD_LOAD_GDAL)
 
-    scaled_im_reference = cv2.resize(im_reference, percentage(20, im_reference))
-    scaled_im_tobe_aligned = cv2.resize(im_tobe_aligned, percentage(20, im_tobe_aligned))
+    scaled_reference = cv2.resize(reference, percentage(20, reference))
+    scaled_current_image = cv2.resize(current_image, percentage(20, current_image))
 
     aligned_path = os.path.join(processed_output_dir, result_filename)
 
-    aligner = Align(scaled_im_reference, scaled_im_tobe_aligned, im_reference, im_tobe_aligned)
+    aligner = Align(scaled_reference, scaled_current_image, reference, current_image)
     found = aligner.find_matches()
     aligner.setup_windows()
-    """
     valid = aligner.validate_homography()
 
     print(VALID_HOMOGRAPHIES, "/", TOTAL_PROCESSED, "\n")
     if found and valid:
-        cv2.imwrite(aligned_path, aligner.im_result)"""
+        cv2.imwrite(aligned_path, aligner.im_result)
 # scale image up, wrap matrix elements by x percent sko it fist.
