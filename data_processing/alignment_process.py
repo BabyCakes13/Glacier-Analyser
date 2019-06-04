@@ -4,9 +4,8 @@ import definitions
 from collections import defaultdict
 from data_gathering import scene_data
 from data_preparing import path_row_grouping as prg
-from data_processing import alignment_algorithm
+from data_processing import alignment_ORB, alignment_ECC
 from data_processing import alignment_validator
-from data_gathering import test_alignment
 
 
 class ProcessAlignment:
@@ -67,8 +66,8 @@ class ProcessAlignment:
 
     def process_list(self, band_list, reference, processed_output_dir):
         """Applies the alignment process to the list of bands."""
-        alignment_algorithm.TOTAL_PROCESSED = 0
-        alignment_algorithm.VALID_HOMOGRAPHIES = 0
+        alignment_ORB.TOTAL_PROCESSED = 0
+        alignment_ORB.VALID_HOMOGRAPHIES = 0
 
         # for each band except the reference
         for band in band_list:
@@ -87,10 +86,10 @@ class ProcessAlignment:
             print("Scene not in months.")
             return False
 
-        test_alignment.setup_alignment(reference_filename=reference,
-                                            image_filename=image,
-                                            result_filename=image,
-                                            processed_output_dir=processed_output_dir)
+        alignment_ECC.setup_alignment(reference_filename=reference,
+                                      image_filename=image,
+                                      result_filename=image,
+                                      processed_output_dir=processed_output_dir)
         return True
 
     def separate_bands_on_type(self, bands_list):

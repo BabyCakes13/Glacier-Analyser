@@ -2,7 +2,6 @@
 import argparse
 from data_gathering import download
 from data_processing import alignment_process
-from data_gathering import test_alignment
 import definitions
 
 
