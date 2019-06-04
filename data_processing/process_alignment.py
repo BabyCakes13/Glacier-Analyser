@@ -184,6 +184,6 @@ class ProcessAlignment:
 
         return str(scene)
 
-# TODO scale down image 10x so that the aligner finds better matches, calculate homography and all transformations on that, then at the last step, apply the transformation on the big image
+# TODO normalise down image 10x so that the aligner finds better matches, calculate homography and all transformations on that, then at the last step, apply the transformation on the big image
 
 

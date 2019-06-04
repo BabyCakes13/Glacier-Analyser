@@ -165,4 +165,4 @@ def setup_alignment(reference_filename, image_filename, result_filename, process
     print(VALID_HOMOGRAPHIES, "/", TOTAL_PROCESSED, "\n")
     if found and valid:
         cv2.imwrite(aligned_path, aligner.im_result)
-# scale image up, wrap matrix elements by x percent sko it fist.
+# normalise image up, wrap matrix elements by x percent sko it fist.
