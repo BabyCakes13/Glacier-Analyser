@@ -51,20 +51,24 @@ class ProcessAlignment:
             B3_and_B6_lists = self.separate_bands_on_type(path_row_files)
 
             # for B3 then B6 lists
+            print(B3_and_B6_lists)
             for band_list in B3_and_B6_lists:
-                # reference image to which the rest from the list will be aligned to
-                """for band in band_list:
-                    print(band, "\n")"""
-                reference_image = band_list[0]
-                rest_of_bands = band_list[1:]
+                if len(band_list) > 0:
+                    # reference image to which the rest from the list will be aligned to
+                    """for band in band_list:
+                        print(band, "\n")"""
+                    reference_image = band_list[0]
+                    rest_of_bands = band_list[1:]
 
-                self.process_list(band_list=rest_of_bands,
-                                  reference=reference_image,
-                                  processed_output_dir=total_PR_output_dir)
+                    self.parse_band_list(band_list=rest_of_bands,
+                                         reference=reference_image,
+                                         processed_output_dir=total_PR_output_dir)
+                else:
+                    print("No bands found.")
 
         self.write_homography_result(glacier=glacier)
 
-    def process_list(self, band_list, reference, processed_output_dir):
+    def parse_band_list(self, band_list, reference, processed_output_dir):
         """Applies the alignment process to the list of bands."""
         alignment_ORB.TOTAL_PROCESSED = 0
         alignment_ORB.VALID_HOMOGRAPHIES = 0
@@ -82,9 +86,9 @@ class ProcessAlignment:
 
     def align_to_reference(self, scene, reference, image, process_alignment) -> bool:
         """Checks whether the scene is between the selected months, then aligns it to the directory reference."""
-        if self.check_scene_in_months(scene) is False:
+        """if self.check_scene_in_months(scene) is False:
             print("Scene not in months.")
-            return False
+            return False"""
 
         alignment_ECC.setup_alignment(reference_filename=reference,
                                       image_filename=image,

@@ -9,17 +9,28 @@ TOTAL_PROCESSED = 0
 
 
 class Align:
-    def __init__(self, im_reference_16bit, im_tobe_aligned_16bit, im_reference, im_tobe_aligned):
-        self.im1_16bit = im_tobe_aligned_16bit
-        self.im2_16bit = im_reference_16bit
+    def __init__(self, scaled_reference_16bit, scaled_image_16bit, reference_16bit, image_16bit):
+        scaled_reference_16bit = scaled_reference_16bit
+        scaled_image_16bit = scaled_image_16bit
 
-        self.im1_8bit = (self.im1_16bit >> 8).astype(np.uint8)
-        self.im2_8bit = (self.im2_16bit >> 8).astype(np.uint8)
+        print("16 bits scaled")
+        print(scaled_image_16bit.shape)
+        print(scaled_reference_16bit.shape)
 
-        self.big_im_reference_8bit = self.im2_16bit >> 8
-        self.big_im_tobe_aligned_8bit = self.im1_16bit >> 8
+        self.scaled_reference_8bit = (scaled_reference_16bit >> 8).astype(np.uint8)
+        self.scaled_image_8bit = (scaled_image_16bit >> 8).astype(np.uint8)
 
-        self.im_matches = None
+        print("8 bits scaled")
+        print(self.scaled_reference_8bit.shape)
+        print(self.scaled_image_8bit.shape)
+
+        self.normal_reference_8bit = (reference_16bit >> 8).astype(np.uint8)
+        self.normal_image_8bit = (image_16bit >> 8).astype(np.uint8)
+
+        print("8 bits normal")
+        print(self.normal_reference_8bit.shape)
+        print(self.normal_image_8bit.shape)
+
         self.im_result = None
         self.homography = None
 
@@ -29,7 +40,7 @@ class Align:
         # Read the images to be aligned
 
         # Find size of image1
-        sz = self.im1_8bit.shape
+        sz = self.scaled_reference_8bit.shape
 
         # Define the motion model
         print("Define motion model...")
@@ -43,11 +54,11 @@ class Align:
             warp_matrix = np.eye(2, 3, dtype=np.float32)
 
         # Specify the number of iterations.
-        number_of_iterations = 1000
+        number_of_iterations = 50
 
         # Specify the threshold of the increment
         # in the correlation coefficient between two iterations
-        termination_eps = 1e-10
+        termination_eps = 0.001
 
         # Define termination criteria
         print("Define criteria")
@@ -55,48 +66,39 @@ class Align:
 
         print("Run algorithm")
         # Run the ECC algorithm. The results are stored in warp_matrix.
-        (cc, warp_matrix) = cv2.findTransformECC(self.im1_8bit, self.im2_8bit, warp_matrix, warp_mode, criteria)
+        (cc, warp_matrix) = cv2.findTransformECC(self.scaled_reference_8bit, self.scaled_image_8bit, warp_matrix, warp_mode, criteria)
 
-        print("Wrap matrix ", warp_matrix)
+        print("Wrap matrix \n", warp_matrix)
 
         if warp_mode == cv2.MOTION_HOMOGRAPHY:
             # Use warpPerspective for homography
             print("Wrap perspective 1")
-            self.im_result = cv2.warpPerspective(self.im2_8bit, warp_matrix, (sz[1], sz[0]),
-                                              flags=cv2.INTER_LINEAR + cv2.WARP_INVERSE_MAP)
+            self.im_result = cv2.warpPerspective(self.scaled_image_8bit, warp_matrix, (sz[1], sz[0]),
+                                                 flags=cv2.INTER_LINEAR + cv2.WARP_INVERSE_MAP)
         else:
             print("Wrap perspective 2")
             # Use warpAffine for Translation, Euclidean and Affine
-            self.im_result = cv2.warpAffine(self.im2_8bit, warp_matrix, (sz[1], sz[0]),
-                                         flags=cv2.INTER_LINEAR + cv2.WARP_INVERSE_MAP);
-
-        # Show final results
-        self.setup_windows()
+            self.im_result = cv2.warpAffine(self.scaled_image_8bit, warp_matrix, (sz[1], sz[0]),
+                                            flags=cv2.INTER_LINEAR + cv2.WARP_INVERSE_MAP);
 
     def setup_windows(self):
+        print("Reference shape ", self.scaled_reference_8bit.shape)
         cv2.namedWindow('Reference', cv2.WINDOW_NORMAL)
         cv2.resizeWindow('Reference', 1000, 1000)
         cv2.moveWindow('Reference', 10, 10)
-        cv2.imshow('Reference', self.im2_8bit)
+        cv2.imshow('Reference', self.scaled_reference_8bit)
 
         while cv2.waitKey() != 27:
             pass
 
-        cv2.namedWindow('imp', cv2.WINDOW_NORMAL)
-        cv2.resizeWindow('imp', 1000, 1000)
-        cv2.moveWindow('imp', 10, 10)
-        cv2.imshow('imp', self.im1_8bit)
+        print("Current image shape ", self.scaled_image_8bit.shape)
+        cv2.namedWindow('Current Image', cv2.WINDOW_NORMAL)
+        cv2.resizeWindow('Current Image', 1000, 1000)
+        cv2.moveWindow('Current Image', 10, 10)
+        cv2.imshow('CurrentImage', self.scaled_image_8bit)
 
         while cv2.waitKey() != 27:
             pass
-
-        """cv2.namedWindow('Differences', cv2.WINDOW_NORMAL)
-        cv2.resizeWindow('Differences', 1000, 2000)
-        cv2.moveWindow('Differences', 10, 10)
-        cv2.imshow('Differences', self.im_matches)
-
-        while cv2.waitKey() != 27:
-            pass"""
 
         cv2.namedWindow('Result', cv2.WINDOW_NORMAL)
         cv2.resizeWindow('Result', 1000, 1000)
@@ -133,23 +135,19 @@ class Align:
             return False
 
 
-def percentage(percent, image):
+def percentage(percent, image) -> tuple:
     """Find what is percent from whole."""
     height, width = image.shape
     height = (percent * height) // 100
     width = (percent * width) // 100
 
-    print("Height ", height)
-    print("Width ", width)
-
-    return (width, height)
+    return width, height
 
 
 def setup_alignment(reference_filename, image_filename, result_filename, processed_output_dir):
     print("Rreference image is: \n", reference_filename)
     print("To be aligned image is: \n", image_filename)
 
-    """
     im_reference = cv2.imread(reference_filename, cv2.IMREAD_LOAD_GDAL)
     im_tobe_aligned = cv2.imread(image_filename, cv2.IMREAD_LOAD_GDAL)
 
@@ -160,15 +158,11 @@ def setup_alignment(reference_filename, image_filename, result_filename, process
 
     aligner = Align(scaled_im_reference, scaled_im_tobe_aligned, im_reference, im_tobe_aligned)
     found = aligner.find_matches()
+    aligner.setup_windows()
+    """
     valid = aligner.validate_homography()
-#    aligner.setup_windows()
 
     print(VALID_HOMOGRAPHIES, "/", TOTAL_PROCESSED, "\n")
     if found and valid:
-        cv2.imwrite(aligned_path, aligner.im_result)
-        """
-
+        cv2.imwrite(aligned_path, aligner.im_result)"""
 # scale image up, wrap matrix elements by x percent sko it fist.
-
-
-
