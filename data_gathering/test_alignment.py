@@ -9,11 +9,15 @@ TOTAL_PROCESSED = 0
 
 
 class Align:
-    def __init__(self, im1_16bit, im2_16bit):
-        self.im1_16bit = im1_16bit
-        self.im2_16bit = im2_16bit
-        self.im1_8bit = (im1_16bit >> 8).astype(np.uint8)
-        self.im2_8bit = (im2_16bit >> 8).astype(np.uint8)
+    def __init__(self, im_reference_16bit, im_tobe_aligned_16bit, im_reference, im_tobe_aligned):
+        self.im1_16bit = im_tobe_aligned_16bit
+        self.im2_16bit = im_reference_16bit
+
+        self.im1_8bit = (self.im1_16bit >> 8).astype(np.uint8)
+        self.im2_8bit = (self.im2_16bit >> 8).astype(np.uint8)
+
+        self.big_im_reference_8bit = self.im2_16bit >> 8
+        self.big_im_tobe_aligned_8bit = self.im1_16bit >> 8
 
         self.im_matches = None
         self.im_result = None
@@ -29,7 +33,7 @@ class Align:
 
         # Define the motion model
         print("Define motion model...")
-        warp_mode = cv2.MOTION_AFFINE
+        warp_mode = cv2.MOTION_TRANSLATION
 
         # Define 2x3 or 3x3 matrices and initialize the matrix to identity
         print("Define motion homography")
@@ -146,12 +150,12 @@ def setup_alignment(reference_filename, image_filename, result_filename, process
     im_reference = cv2.imread(reference_filename, cv2.IMREAD_LOAD_GDAL)
     im_tobe_aligned = cv2.imread(image_filename, cv2.IMREAD_LOAD_GDAL)
 
-    im_reference = cv2.resize(im_reference, percentage(10, im_reference))
-    im_tobe_aligned = cv2.resize(im_tobe_aligned, percentage(10, im_tobe_aligned))
+    scaled_im_reference = cv2.resize(im_reference, percentage(20, im_reference))
+    scaled_im_tobe_aligned = cv2.resize(im_tobe_aligned, percentage(20, im_tobe_aligned))
 
     aligned_path = os.path.join(processed_output_dir, result_filename)
 
-    aligner = Align(im_tobe_aligned, im_reference)
+    aligner = Align(scaled_im_reference, scaled_im_tobe_aligned, im_reference, im_tobe_aligned)
     found = aligner.find_matches()
     valid = aligner.validate_homography()
 #    aligner.setup_windows()
@@ -159,6 +163,8 @@ def setup_alignment(reference_filename, image_filename, result_filename, process
     print(VALID_HOMOGRAPHIES, "/", TOTAL_PROCESSED, "\n")
     if found and valid:
         cv2.imwrite(aligned_path, aligner.im_result)
+
+# scale image up, wrap matrix elements by x percent sko it fist.
 
 
 
