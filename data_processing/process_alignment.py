@@ -55,8 +55,6 @@ class ProcessAlignment:
             for band_list in B3_and_B6_lists:
                 if len(band_list) > 0:
                     # reference image to which the rest from the list will be aligned to
-                    """for band in band_list:
-                        print(band, "\n")"""
                     reference_image = band_list[0]
                     rest_of_bands = band_list[1:]
 
