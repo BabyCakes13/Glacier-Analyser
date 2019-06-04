@@ -78,9 +78,9 @@ class ProcessAlignment:
             row = scene_data_handler.get_row()
             outpur_dir = self.assign_directory(path=path, row=row, total_PR_dir=processed_output_dir)
 
-            self.align_to_reference(scene=scene, reference=reference, image=band, processed_output_dir=outpur_dir)
+            self.align_to_reference(scene=scene, reference=reference, image=band, process_alignment=outpur_dir)
 
-    def align_to_reference(self, scene, reference, image, processed_output_dir) -> bool:
+    def align_to_reference(self, scene, reference, image, process_alignment) -> bool:
         """Checks whether the scene is between the selected months, then aligns it to the directory reference."""
         if self.check_scene_in_months(scene) is False:
             print("Scene not in months.")
@@ -89,7 +89,7 @@ class ProcessAlignment:
         alignment_ECC.setup_alignment(reference_filename=reference,
                                       image_filename=image,
                                       result_filename=image,
-                                      processed_output_dir=processed_output_dir)
+                                      processed_output_dir=process_alignment)
         return True
 
     def separate_bands_on_type(self, bands_list):

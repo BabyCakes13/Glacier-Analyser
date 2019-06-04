@@ -146,7 +146,10 @@ def percentage(percent, image):
 
 
 def setup_alignment(reference_filename, image_filename, result_filename, processed_output_dir):
+    print("Rreference image is: \n", reference_filename)
+    print("To be aligned image is: \n", image_filename)
 
+    """
     im_reference = cv2.imread(reference_filename, cv2.IMREAD_LOAD_GDAL)
     im_tobe_aligned = cv2.imread(image_filename, cv2.IMREAD_LOAD_GDAL)
 
@@ -163,6 +166,7 @@ def setup_alignment(reference_filename, image_filename, result_filename, process
     print(VALID_HOMOGRAPHIES, "/", TOTAL_PROCESSED, "\n")
     if found and valid:
         cv2.imwrite(aligned_path, aligner.im_result)
+        """
 
 # scale image up, wrap matrix elements by x percent sko it fist.
 
