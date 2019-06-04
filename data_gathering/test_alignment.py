@@ -29,7 +29,7 @@ class Align:
 
         # Define the motion model
         print("Define motion model...")
-        warp_mode = cv2.MOTION_HOMOGRAPHY
+        warp_mode = cv2.MOTION_AFFINE
 
         # Define 2x3 or 3x3 matrices and initialize the matrix to identity
         print("Define motion homography")
@@ -39,7 +39,7 @@ class Align:
             warp_matrix = np.eye(2, 3, dtype=np.float32)
 
         # Specify the number of iterations.
-        number_of_iterations = 5000
+        number_of_iterations = 1000
 
         # Specify the threshold of the increment
         # in the correlation coefficient between two iterations
@@ -129,12 +129,27 @@ class Align:
             return False
 
 
-def setup_alignment(reference_filename, tobe_aligned_filename, result_filename, aligned_dir):
+def percentage(percent, image):
+    """Find what is percent from whole."""
+    height, width = image.shape
+    height = (percent * height) // 100
+    width = (percent * width) // 100
+
+    print("Height ", height)
+    print("Width ", width)
+
+    return (width, height)
+
+
+def setup_alignment(reference_filename, image_filename, result_filename, processed_output_dir):
 
     im_reference = cv2.imread(reference_filename, cv2.IMREAD_LOAD_GDAL)
-    im_tobe_aligned = cv2.imread(tobe_aligned_filename, cv2.IMREAD_LOAD_GDAL)
+    im_tobe_aligned = cv2.imread(image_filename, cv2.IMREAD_LOAD_GDAL)
 
-    aligned_path = os.path.join(aligned_dir, result_filename)
+    im_reference = cv2.resize(im_reference, percentage(10, im_reference))
+    im_tobe_aligned = cv2.resize(im_tobe_aligned, percentage(10, im_tobe_aligned))
+
+    aligned_path = os.path.join(processed_output_dir, result_filename)
 
     aligner = Align(im_tobe_aligned, im_reference)
     found = aligner.find_matches()

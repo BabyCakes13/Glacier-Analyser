@@ -54,8 +54,12 @@ class ProcessAlignment:
             # for B3 then B6 lists
             for band_list in B3_and_B6_lists:
                 # reference image to which the rest from the list will be aligned to
+                """for band in band_list:
+                    print(band, "\n")"""
                 reference_image = band_list[0]
-                self.process_list(band_list=band_list,
+                rest_of_bands = band_list[1:]
+
+                self.process_list(band_list=rest_of_bands,
                                   reference=reference_image,
                                   processed_output_dir=total_PR_output_dir)
 
@@ -67,7 +71,7 @@ class ProcessAlignment:
         alignment_algorithm.VALID_HOMOGRAPHIES = 0
 
         # for each band except the reference
-        for band in band_list[1:]:
+        for band in band_list:
             scene = self.get_scene_name(band)
             scene_data_handler = scene_data.SceneData(scene)
 
@@ -80,9 +84,10 @@ class ProcessAlignment:
     def align_to_reference(self, scene, reference, image, processed_output_dir) -> bool:
         """Checks whether the scene is between the selected months, then aligns it to the directory reference."""
         if self.check_scene_in_months(scene) is False:
+            print("Scene not in months.")
             return False
 
-        alignment_algorithm.setup_alignment(reference_filename=reference,
+        test_alignment.setup_alignment(reference_filename=reference,
                                             image_filename=image,
                                             result_filename=image,
                                             processed_output_dir=processed_output_dir)
