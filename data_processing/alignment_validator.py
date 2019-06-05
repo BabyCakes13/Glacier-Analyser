@@ -1,8 +1,9 @@
 import csv
 import os
 import definitions
-from data_processing import ex_alignment_ORB
+from data_processing import alignment_ORB
 from util import strings
+
 
 class HomographyCSV:
     def __init__(self, glacier_id, homography_csv):
@@ -15,10 +16,10 @@ class HomographyCSV:
         self.add_item_to_csv()
 
     def generate_csv_item(self):
-        if ex_alignment_ORB.TOTAL_PROCESSED == 0:
+        if alignment_ORB.TOTAL_PROCESSED == 0:
             ratio = 0
         else:
-            ratio = ex_alignment_ORB.VALID_HOMOGRAPHIES / ex_alignment_ORB.TOTAL_PROCESSED
+            ratio = alignment_ORB.VALID_HOMOGRAPHIES / alignment_ORB.TOTAL_PROCESSED
 
         item = [
             self.glacier_id,
@@ -26,8 +27,8 @@ class HomographyCSV:
             definitions.GOOD_MATCH_PERCENT,
             definitions.ALLOWED_ERROR,
             definitions.ALLOWED_INTEGRAL,
-            ex_alignment_ORB.VALID_HOMOGRAPHIES,
-            ex_alignment_ORB.TOTAL_PROCESSED,
+            alignment_ORB.VALID_HOMOGRAPHIES,
+            alignment_ORB.TOTAL_PROCESSED,
             ratio
         ]
         return item

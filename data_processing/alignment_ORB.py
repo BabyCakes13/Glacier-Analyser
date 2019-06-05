@@ -6,6 +6,7 @@ import definitions
 
 VALID_HOMOGRAPHIES = 0
 TOTAL_PROCESSED = 0
+VALID = False
 
 
 class Align:
@@ -42,7 +43,6 @@ class Align:
         # draw the best matches
         self.matches = cv2.drawMatches(self.reference_8bit, keypoints1, self.current_image_8bit,
                                        keypoints2, matches, None)
-        self.display_image('MATCHES', self.matches)
 
         # prepare the arras which hold the matches location
         points1 = np.zeros((len(matches), 2), dtype=np.float32)
@@ -54,12 +54,45 @@ class Align:
 
         # find homography
         homography, mask = cv2.findHomography(points1, points2, cv2.RANSAC)
-
-        print("Homography \n", homography)
+        global VALID
+        VALID = self.validate_homography(homography)
 
         # generate result
         height, width = self.reference_8bit.shape
         self.result_8bit = cv2.warpPerspective(self.reference_8bit, homography, (width, height))
+
+    def validate_homography(self, homography):
+        # convert from scientific notation to decimal notation for better data interpretation
+        np.set_printoptions(suppress=True, precision=4)
+
+        global TOTAL_PROCESSED
+        global VALID_HOMOGRAPHIES
+        TOTAL_PROCESSED += 1
+
+        identity = np.identity(3)
+        difference = np.absolute(np.subtract(identity, homography))
+        compare = self.create_comparison_matrix()
+
+        print("Homography \n", homography)
+        print("Difference \n", difference)
+        print("Comparison \n", compare)
+
+        if np.less_equal(difference, compare).all():
+            VALID_HOMOGRAPHIES += 1
+            print("Homography is good.")
+            return True
+        else:
+            print("Homography is not good.")
+            return False
+
+    @staticmethod
+    def create_comparison_matrix():
+        """Creates the matrix for comparing."""
+        comparison = np.full((3, 3), definitions.ALLOWED_ERROR)
+        comparison[0, 2] = definitions.ALLOWED_INTEGRAL
+        comparison[1, 2] = definitions.ALLOWED_INTEGRAL
+
+        return comparison
 
     @staticmethod
     def display_image(window_name, image):
@@ -82,27 +115,44 @@ def percentage(percent, image) -> tuple:
     return width, height
 
 
-def setup_alignment(reference_filename, image_filename, result_filename, processed_output_dir):
-
+def start_alignment(reference_filename, image_filename, result_filename, processed_output_dir):
+    """Starts the alignment process."""
     # prepare the images for alignment
     normalised_reference_8bit, current_image_8bit, \
     scaled_normalised_reference_8bit, scaled_current_image_8bit = resize_depth(reference_filename, image_filename)
 
-    aligned_path = os.path.join(processed_output_dir, result_filename)
-    aligner = Align(scaled_normalised_reference_8bit, scaled_current_image_8bit)
+    result_path = os.path.join(processed_output_dir, result_filename)
+
+    print_messages(reference_filename, image_filename, result_path)
+
+    aligner = Align(normalised_reference_8bit, current_image_8bit)
     aligner.find_matches()
 
+    if VALID:
+        cv2.imwrite(result_path, aligner.result_8bit)
+
+    print("(", VALID_HOMOGRAPHIES, ", ", TOTAL_PROCESSED, ")")
+
+    """
     aligner.display_image("Rerefence", aligner.reference_8bit)
     aligner.display_image("Current Image", aligner.current_image_8bit)
     aligner.display_image("Result", aligner.result_8bit)
-
     cv2.destroyAllWindows()
+    """
+
+
+def print_messages(reference_filename, image_filename, aligned_filename):
+    print("\n\n")
+    print("Reference filename: ", reference_filename)
+    print("Image filename ", image_filename)
+    print("Aligned filename  ", aligned_filename)
 
 
 def resize_depth(reference_filename, image_filename):
     """Resize the depth of the images from 16 to 8 pixels.
     Normalise reference.
     Scale images."""
+
     reference_16bit = cv2.imread(reference_filename, cv2.IMREAD_LOAD_GDAL)
     current_image_16bit = cv2.imread(image_filename, cv2.IMREAD_LOAD_GDAL)
 

@@ -6,6 +6,7 @@ from data_gathering import scene_data
 from data_preparing import path_row_grouping as prg
 from data_processing import alignment_ORB, alignment_ECC
 from data_processing import alignment_validator
+from util import strings
 
 
 class ProcessAlignment:
@@ -36,9 +37,12 @@ class ProcessAlignment:
 
     def parse_directory(self, current_dir):
         """Applies the changes to the input_dir which contains the images."""
+        alignment_ORB.TOTAL_PROCESSED = 0
+        alignment_ORB.VALID_HOMOGRAPHIES = 0
+
         # get glacier id to make glacier output folder
         root, glacier = os.path.split(current_dir)
-        glacier_dir = self.make_glacier_dir(glacier=glacier)
+        glacier_dir = self.make_glacier_dir(glacier)
 
         processed_output_dir = os.path.join(self.output_dir, glacier)
         path_row_handler = prg.PathRowGrouping(input_dir=current_dir, output_dir=processed_output_dir)
@@ -51,7 +55,6 @@ class ProcessAlignment:
             B3_and_B6_lists = self.separate_bands_on_type(path_row_files)
 
             # for B3 then B6 lists
-            print(B3_and_B6_lists)
             for band_list in B3_and_B6_lists:
                 if len(band_list) > 0:
                     # reference image to which the rest from the list will be aligned to
@@ -60,39 +63,30 @@ class ProcessAlignment:
 
                     self.parse_band_list(band_list=rest_of_bands,
                                          reference=reference_image,
-                                         processed_output_dir=total_PR_output_dir)
+                                         processed_output_dir=total_PR_output_dir,
+                                         glacier=glacier)
                 else:
                     print("No bands found.")
 
+        print("WRITE HOMOGRAPHY")
         self.write_homography_result(glacier=glacier)
 
-    def parse_band_list(self, band_list, reference, processed_output_dir):
+    def parse_band_list(self, band_list, reference, processed_output_dir, glacier):
         """Applies the alignment process to the list of bands."""
-        alignment_ORB.TOTAL_PROCESSED = 0
-        alignment_ORB.VALID_HOMOGRAPHIES = 0
-
         # for each band except the reference
-        for band in band_list:
-            scene = self.get_scene_name(band)
+        for file in band_list:
+            scene = strings.get_scene_name(file)
             scene_data_handler = scene_data.SceneData(scene)
 
             path = scene_data_handler.get_path()
             row = scene_data_handler.get_row()
-            outpur_dir = self.assign_directory(path=path, row=row, total_PR_dir=processed_output_dir)
+            output_dir = self.assign_directory(path=path, row=row, total_PR_dir=processed_output_dir)
+            result_filename = strings.get_file_name(file)
 
-            self.align_to_reference(scene=scene, reference=reference, image=band, process_alignment=outpur_dir)
-
-    def align_to_reference(self, scene, reference, image, process_alignment) -> bool:
-        """Checks whether the scene is between the selected months, then aligns it to the directory reference."""
-        """if self.check_scene_in_months(scene) is False:
-            print("Scene not in months.")
-            return False"""
-
-        alignment_ORB.setup_alignment(reference_filename=reference,
-                                      image_filename=image,
-                                      result_filename=image,
-                                      processed_output_dir=process_alignment)
-        return True
+            alignment_ORB.start_alignment(reference_filename=reference,
+                                          image_filename=file,
+                                          result_filename=result_filename,
+                                          processed_output_dir=output_dir)
 
     def separate_bands_on_type(self, bands_list):
         """Gathers all the B3 and B6 bands from the current directory in a list of band lists.
@@ -121,7 +115,8 @@ class ProcessAlignment:
 
         for file in os.listdir(current_dir):
             if file.endswith((definitions.GREEN_BAND_END, definitions.SWIR1_BAND_END)):
-                scene = self.get_scene_name(file)
+                print("\n")
+                scene = strings.get_scene_name(file)
                 scene_data_handler = scene_data.SceneData(scene)
 
                 path = scene_data_handler.get_path()
@@ -133,6 +128,7 @@ class ProcessAlignment:
         return total_PR_lists
 
     def make_glacier_dir(self, glacier):
+        """Creates and returns the path to the directory with the current glacier name."""
         glacier_dir = os.path.join(self.output_dir, glacier)
 
         if os.path.exists(glacier_dir):
@@ -168,20 +164,5 @@ class ProcessAlignment:
                 break
 
         return output_directory
-
-    @staticmethod
-    def get_scene_name(band_path):
-        """Returns the scene name."""
-        input_dir, band = os.path.split(band_path)
-
-        if band.endswith(definitions.GREEN_BAND_END):
-            split = band.split(definitions.GREEN_BAND_END)
-        else:
-            split = band.split(definitions.SWIR1_BAND_END)
-        scene = split[0]
-
-        return str(scene)
-
-# TODO normalise down image 10x so that the aligner finds better matches, calculate homography and all transformations on that, then at the last step, apply the transformation on the big image
 
 

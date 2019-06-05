@@ -1,4 +1,5 @@
 import datetime
+import os
 import definitions
 
 
@@ -108,6 +109,24 @@ def get_default_homography_csv():
     return attributes
 
 
+def get_scene_name(band_path):
+    """Returns the scene name."""
+    input_dir, band = os.path.split(band_path)
+
+    if band.endswith(definitions.GREEN_BAND_END):
+        split = band.split(definitions.GREEN_BAND_END)
+    else:
+        split = band.split(definitions.SWIR1_BAND_END)
+    scene = split[0]
+
+    return str(scene)
+
+
+def get_file_name(file_path):
+    """Returns the file name."""
+    input_dir, file_name = os.path.split(file_path)
+    return file_name
+
 def get_system_messages():
 
     messages = [
@@ -125,3 +144,4 @@ def error_messages():
     ]
 
     return errors
+
