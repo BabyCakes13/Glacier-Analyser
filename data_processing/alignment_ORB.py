@@ -6,8 +6,9 @@ import definitions
 
 VALID_HOMOGRAPHIES = 0
 TOTAL_PROCESSED = 0
-VALID = False
 
+VALID = False
+DISPLAY=0
 
 class Align:
     def __init__(self, reference_8bit, current_image8bit):
@@ -25,40 +26,44 @@ class Align:
 
         orb = cv2.ORB_create(definitions.MAX_FEATURES)
 
-        keypoints1, descriptors1 = orb.detectAndCompute(self.reference_8bit, None)
-        keypoints2, descriptors2 = orb.detectAndCompute(self.current_image_8bit, None)
+        keypoints_ref, descriptors_ref = orb.detectAndCompute(self.reference_8bit, None)
+        keypoints_img, descriptors_img = orb.detectAndCompute(self.current_image_8bit, None)
 
-#        print("Keypoints 1 length ", len(keypoints1))
-#        print("Keypoints 2 length ", len(keypoints2))
-#        print("Descriptor 1 ", descriptors1)
-#        print("Descriptor 2 ", descriptors2)
+#        print("Keypoints 1 length ", len(keypoints_ref))
+#        print("Keypoints 2 length ", len(keypoints_img))
+#        print("Descriptor 1 ", descriptors_ref)
+#        print("Descriptor 2 ", descriptors_img)
 
         matcher = cv2.DescriptorMatcher_create(cv2.DESCRIPTOR_MATCHER_BRUTEFORCE_HAMMING)
-        matches = matcher.match(descriptors1, descriptors2, None)
+        matches = matcher.match(descriptors_ref, descriptors_img, None)
         # best matches first
         matches.sort(key=lambda x: x.distance, reverse=False)
         # remove matches with low score
         numGoodMatches = int(len(matches) * definitions.GOOD_MATCH_PERCENT)
         matches = matches[:numGoodMatches]
         # draw the best matches
-        self.matches = cv2.drawMatches(self.reference_8bit, keypoints1, self.current_image_8bit,
-                                       keypoints2, matches, None)
+        if (DISPLAY):
+            self.matches = cv2.drawMatches(self.reference_8bit, keypoints_ref,
+                                           self.current_image_8bit, keypoints_img, matches,
+                                           None, matchColor=(0,255,0), singlePointColor=(100,0,0),
+                                           flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+            self.display_image('MATCHES', self.matches)
 
         # prepare the arras which hold the matches location
-        points1 = np.zeros((len(matches), 2), dtype=np.float32)
-        points2 = np.zeros((len(matches), 2), dtype=np.float32)
+        points_ref = np.zeros((len(matches), 2), dtype=np.float32)
+        points_img = np.zeros((len(matches), 2), dtype=np.float32)
         # fill points from the matcher
         for i, match in enumerate(matches):
-            points1[i, :] = keypoints1[match.queryIdx].pt
-            points2[i, :] = keypoints2[match.trainIdx].pt
+            points_ref[i, :] = keypoints_ref[match.queryIdx].pt
+            points_img[i, :] = keypoints_img[match.trainIdx].pt
 
         # find homography
-        homography, mask = cv2.findHomography(points1, points2, cv2.RANSAC)
+        homography, mask = cv2.findHomography(points_img, points_ref, cv2.RANSAC)
         global VALID
         VALID = self.validate_homography(homography)
 
         # generate result
-        height, width = self.current_image_8bit.shape
+        height, width = self.reference_8bit.shape
         self.result_8bit = cv2.warpPerspective(self.current_image_8bit, homography, (width, height))
 
     def validate_homography(self, homography):
@@ -102,9 +107,10 @@ class Align:
         cv2.moveWindow(window_name, 10, 10)
         cv2.imshow(window_name, image)
 
+    @staticmethod
+    def display_image_flush():
         while cv2.waitKey() != 27:
             pass
-
 
 def percentage(percent, image) -> tuple:
     """Find what is percent from whole."""
@@ -133,9 +139,12 @@ def start_alignment(reference_filename, image_filename, result_filename, process
 
     print("(", VALID_HOMOGRAPHIES, ", ", TOTAL_PROCESSED, ")")
 
-    aligner.display_image("Rerefence", aligner.reference_8bit)
-    aligner.display_image("Current Image", aligner.current_image_8bit)
-    aligner.display_image("Result", aligner.result_8bit)
+    if(DISPLAY):
+        aligner.display_image("Rerefence", aligner.reference_8bit)
+        aligner.display_image("Current Image", aligner.current_image_8bit)
+        aligner.display_image("Result", aligner.result_8bit)
+        aligner.display_image_flush()
+
     cv2.destroyAllWindows()
 
 
