@@ -2,6 +2,7 @@ from __future__ import print_function
 import cv2
 import numpy as np
 import os
+import sys
 import definitions
 
 VALID_HOMOGRAPHIES = 0
@@ -173,3 +174,5 @@ def resize_depth(reference_filename, image_filename):
 
     return normalised_reference_8bit, current_image_8bit, scaled_normalised_reference_8bit, scaled_current_image_8bit
 
+if __name__ == "__main__":
+    setup_alignment(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
