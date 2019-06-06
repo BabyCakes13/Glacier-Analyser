@@ -1,6 +1,7 @@
 import shutil
 import os
 import definitions
+import subprocess
 from collections import defaultdict
 from data_gathering import scene_data
 from data_preparing import path_row_grouping as prg
@@ -10,7 +11,8 @@ from util import strings
 
 
 class ProcessAlignment:
-    def __init__(self, little_dir, big_input_dir, output_dir, months):
+    def __init__(self, little_dir, big_input_dir, output_dir, months,
+                     max_threads=definitions.MAX_THREADS):
         self.little_dir = little_dir
         self.big_input_dir = big_input_dir
         self.output_dir = output_dir
@@ -18,6 +20,9 @@ class ProcessAlignment:
         self.months = months
         self.homography_csv = os.path.join(self.output_dir, definitions.HOMOGRAPHY_CSV)
         self.path_row_handler = None
+
+        self.process_queue = []
+        self.max_threads = 20 # max_threads
 
     def start(self):
         """Checks the type of the input directory and calls the aligner."""
@@ -78,6 +83,25 @@ class ProcessAlignment:
         print("WRITE HOMOGRAPHY")
         self.write_homography_result(glacier=glacier)
 
+    def check_process_full(self):
+        """Checks if the process queue is full."""
+        if len(self.process_queue) >= self.max_threads:
+            filename, sp = self.process_queue.pop()
+            sp.wait()
+            print("Query done: ", filename)
+
+    def check_process_done(self):
+        """Checks if a process from the process queue is done, removes if so."""
+        for filename, sp in self.process_queue:
+            if sp.poll() == 0:
+                self.process_queue.remove((filename, sp))
+                print("Query done: ", filename)
+
+    def poll_process_done(self):
+        """Checks if a process from the process queue is done, removes if so."""
+        while len(self.process_queue) >= self.max_threads:
+            self.check_process_done()
+
     def parse_band_list(self, band_list, reference, processed_output_dir, glacier):
         """Applies the alignment process to the list of bands."""
         # for each band except the reference
@@ -89,6 +113,23 @@ class ProcessAlignment:
             row = scene_data_handler.get_row()
             output_dir = self.assign_directory(path=path, row=row, total_PR_dir=processed_output_dir)
             result_filename = strings.get_file_name(file)
+            outpur_dir = self.assign_directory(path=path, row=row, total_PR_dir=processed_output_dir)
+
+            MULTITHREADED=True
+            if(MULTITHREADED):
+                try:
+                    self.poll_process_done()
+                    align_arglist = ["python3", "data_processing/alignment_ORB.py",
+                                     reference, band, result_filename ,outpur_dir]
+                    sp = subprocess.Popen(align_arglist)
+                    self.process_queue.append((band, sp))
+                    self.check_process_done()
+                except KeyboardInterrupt:
+                    print("Keyboard interrupt.")
+                    sys.exit(1)
+
+            else:
+                self.align_to_reference(scene=scene, reference=reference, image=band, process_alignment=outpur_dir)
 
             alignment_ORB.start_alignment(reference_filename=reference,
                                           image_filename=file,
