@@ -4,7 +4,7 @@ import definitions
 from collections import defaultdict
 from data_gathering import scene_data
 from data_preparing import path_row_grouping as prg
-from data_processing import alignment_ORB, alignment_ECC
+from data_processing import alignment_ORB, alignment_ECC, process_ndsi
 from data_processing import alignment_validator
 from util import strings
 
@@ -37,6 +37,7 @@ class ProcessAlignment:
 
     def parse_directory(self, current_dir):
         """Applies the changes to the input_dir which contains the images."""
+        # valid analysis
         alignment_ORB.TOTAL_PROCESSED = 0
         alignment_ORB.VALID_HOMOGRAPHIES = 0
 
@@ -44,18 +45,23 @@ class ProcessAlignment:
         root, glacier = os.path.split(current_dir)
         glacier_dir = self.make_glacier_dir(glacier)
 
+        # prepare output paths
         processed_output_dir = os.path.join(self.output_dir, glacier)
         path_row_handler = prg.PathRowGrouping(input_dir=current_dir, output_dir=processed_output_dir)
         total_PR_output_dir = path_row_handler.determine_total_PR()
         path_row_dir_map = self.group_bands_to_path_row(current_dir=current_dir)
 
-        # for each path_row option
+        # for each path/row
         for path_row, path_row_files in path_row_dir_map.items():
             print("----------------------- ", path_row, "----------------------- ")
             B3_and_B6_lists = self.separate_bands_on_type(path_row_files)
 
+            #ndsi = process_ndsi.ProcessNDSI(B3_and_B6_lists[0], B3_and_B6_lists[1])
+            #ndsi.make_pairs()
+
             # for B3 then B6 lists
             for band_list in B3_and_B6_lists:
+                # process only if there is at least one image in the list
                 if len(band_list) > 0:
                     # reference image to which the rest from the list will be aligned to
                     reference_image = band_list[0]

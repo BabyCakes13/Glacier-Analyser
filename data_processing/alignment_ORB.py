@@ -58,8 +58,8 @@ class Align:
         VALID = self.validate_homography(homography)
 
         # generate result
-        height, width = self.reference_8bit.shape
-        self.result_8bit = cv2.warpPerspective(self.reference_8bit, homography, (width, height))
+        height, width = self.current_image_8bit.shape
+        self.result_8bit = cv2.warpPerspective(self.current_image_8bit, homography, (width, height))
 
     def validate_homography(self, homography):
         # convert from scientific notation to decimal notation for better data interpretation
@@ -133,12 +133,10 @@ def start_alignment(reference_filename, image_filename, result_filename, process
 
     print("(", VALID_HOMOGRAPHIES, ", ", TOTAL_PROCESSED, ")")
 
-    """
     aligner.display_image("Rerefence", aligner.reference_8bit)
     aligner.display_image("Current Image", aligner.current_image_8bit)
     aligner.display_image("Result", aligner.result_8bit)
     cv2.destroyAllWindows()
-    """
 
 
 def print_messages(reference_filename, image_filename, aligned_filename):
