@@ -16,19 +16,19 @@ class HomographyCSV:
         self.add_item_to_csv()
 
     def generate_csv_item(self):
-        if alignment_ORB.TOTAL_PROCESSED == 0:
-            ratio = 0
-        else:
-            ratio = alignment_ORB.VALID_HOMOGRAPHIES / alignment_ORB.TOTAL_PROCESSED
-
+#        if alignment_ORB.TOTAL_PROCESSED == 0:
+#            ratio = 0
+#        else:
+#            ratio = alignment_ORB.VALID_HOMOGRAPHIES / alignment_ORB.TOTAL_PROCESSED
+        ratio = 3.14
         item = [
             self.glacier_id,
             definitions.MAX_FEATURES,
             definitions.GOOD_MATCH_PERCENT,
             definitions.ALLOWED_ERROR,
             definitions.ALLOWED_INTEGRAL,
-            alignment_ORB.VALID_HOMOGRAPHIES,
-            alignment_ORB.TOTAL_PROCESSED,
+            #alignment_ORB.VALID_HOMOGRAPHIES,
+            #alignment_ORB.TOTAL_PROCESSED,
             ratio
         ]
         return item

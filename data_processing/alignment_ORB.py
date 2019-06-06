@@ -3,13 +3,14 @@ import cv2
 import numpy as np
 import os
 import sys
-import definitions
 
-VALID_HOMOGRAPHIES = 0
-TOTAL_PROCESSED = 0
-
-VALID = False
 DISPLAY=0
+
+# align
+MAX_FEATURES = 1500
+GOOD_MATCH_PERCENT = 0.10
+ALLOWED_ERROR = 0.05
+ALLOWED_INTEGRAL = 100
 
 class Align:
     def __init__(self, reference_8bit, current_image8bit):
@@ -25,7 +26,7 @@ class Align:
         # transform from scientific notation to decimal for easy check
         np.set_printoptions(suppress=True, precision=4)
 
-        orb = cv2.ORB_create(definitions.MAX_FEATURES)
+        orb = cv2.ORB_create(MAX_FEATURES)
 
         keypoints_ref, descriptors_ref = orb.detectAndCompute(self.reference_8bit, None)
         keypoints_img, descriptors_img = orb.detectAndCompute(self.current_image_8bit, None)
@@ -40,7 +41,7 @@ class Align:
         # best matches first
         matches.sort(key=lambda x: x.distance, reverse=False)
         # remove matches with low score
-        numGoodMatches = int(len(matches) * definitions.GOOD_MATCH_PERCENT)
+        numGoodMatches = int(len(matches) * GOOD_MATCH_PERCENT)
         matches = matches[:numGoodMatches]
         # draw the best matches
         if (DISPLAY):
@@ -60,20 +61,18 @@ class Align:
 
         # find homography
         homography, mask = cv2.findHomography(points_img, points_ref, cv2.RANSAC)
-        global VALID
         VALID = self.validate_homography(homography)
 
         # generate result
         height, width = self.reference_8bit.shape
         self.result_8bit = cv2.warpPerspective(self.current_image_8bit, homography, (width, height))
 
+        return VALID
+
     def validate_homography(self, homography):
         # convert from scientific notation to decimal notation for better data interpretation
         np.set_printoptions(suppress=True, precision=4)
 
-        global TOTAL_PROCESSED
-        global VALID_HOMOGRAPHIES
-        TOTAL_PROCESSED += 1
 
         identity = np.identity(3)
         difference = np.absolute(np.subtract(identity, homography))
@@ -84,7 +83,6 @@ class Align:
         print("Comparison \n", compare)
 
         if np.less_equal(difference, compare).all():
-            VALID_HOMOGRAPHIES += 1
             print("Homography is good.")
             return True
         else:
@@ -94,9 +92,9 @@ class Align:
     @staticmethod
     def create_comparison_matrix():
         """Creates the matrix for comparing."""
-        comparison = np.full((3, 3), definitions.ALLOWED_ERROR)
-        comparison[0, 2] = definitions.ALLOWED_INTEGRAL
-        comparison[1, 2] = definitions.ALLOWED_INTEGRAL
+        comparison = np.full((3, 3), ALLOWED_ERROR)
+        comparison[0, 2] = ALLOWED_INTEGRAL
+        comparison[1, 2] = ALLOWED_INTEGRAL
 
         return comparison
 
@@ -124,21 +122,18 @@ def percentage(percent, image) -> tuple:
 
 def start_alignment(reference_filename, image_filename, result_filename, processed_output_dir):
     """Starts the alignment process."""
+    result_path = os.path.join(processed_output_dir, result_filename)
+    print_messages(reference_filename, image_filename, result_path)
+
     # prepare the images for alignment
     normalised_reference_8bit, current_image_8bit, \
     scaled_normalised_reference_8bit, scaled_current_image_8bit = resize_depth(reference_filename, image_filename)
 
-    result_path = os.path.join(processed_output_dir, result_filename)
-
-    print_messages(reference_filename, image_filename, result_path)
-
     aligner = Align(normalised_reference_8bit, current_image_8bit)
-    aligner.find_matches()
+    VALID = aligner.find_matches()
 
     if VALID:
         cv2.imwrite(result_path, aligner.result_8bit)
-
-    print("(", VALID_HOMOGRAPHIES, ", ", TOTAL_PROCESSED, ")")
 
     if(DISPLAY):
         aligner.display_image("Rerefence", aligner.reference_8bit)
@@ -148,6 +143,7 @@ def start_alignment(reference_filename, image_filename, result_filename, process
 
     cv2.destroyAllWindows()
 
+    return VALID
 
 def print_messages(reference_filename, image_filename, aligned_filename):
     print("\n\n")
@@ -175,4 +171,14 @@ def resize_depth(reference_filename, image_filename):
     return normalised_reference_8bit, current_image_8bit, scaled_normalised_reference_8bit, scaled_current_image_8bit
 
 if __name__ == "__main__":
-    setup_alignment(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+    try:
+        VALID = start_alignment(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+    except KeyboardInterrupt:
+        sys.exit(3)
+    except:
+        sys.exit(5)
+
+    if(VALID):
+        sys.exit(0)
+    else:
+        sys.exit(1)

@@ -1,3 +1,6 @@
+import signal
+from colors import *
+import time
 import shutil
 import os
 import definitions
@@ -9,6 +12,7 @@ from data_processing import alignment_ORB, alignment_ECC, process_ndsi
 from data_processing import alignment_validator
 from util import strings
 
+DEBUG = False
 
 class ProcessAlignment:
     def __init__(self, little_dir, big_input_dir, output_dir, months,
@@ -23,6 +27,10 @@ class ProcessAlignment:
 
         self.process_queue = []
         self.max_threads = 20 # max_threads
+
+        self.VALID_HOMOGRAPHIES = 0
+        self.TOTAL_PROCESSED = 0
+        self.INTERRUPT_SIGNAL = False
 
     def start(self):
         """Checks the type of the input directory and calls the aligner."""
@@ -40,11 +48,17 @@ class ProcessAlignment:
                 dir_fullpath = os.path.join(root, dir)
                 self.parse_directory(dir_fullpath)
 
+                if self.INTERRUPT_SIGNAL:
+                    break
+
+            if self.INTERRUPT_SIGNAL:
+                break
+
     def parse_directory(self, current_dir):
         """Applies the changes to the input_dir which contains the images."""
         # valid analysis
-        alignment_ORB.TOTAL_PROCESSED = 0
-        alignment_ORB.VALID_HOMOGRAPHIES = 0
+        self.TOTAL_PROCESSED = 0
+        self.VALID_HOMOGRAPHIES = 0
 
         # get glacier id to make glacier output folder
         root, glacier = os.path.split(current_dir)
@@ -80,6 +94,12 @@ class ProcessAlignment:
                 else:
                     print("No bands found.")
 
+                if self.INTERRUPT_SIGNAL:
+                    break
+
+            if self.INTERRUPT_SIGNAL:
+                break
+
         print("WRITE HOMOGRAPHY")
         self.write_homography_result(glacier=glacier)
 
@@ -93,48 +113,77 @@ class ProcessAlignment:
     def check_process_done(self):
         """Checks if a process from the process queue is done, removes if so."""
         for filename, sp in self.process_queue:
-            if sp.poll() == 0:
+            if sp.poll() is not None:
                 self.process_queue.remove((filename, sp))
                 print("Query done: ", filename)
+
+                self.TOTAL_PROCESSED += 1
+                if (sp.returncode == 0):
+                    self.VALID_HOMOGRAPHIES += 1
+                    print(green("----------------------------SUCCESS---------------------"))
+                elif (sp.returncode == 3):
+                    print(yellow("-----------------------INTERRRUPTED------------"))
+                elif (sp.returncode == 1):
+                    print(red("-----------------------FAILURE------------"))
+                else:
+                    print(magenta("-----------------------SOME OTHER ERROR ------------"))
 
     def poll_process_done(self):
         """Checks if a process from the process queue is done, removes if so."""
         while len(self.process_queue) >= self.max_threads:
             self.check_process_done()
 
+    def wait_all_process_done(self):
+        """Checks if a process from the process queue is done, removes if so."""
+        while len(self.process_queue) > 0:
+            if(DEBUG):
+                print("waaaait", len(self.process_queue))
+                time.sleep(1)
+            self.check_process_done()
+
+    def kill_all_humans(self):
+        for filename, sp in self.process_queue:
+            sp.send_signal(signal.SIGINT)
+
     def parse_band_list(self, band_list, reference, processed_output_dir, glacier):
+        MULTITHREADED=True
         """Applies the alignment process to the list of bands."""
         # for each band except the reference
         for file in band_list:
-            scene = strings.get_scene_name(file)
-            scene_data_handler = scene_data.SceneData(scene)
+            try:
+                scene = strings.get_scene_name(file)
+                scene_data_handler = scene_data.SceneData(scene)
 
-            path = scene_data_handler.get_path()
-            row = scene_data_handler.get_row()
-            output_dir = self.assign_directory(path=path, row=row, total_PR_dir=processed_output_dir)
-            result_filename = strings.get_file_name(file)
-            outpur_dir = self.assign_directory(path=path, row=row, total_PR_dir=processed_output_dir)
+                path = scene_data_handler.get_path()
+                row = scene_data_handler.get_row()
+                output_dir = self.assign_directory(path=path, row=row, total_PR_dir=processed_output_dir)
+                result_filename = strings.get_file_name(file)
+                outpur_dir = self.assign_directory(path=path, row=row, total_PR_dir=processed_output_dir)
 
-            MULTITHREADED=True
-            if(MULTITHREADED):
-                try:
+                if(MULTITHREADED):
                     self.poll_process_done()
                     align_arglist = ["python3", "data_processing/alignment_ORB.py",
-                                     reference, band, result_filename ,outpur_dir]
+                                     reference, file, result_filename ,outpur_dir]
+
+                    print(" current processes nr ", len(self.process_queue))
+
                     sp = subprocess.Popen(align_arglist)
-                    self.process_queue.append((band, sp))
-                    self.check_process_done()
-                except KeyboardInterrupt:
-                    print("Keyboard interrupt.")
-                    sys.exit(1)
+                    self.process_queue.append((file, sp))
 
-            else:
-                self.align_to_reference(scene=scene, reference=reference, image=band, process_alignment=outpur_dir)
+                    print(" after processes nr ", len(self.process_queue))
+                else:
+                    alignment_ORB.start_alignment(reference_filename=reference,
+                                                  image_filename=file,
+                                                  result_filename=result_filename,
+                                                  processed_output_dir=output_dir)
+            except KeyboardInterrupt:
+                print("Keyboard interrupt.")
+                self.kill_all_humans()
+                self.INTERRUPT_SIGNAL = True
+                break
 
-            alignment_ORB.start_alignment(reference_filename=reference,
-                                          image_filename=file,
-                                          result_filename=result_filename,
-                                          processed_output_dir=output_dir)
+        if (MULTITHREADED):
+            self.wait_all_process_done()
 
     def separate_bands_on_type(self, bands_list):
         """Gathers all the B3 and B6 bands from the current directory in a list of band lists.
