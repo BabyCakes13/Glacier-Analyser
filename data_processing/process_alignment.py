@@ -65,7 +65,8 @@ class ProcessAlignment:
                 if len(band_list) > 0:
                     # reference image to which the rest from the list will be aligned to
                     reference_image = band_list[0]
-                    rest_of_bands = band_list[1:]
+                    # pass all of the images here, so the reference image is also in the output
+                    rest_of_bands = band_list
 
                     self.parse_band_list(band_list=rest_of_bands,
                                          reference=reference_image,
