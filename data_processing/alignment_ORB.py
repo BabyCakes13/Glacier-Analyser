@@ -4,16 +4,20 @@ import numpy as np
 import os
 import sys
 
-DISPLAY=0
+DISPLAY=1
 
 # align
-MAX_FEATURES = 1500
-GOOD_MATCH_PERCENT = 0.10
-ALLOWED_ERROR = 0.05
+MAX_FEATURES = 5000
+GOOD_MATCH_PERCENT = 0.50
+ALLOWED_ERROR = 0.5
 ALLOWED_INTEGRAL = 100
+EUCLIDIAN_DISTANCE = 200
+
+N_R = 8
+N_C = 8
 
 class Align:
-    def __init__(self, reference_8bit, current_image8bit):
+    def __init__(self, reference_8bit, current_image8bit, cfn):
 
         self.reference_8bit = reference_8bit
         self.current_image_8bit = cv2.normalize(current_image8bit, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8UC2)
@@ -21,15 +25,43 @@ class Align:
         self.result_8bit = None
         self.matches = None
 
+        self.cfn = cfn
+
+
+    def boxedDetectAndCompute(self, image):
+        orb = cv2.ORB_create(nfeatures=MAX_FEATURES // N_R // N_C, scaleFactor=2.5) #, patchSize=100)
+
+        keypoints=[]
+
+        for x in range(0,N_C):
+            for y in range(0, N_R):
+                x0 = x * image.shape[1] // N_C
+                x1 = (x+1) * image.shape[1] // N_C
+                y0 = y * image.shape[0] // N_R
+                y1 = (y+1) * image.shape[0] // N_R
+
+                #print ("BBOX "," ", x0,"-", x1," ", y0,"-", y1 )
+                imagebox = image[y0:y1 , x0:x1]
+                #self.display_image('BOX ' + str(x) + str(y), imagebox)
+
+                keypoints_bbox = orb.detect(imagebox)
+
+                for kp in keypoints_bbox:
+                    kp.pt = (kp.pt[0] + x0, kp.pt[1] + y0)
+                    keypoints.append(kp)
+
+#        keypoints = orb.detect(image)
+        keypoints, descriptors = orb.compute(image, keypoints)
+
+        return keypoints, descriptors;
+
     def find_matches(self):
         """Returns whether the homography finding was succesfull or not."""
         # transform from scientific notation to decimal for easy check
         np.set_printoptions(suppress=True, precision=4)
 
-        orb = cv2.ORB_create(MAX_FEATURES)
-
-        keypoints_ref, descriptors_ref = orb.detectAndCompute(self.reference_8bit, None)
-        keypoints_img, descriptors_img = orb.detectAndCompute(self.current_image_8bit, None)
+        keypoints_ref, descriptors_ref = self.boxedDetectAndCompute(self.reference_8bit)
+        keypoints_img, descriptors_img = self.boxedDetectAndCompute(self.current_image_8bit)
 
 #        print("Keypoints 1 length ", len(keypoints_ref))
 #        print("Keypoints 2 length ", len(keypoints_img))
@@ -37,37 +69,64 @@ class Align:
 #        print("Descriptor 2 ", descriptors_img)
 
         matcher = cv2.DescriptorMatcher_create(cv2.DESCRIPTOR_MATCHER_BRUTEFORCE_HAMMING)
-        matches = matcher.match(descriptors_ref, descriptors_img, None)
+        matches = matcher.match(descriptors_ref, descriptors_img)
+
         # best matches first
         matches.sort(key=lambda x: x.distance, reverse=False)
+
         # remove matches with low score
         numGoodMatches = int(len(matches) * GOOD_MATCH_PERCENT)
         matches = matches[:numGoodMatches]
-        # draw the best matches
-        if (DISPLAY):
-            self.matches = cv2.drawMatches(self.reference_8bit, keypoints_ref,
-                                           self.current_image_8bit, keypoints_img, matches,
-                                           None, matchColor=(0,255,0), singlePointColor=(100,0,0),
-                                           flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-            self.display_image('MATCHES', self.matches)
 
         # prepare the arras which hold the matches location
         points_ref = np.zeros((len(matches), 2), dtype=np.float32)
         points_img = np.zeros((len(matches), 2), dtype=np.float32)
+
+        matches_pruned=[]
         # fill points from the matcher
         for i, match in enumerate(matches):
-            points_ref[i, :] = keypoints_ref[match.queryIdx].pt
-            points_img[i, :] = keypoints_img[match.trainIdx].pt
+            refpt = keypoints_ref[match.queryIdx].pt
+            imgpt = keypoints_img[match.trainIdx].pt
 
-        # find homography
-        homography, mask = cv2.findHomography(points_img, points_ref, cv2.RANSAC)
-        VALID = self.validate_homography(homography)
+#            print ( "tip: ", type(refpt),
+#                    "  x  ", refpt[0] - imgpt[0],
+#                    "  y  ", refpt[1] - imgpt[1])
 
-        # generate result
-        height, width = self.reference_8bit.shape
-        self.result_8bit = cv2.warpPerspective(self.current_image_8bit, homography, (width, height))
+            if ((abs(refpt[0] - imgpt[0]) < EUCLIDIAN_DISTANCE) and
+                (abs(refpt[1] - imgpt[1]) < EUCLIDIAN_DISTANCE)):
+                points_ref[i, :] = keypoints_ref[match.queryIdx].pt
+                points_img[i, :] = keypoints_img[match.trainIdx].pt
+                matches_pruned.append(match)
 
-        return VALID
+#                print ( "tipOKOKO: ", self.cfn,
+#                        "  x  ", refpt[0] - imgpt[0],
+#                        "  y  ", refpt[1] - imgpt[1])
+
+
+
+        # draw the best matches
+        prunedmatches = cv2.drawMatches(self.reference_8bit, keypoints_ref,
+                                        self.current_image_8bit, keypoints_img,
+                                        matches_pruned,
+                                        None, matchColor=(0,255,255), singlePointColor=(100,0,0),
+                                        flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+        if (DISPLAY):
+            self.display_image('prunedMATCHES', prunedmatches)
+
+            height, width = self.reference_8bit.shape
+        if False:
+            # find homography
+            homography, mask = cv2.findHomography(points_img, points_ref, cv2.RANSAC)
+            VALID = self.validate_homography(homography)
+            self.result_8bit = cv2.warpPerspective(self.current_image_8bit, homography, (width, height))
+        else:
+            affine, inliers = cv2.estimateAffine2D(points_img, points_ref, confidence=0.99)
+            print("affine \n",
+                  affine)
+            self.result_8bit = cv2.warpAffine(self.current_image_8bit, affine, (width, height))
+            VALID=True
+
+        return VALID, prunedmatches
 
     def validate_homography(self, homography):
         # convert from scientific notation to decimal notation for better data interpretation
@@ -129,11 +188,12 @@ def start_alignment(reference_filename, image_filename, result_filename, process
     normalised_reference_8bit, current_image_8bit, \
     scaled_normalised_reference_8bit, scaled_current_image_8bit = resize_depth(reference_filename, image_filename)
 
-    aligner = Align(normalised_reference_8bit, current_image_8bit)
-    VALID = aligner.find_matches()
+    aligner = Align(normalised_reference_8bit, current_image_8bit, result_filename)
+    VALID, matchesimage = aligner.find_matches()
 
     if VALID:
         cv2.imwrite(result_path, aligner.result_8bit)
+    cv2.imwrite(result_path + "match.TIF", matchesimage)
 
     if(DISPLAY):
         aligner.display_image("Rerefence", aligner.reference_8bit)
@@ -175,8 +235,6 @@ if __name__ == "__main__":
         VALID = start_alignment(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
     except KeyboardInterrupt:
         sys.exit(3)
-    except:
-        sys.exit(5)
 
     if(VALID):
         sys.exit(0)
