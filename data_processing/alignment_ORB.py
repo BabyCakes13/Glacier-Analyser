@@ -4,7 +4,8 @@ import numpy as np
 import os
 import sys
 
-DISPLAY=1
+DISPLAY=0
+DEBUG=False
 
 # align
 MAX_FEATURES = 5000
@@ -29,7 +30,7 @@ class Align:
 
 
     def boxedDetectAndCompute(self, image):
-        orb = cv2.ORB_create(nfeatures=MAX_FEATURES // N_R // N_C, scaleFactor=2.5) #, patchSize=100)
+        orb = cv2.ORB_create(nfeatures=MAX_FEATURES // N_R // N_C, scaleFactor=2, patchSize=100)
 
         keypoints=[]
 
@@ -79,8 +80,8 @@ class Align:
         matches = matches[:numGoodMatches]
 
         # prepare the arras which hold the matches location
-        points_ref = np.zeros((len(matches), 2), dtype=np.float32)
-        points_img = np.zeros((len(matches), 2), dtype=np.float32)
+        points_list_ref = []
+        points_list_img = []
 
         matches_pruned=[]
         # fill points from the matcher
@@ -94,15 +95,12 @@ class Align:
 
             if ((abs(refpt[0] - imgpt[0]) < EUCLIDIAN_DISTANCE) and
                 (abs(refpt[1] - imgpt[1]) < EUCLIDIAN_DISTANCE)):
-                points_ref[i, :] = keypoints_ref[match.queryIdx].pt
-                points_img[i, :] = keypoints_img[match.trainIdx].pt
+                points_list_ref.append(keypoints_ref[match.queryIdx].pt)
+                points_list_img.append(keypoints_img[match.trainIdx].pt)
                 matches_pruned.append(match)
 
-#                print ( "tipOKOKO: ", self.cfn,
-#                        "  x  ", refpt[0] - imgpt[0],
-#                        "  y  ", refpt[1] - imgpt[1])
-
-
+        points_ref = np.array(points_list_ref)
+        points_img = np.array(points_list_img)
 
         # draw the best matches
         prunedmatches = cv2.drawMatches(self.reference_8bit, keypoints_ref,
@@ -113,45 +111,61 @@ class Align:
         if (DISPLAY):
             self.display_image('prunedMATCHES', prunedmatches)
 
-            height, width = self.reference_8bit.shape
+        height, width = self.reference_8bit.shape
         if False:
             # find homography
             homography, mask = cv2.findHomography(points_img, points_ref, cv2.RANSAC)
-            VALID = self.validate_homography(homography)
+            VALID = self.validate_transform(homography)
             self.result_8bit = cv2.warpPerspective(self.current_image_8bit, homography, (width, height))
         else:
-            affine, inliers = cv2.estimateAffine2D(points_img, points_ref, confidence=0.99)
+            inliers=None
+            affine, inliers = cv2.estimateAffine2D(points_img, points_ref, inliers, method=cv2.LMEDS, confidence=0.99)
+
+            for inl, refpt, imgpt in zip(inliers, points_img, points_ref):
+                status = None
+                if (inl == 1):
+                    status = "inlier"
+                else:
+                    status = "outlier"
+                if(DEBUG):
+                    print (status , refpt[0] ,
+                           "  x  ", refpt[0] - imgpt[0],
+                           "  y  ", refpt[1] - imgpt[1])
+
             print("affine \n",
                   affine)
             self.result_8bit = cv2.warpAffine(self.current_image_8bit, affine, (width, height))
-            VALID=True
+            VALID = self.validate_transform(affine)
 
         return VALID, prunedmatches
 
-    def validate_homography(self, homography):
+    def validate_transform(self, transform):
         # convert from scientific notation to decimal notation for better data interpretation
         np.set_printoptions(suppress=True, precision=4)
 
+        w = transform.shape[1]
+        h = transform.shape[0]
 
         identity = np.identity(3)
-        difference = np.absolute(np.subtract(identity, homography))
-        compare = self.create_comparison_matrix()
+        identity = identity[0:h , 0:w]
+        difference = np.absolute(np.subtract(identity, transform))
+        compare = self.create_comparison_matrix(h, w)
 
-        print("Homography \n", homography)
+        print("Transform \n", transform)
         print("Difference \n", difference)
         print("Comparison \n", compare)
 
         if np.less_equal(difference, compare).all():
-            print("Homography is good.")
+            print("Transform is good.")
             return True
         else:
-            print("Homography is not good.")
+            print("Transform is not good.")
             return False
 
     @staticmethod
-    def create_comparison_matrix():
+    def create_comparison_matrix(w=3, h=3):
         """Creates the matrix for comparing."""
-        comparison = np.full((3, 3), ALLOWED_ERROR)
+        comparison = np.full((w, h), ALLOWED_ERROR)
         comparison[0, 2] = ALLOWED_INTEGRAL
         comparison[1, 2] = ALLOWED_INTEGRAL
 
