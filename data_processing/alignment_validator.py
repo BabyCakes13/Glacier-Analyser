@@ -16,10 +16,10 @@ class HomographyCSV:
         self.add_item_to_csv()
 
     def generate_csv_item(self):
-#        if alignment_ORB.TOTAL_PROCESSED == 0:
-#            ratio = 0
-#        else:
-#            ratio = alignment_ORB.VALID_HOMOGRAPHIES / alignment_ORB.TOTAL_PROCESSED
+        if alignment_ORB.TOTAL_PROCESSED == 0:
+            ratio = 0
+        else:
+            ratio = alignment_ORB.VALID_HOMOGRAPHIES / alignment_ORB.TOTAL_PROCESSED
         ratio = 3.14
         item = [
             self.glacier_id,
