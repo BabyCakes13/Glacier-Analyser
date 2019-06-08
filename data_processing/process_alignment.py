@@ -13,10 +13,12 @@ from data_processing import alignment_validator
 from util import strings
 
 DEBUG = False
+VALID_TRANSFORMATIONS = 0
+TOTAL_TRANSFORMATIONS = 0
+
 
 class ProcessAlignment:
-    def __init__(self, little_dir, big_input_dir, output_dir, months,
-                     max_threads=definitions.MAX_THREADS):
+    def __init__(self, little_dir, big_input_dir, output_dir, months, max_threads=definitions.MAX_THREADS):
         self.little_dir = little_dir
         self.big_input_dir = big_input_dir
         self.output_dir = output_dir
@@ -26,10 +28,8 @@ class ProcessAlignment:
         self.path_row_handler = None
 
         self.process_queue = []
-        self.max_threads = 20 # max_threads
+        self.max_threads = max_threads
 
-        self.VALID_HOMOGRAPHIES = 0
-        self.TOTAL_PROCESSED = 0
         self.INTERRUPT_SIGNAL = False
 
     def start(self):
@@ -56,9 +56,9 @@ class ProcessAlignment:
 
     def parse_directory(self, current_dir):
         """Applies the changes to the input_dir which contains the images."""
-        # valid analysis
-        self.TOTAL_PROCESSED = 0
-        self.VALID_HOMOGRAPHIES = 0
+        global VALID_TRANSFORMATIONS, TOTAL_TRANSFORMATIONS
+        VALID_TRANSFORMATIONS = 0
+        TOTAL_TRANSFORMATIONS = 0
 
         # get glacier id to make glacier output folder
         root, glacier = os.path.split(current_dir)
@@ -74,9 +74,6 @@ class ProcessAlignment:
         for path_row, path_row_files in path_row_dir_map.items():
             print("----------------------- ", path_row, "----------------------- ")
             B3_and_B6_lists = self.separate_bands_on_type(path_row_files)
-
-            #ndsi = process_ndsi.ProcessNDSI(B3_and_B6_lists[0], B3_and_B6_lists[1])
-            #ndsi.make_pairs()
 
             # for B3 then B6 lists
             for band_list in B3_and_B6_lists:
@@ -112,14 +109,15 @@ class ProcessAlignment:
 
     def check_process_done(self):
         """Checks if a process from the process queue is done, removes if so."""
+        global VALID_TRANSFORMATIONS, TOTAL_TRANSFORMATIONS
         for filename, sp in self.process_queue:
             if sp.poll() is not None:
                 self.process_queue.remove((filename, sp))
                 print("Query done: ", filename)
 
-                self.TOTAL_PROCESSED += 1
+                TOTAL_TRANSFORMATIONS += 1
                 if (sp.returncode == 0):
-                    self.VALID_HOMOGRAPHIES += 1
+                    VALID_TRANSFORMATIONS += 1
                     print(green("----------------------------SUCCESS---------------------"))
                 elif (sp.returncode == 3):
                     print(yellow("-----------------------INTERRRUPTED------------"))
@@ -172,10 +170,10 @@ class ProcessAlignment:
 
                     print(" after processes nr ", len(self.process_queue))
                 else:
-                    alignment_ORB.start_alignment(reference_filename=reference,
-                                                  image_filename=file,
+                    alignment_ORB.start_alignment(reference_path=reference,
+                                                  image_path=file,
                                                   result_filename=result_filename,
-                                                  processed_output_dir=output_dir)
+                                                  output_directory=output_dir)
             except KeyboardInterrupt:
                 print("Keyboard interrupt.")
                 self.kill_all_humans()
