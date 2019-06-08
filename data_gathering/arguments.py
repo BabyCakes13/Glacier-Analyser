@@ -78,6 +78,11 @@ class ArgsParser:
                                     type=int,
                                     nargs='*',
                                     dest='months')
+        process_parser.add_argument('-j',
+                                    help='Number of threads which will process the directories.',
+                                    default=definitions.MAX_THREADS,
+                                    type=int,
+                                    dest='j')
         process_parser.set_defaults(func=set_process_function)
 
 
@@ -102,6 +107,6 @@ def set_process_function(args):
     """The default function for process sub parser."""
     print("Setting up process...")
 
-    process_align = process_alignment.ProcessAlignment(args.input, args.bigdir, args.output, args.months)
+    process_align = process_alignment.ProcessAlignment(args.input, args.bigdir, args.output, args.months, args.j)
     process_align.start()
     print("Finished process.")

@@ -21,7 +21,7 @@ COLUMNS_NUMBER = 8  # the number of columns the full image will be split into fo
 
 class AlignORB:
     """Class which handles ORB alignment of two images."""
-    def __init__(self, reference_8bit, current_8bit):
+    def __init__(self, reference_8bit, current_8bit, scene_name):
         """
         Prepares the pictures for alignment by normalising the current image and initialising the result
         and matches.
@@ -33,6 +33,8 @@ class AlignORB:
 
         self.result_8bit = None
         self.matches = None
+
+        self.scene_name = scene_name
 
     @staticmethod
     def boxedDetectAndCompute(image, rows, columns):
@@ -231,6 +233,7 @@ class AlignORB:
         compare = self.create_comparison_matrix(height, width)
 
         if DEBUG_TRANSFORM_MATRIX:
+            print("Current image: ", self.scene_name)
             print("Transform \n", transform)
             print("Difference \n", difference)
             print("Comparison \n", compare)
@@ -297,7 +300,7 @@ def start_alignment(reference_path, image_path, result_filename, output_director
     normalised_reference_8bit, current_image_8bit = resize_depth(reference_path, image_path)
 
     # align
-    aligner = AlignORB(normalised_reference_8bit, current_image_8bit)
+    aligner = AlignORB(normalised_reference_8bit, current_image_8bit, result_filename)
     VALID, pruned_matches_image = aligner.align()
 
     # write the valid images and all matches
