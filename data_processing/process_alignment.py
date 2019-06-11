@@ -8,7 +8,8 @@ import subprocess
 from collections import defaultdict
 from data_gathering import scene_data
 from data_preparing import path_row_grouping as prg
-from data_processing import alignment_ORB, alignment_ECC, process_ndsi
+from data_preparing import multithread_handler
+from data_processing import alignment_ORB
 from data_processing import alignment_validator
 from util import strings
 
@@ -27,7 +28,6 @@ class ProcessAlignment:
         self.homography_csv = os.path.join(self.output_dir, definitions.HOMOGRAPHY_CSV)
         self.path_row_handler = None
 
-        self.process_queue = []
         self.max_threads = max_threads
 
         self.INTERRUPT_SIGNAL = False
@@ -86,10 +86,9 @@ class ProcessAlignment:
 
                     self.parse_band_list(band_list=rest_of_bands,
                                          reference=reference_image,
-                                         processed_output_dir=total_PR_output_dir,
-                                         glacier=glacier)
+                                         processed_output_dir=total_PR_output_dir)
                 else:
-                    print("No bands found.")
+                    print(red("No bands found."))
 
                 if self.INTERRUPT_SIGNAL:
                     break
@@ -97,91 +96,41 @@ class ProcessAlignment:
             if self.INTERRUPT_SIGNAL:
                 break
 
-        print("WRITE HOMOGRAPHY")
+        print(blue("Homography is being written..."))
         self.write_homography_result(glacier=glacier)
 
-    def check_process_full(self):
-        """Checks if the process queue is full."""
-        if len(self.process_queue) >= self.max_threads:
-            filename, sp = self.process_queue.pop()
-            sp.wait()
-            print("Query done: ", filename)
-
-    def check_process_done(self):
-        """Checks if a process from the process queue is done, removes if so."""
-        global VALID_TRANSFORMATIONS, TOTAL_TRANSFORMATIONS
-        for filename, sp in self.process_queue:
-            if sp.poll() is not None:
-                self.process_queue.remove((filename, sp))
-                print("Query done: ", filename)
-
-                TOTAL_TRANSFORMATIONS += 1
-                if (sp.returncode == 0):
-                    VALID_TRANSFORMATIONS += 1
-                    print(green("----------------------------SUCCESS---------------------"))
-                elif (sp.returncode == 3):
-                    print(yellow("-----------------------INTERRRUPTED------------"))
-                elif (sp.returncode == 1):
-                    print(red("-----------------------FAILURE------------"))
-                else:
-                    print(magenta("-----------------------SOME OTHER ERROR ------------"))
-
-    def poll_process_done(self):
-        """Checks if a process from the process queue is done, removes if so."""
-        while len(self.process_queue) >= self.max_threads:
-            self.check_process_done()
-
-    def wait_all_process_done(self):
-        """Checks if a process from the process queue is done, removes if so."""
-        while len(self.process_queue) > 0:
-            if(DEBUG):
-                print("waaaait", len(self.process_queue))
-                time.sleep(1)
-            self.check_process_done()
-
-    def kill_all_humans(self):
-        for filename, sp in self.process_queue:
-            sp.send_signal(signal.SIGINT)
-
-    def parse_band_list(self, band_list, reference, processed_output_dir, glacier):
-        MULTITHREADED=True
+    def parse_band_list(self, band_list, reference, processed_output_dir):
         """Applies the alignment process to the list of bands."""
+        process_queue = []
+        global TOTAL_TRANSFORMATIONS
+
         # for each band except the reference
         for file in band_list:
+            start_multithreaded_process = None
+            TOTAL_TRANSFORMATIONS += 1
+
             try:
                 scene = strings.get_scene_name(file)
                 scene_data_handler = scene_data.SceneData(scene)
 
                 path = scene_data_handler.get_path()
                 row = scene_data_handler.get_row()
-                output_dir = self.assign_directory(path=path, row=row, total_PR_dir=processed_output_dir)
                 result_filename = strings.get_file_name(file)
                 outpur_dir = self.assign_directory(path=path, row=row, total_PR_dir=processed_output_dir)
 
-                if(MULTITHREADED):
-                    self.poll_process_done()
-                    align_arglist = ["python3", "data_processing/alignment_ORB.py",
-                                     reference, file, result_filename ,outpur_dir]
+                task = ["python3", "data_processing/alignment_ORB.py",
+                        reference, file, result_filename, outpur_dir]
+                start_multithreaded_process = multithread_handler.Multithread(task=task,
+                                                                              target_file=file,
+                                                                              process_queue=process_queue,
+                                                                              max_threads=self.max_threads)
+                process_queue = start_multithreaded_process.start_processing()
 
-                    print(" current processes nr ", len(self.process_queue))
-
-                    sp = subprocess.Popen(align_arglist)
-                    self.process_queue.append((file, sp))
-
-                    print(" after processes nr ", len(self.process_queue))
-                else:
-                    alignment_ORB.start_alignment(reference_path=reference,
-                                                  image_path=file,
-                                                  result_filename=result_filename,
-                                                  output_directory=output_dir)
             except KeyboardInterrupt:
                 print("Keyboard interrupt.")
-                self.kill_all_humans()
                 self.INTERRUPT_SIGNAL = True
+                start_multithreaded_process.wait_all_process_done()
                 break
-
-        if (MULTITHREADED):
-            self.wait_all_process_done()
 
     def separate_bands_on_type(self, bands_list):
         """Gathers all the B3 and B6 bands from the current directory in a list of band lists.

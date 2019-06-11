@@ -43,6 +43,6 @@ DEFAULT_END_DATE = datetime.datetime.now().strftime('%Y-%m-%d')
 
 # download parameters
 DEFAULT_CLOUD_COVERAGE = "5"
-BBOX_SIZE = 0
+BBOX_SIZE = 0.000001
 MAX_THREADS = 4
 VALID_MONTHS = [6, 7, 8]

@@ -1,9 +1,12 @@
 import csv
+from colors import *
 import json
 import os
-import sys
+import shutil
+import time
 import subprocess
 import definitions
+from data_preparing import multithread_handler
 
 
 class Downloader:
@@ -19,6 +22,8 @@ class Downloader:
         self.months = months
         self.max_threads = max_threads
         self.process_queue = []
+
+        self.INTERRUPT_SIGNAL = False
 
         print("Input: " + str(input_csv))
 
@@ -64,54 +69,41 @@ class Downloader:
 
         return download_arglist
 
-    def check_process_full(self):
-        """Checks if the process queue is full."""
-        if len(self.process_queue) >= self.max_threads:
-            filename, sp = self.process_queue.pop()
-            sp.wait()
-            print("Query done: ", filename)
-
-    def call_processes(self, search_arglist, download_arglist, json_query_filename):
-        """Calls and appends sat-search and sat-load processes."""
-
-        print(search_arglist)
-        sp = subprocess.call(search_arglist)
-
-        print(download_arglist)
-        sp = subprocess.Popen(download_arglist)
-
-        self.process_queue.append((json_query_filename, sp))
-
-    def check_process_done(self):
-        """Checks if a process from the process queue is done, removes if so."""
-        for filename, sp in self.process_queue:
-            if sp.poll() == 0:
-                self.process_queue.remove((filename, sp))
-                print("Query done: ", filename)
-
     def parse_rows(self, csv_reader):
         """Parses and processes each row in the CSV file."""
+        process_queue_download = []
         for row in csv_reader:
-            
+
             directory_id = row['wgi_glacier_id'] + "_" + row['lon'] + "_" + row['lat']
             directory_name = os.path.join(self.download_dir, directory_id)
             json_query_filename = os.path.join(directory_name, definitions.JSON_QUERY)
 
-            # self.check_months(json_query_filename)
-
+            start_multithreaded_process_download = None
             try:
+                if os.path.exists(directory_name):
+                    shutil.rmtree(directory_name)
                 os.mkdir(directory_name)
-            except FileExistsError:
-                print("Directory already exists.")
-
-            search_arglist = self.create_search_arglist(row, json_query_filename)
-            download_arglist = self.create_download_arglist(json_query_filename, directory_name)
+            except FileNotFoundError:
+                print("Cannot create download directory. The path has a directory which does not exist.")
 
             try:
-                self.check_process_full()
-                self.call_processes(search_arglist, download_arglist, json_query_filename)
-                self.check_process_done()
+                search_task = self.create_search_arglist(row, json_query_filename)
+                print(blue(search_task))
+
+                search = subprocess.call(search_task)
+
+                download_task = self.create_download_arglist(json_query_filename, directory_name)
+                print(yellow(download_task))
+                start_multithreaded_process_download = \
+                    multithread_handler.Multithread(task=download_task,
+                                                    target_file=json_query_filename,
+                                                    process_queue=process_queue_download,
+                                                    max_threads=self.max_threads)
+                process_queue_download = start_multithreaded_process_download.start_processing()
+
             except KeyboardInterrupt:
                 print("Keyboard interrupt.")
-                sys.exit(1)
+                self.INTERRUPT_SIGNAL = True
+                start_multithreaded_process_download.wait_all_process_done()
+                break
 
