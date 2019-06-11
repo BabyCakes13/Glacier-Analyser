@@ -21,20 +21,17 @@ COLUMNS_NUMBER = 8  # the number of columns the full image will be split into fo
 
 class AlignORB:
     """Class which handles ORB alignment of two images."""
-    def __init__(self, reference_8bit, current_8bit, scene_name):
-        """
-        Prepares the pictures for alignment by normalising the current image and initialising the result
-        and matches.
-        :param reference_8bit: The reference image in gray scale.
-        :param current_8bit: The current comparison image in gray scale.
-        """
-        self.reference_8bit = reference_8bit
-        self.current_8bit = cv2.normalize(current_8bit, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8UC2)
+    def __init__(self, scene, reference_scene, aligned_scene):
+        green_16bit, green_8bit, normalized_green_8bit = resize_depth(scene.green_band)
+        swir1_16bit, swir1_8bit, normalized_swir1_8bit = resize_depth(scene.swir1_band)
+
+        green_reference_16bit, green_reference_8bit, normalized_green_reference_8bit = \
+            resize_depth(reference_scene.green_band)
+        swir1_reference_16bit, swir1_reference_8bit, swir1_reference_normalized_8bit = \
+            resize_depth(reference_scene.swir1_band)
 
         self.result_8bit = None
         self.matches = None
-
-        self.scene_name = scene_name
 
     @staticmethod
     def boxedDetectAndCompute(image, rows, columns):
@@ -233,7 +230,6 @@ class AlignORB:
         compare = self.create_comparison_matrix(height, width)
 
         if DEBUG_TRANSFORM_MATRIX:
-            print("Current image: ", self.scene_name)
             print("Transform \n", transform)
             print("Difference \n", difference)
             print("Comparison \n", compare)
@@ -282,7 +278,7 @@ class AlignORB:
             pass
 
 
-def start_alignment(reference_path, image_path, result_filename, output_directory):
+def start_dir_alignment(reference_path, image_path, result_filename, output_directory):
     """
     Starts the alignment process.
     :param reference_path: Path to the reference image.
@@ -294,7 +290,7 @@ def start_alignment(reference_path, image_path, result_filename, output_director
     result_path = os.path.join(output_directory, result_filename)
     pruned_matches_path = os.path.join(output_directory, "matched_" + result_filename)
 
-    print_current_images(reference_path, image_path, result_path)
+    # print_current_images(reference_path, image_path, result_path)
 
     # prepare the images for alignment
     normalised_reference_8bit, current_image_8bit = resize_depth(reference_path, image_path)
@@ -319,37 +315,24 @@ def start_alignment(reference_path, image_path, result_filename, output_director
     return VALID
 
 
-def print_current_images(reference_path, image_path, aligned_path):
+def start_scene_alignment(scene, reference_scene, aligned_scene):
+
+
+
+    aligner = AlignORB(scene, reference_scene, aligned_scene)
+
+
+def resize_depth(image_path):
     """
-    Prints the current images which are being processed.
-    :param reference_path: The path to the reference image.
-    :param image_path: The path to the current image.
-    :param aligned_path: The path to the aligned image.
-    :return: Nothing.
+    Prepare the image for the alignment by changing depth for descriptor and normalisation.
+    :param image_path: The full path to the input image.
+    :return: Returns the necessary images for alignment calculation.
     """
-    print("\n...")
-    print("Reference filename: ", reference_path)
-    print("Image filename ", image_path)
-    print("Aligned filename  ", aligned_path)
+    image_16bit = cv2.imread(image_path, cv2.IMREAD_LOAD_GDAL)
+    image_8bit = (image_16bit >> 8).astype(np.uint8)
+    normalized_image_8bit = cv2.normalize(image_8bit, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8UC2)
 
-
-def resize_depth(reference_path, image_path):
-    """
-    Resize the image depth and normalise the reference just one time rather than each time.
-    :param reference_path: The path to the reference image
-    :param image_path: The path to the current image
-    :return: Returns the normalised reference and the current image in 8 bits.
-    """
-    reference_16bit = cv2.imread(reference_path, cv2.IMREAD_LOAD_GDAL)
-    current_image_16bit = cv2.imread(image_path, cv2.IMREAD_LOAD_GDAL)
-
-    reference_8bit = (reference_16bit >> 8).astype(np.uint8)
-    current_image_8bit = (current_image_16bit >> 8).astype(np.uint8)
-
-    # normalise the reference just once at the beginning since it will be used in each alignment
-    normalised_reference_8bit = cv2.normalize(reference_8bit, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8UC2)
-
-    return normalised_reference_8bit, current_image_8bit
+    return image_16bit, image_8bit, normalized_image_8bit
 
 
 if __name__ == "__main__":
@@ -357,7 +340,7 @@ if __name__ == "__main__":
     Handle multi process.
     """
     try:
-        VALID = start_alignment(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+        VALID = start_dir_alignment(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
     except KeyboardInterrupt:
         sys.exit(3)
 

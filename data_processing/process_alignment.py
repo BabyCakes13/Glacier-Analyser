@@ -1,14 +1,12 @@
-import signal
 from colors import *
-import time
 import shutil
 import os
 import definitions
-import subprocess
 from collections import defaultdict
 from data_gathering import scene_data
 from data_preparing import path_row_grouping as prg
 from data_preparing import multithread_handler
+from data_preparing import scene as sc
 from data_processing import alignment_ORB
 from data_processing import alignment_validator
 from util import strings
@@ -41,8 +39,6 @@ class ProcessAlignment:
 
     def parse_directories(self):
         """Parses all the subdirectories of one directory and applies the processing on found images."""
-#        print("Parsing big directory: ", self.big_input_dir )
-
         for root, dirs, files in os.walk(self.big_input_dir):
             for dir in dirs:
                 dir_fullpath = os.path.join(root, dir)
@@ -72,32 +68,36 @@ class ProcessAlignment:
 
         # for each path/row
         for path_row, path_row_files in path_row_dir_map.items():
-            print("----------------------- ", path_row, "----------------------- ")
-            B3_and_B6_lists = self.separate_bands_on_type(path_row_files)
+            print(blue(path_row))
 
-            # for B3 then B6 lists
-            for band_list in B3_and_B6_lists:
-                # process only if there is at least one image in the list
-                if len(band_list) > 0:
-                    # reference image to which the rest from the list will be aligned to
-                    reference_image = band_list[0]
-                    # pass all of the images here, so the reference image is also in the output
-                    rest_of_bands = band_list
+            green_band_list, swir1_band_list = self.separate_bands_on_type(path_row_files)
+            scenes = self.make_band_pairs(green_band_list=green_band_list,
+                                          swir1_band_list=swir1_band_list)
+            if len(scenes) == 0:
+                print("Not enough scenes.")
+                break
 
-                    self.parse_band_list(band_list=rest_of_bands,
-                                         reference=reference_image,
-                                         processed_output_dir=total_PR_output_dir)
-                else:
-                    print(red("No bands found."))
-
-                if self.INTERRUPT_SIGNAL:
-                    break
+            for scene in scenes:
+                self.process_scene(scene=scene, reference_scene=scenes[0])
 
             if self.INTERRUPT_SIGNAL:
                 break
 
         print(blue("Homography is being written..."))
         self.write_homography_result(glacier=glacier)
+
+    def process_scene(self, scene, reference_scene):
+        output_dir = self.assign_path_row_directory(scene=scene)
+        aligned_green_filename = scene + definitions.GREEN_BAND_END
+        aligned_swir1_filename = scene + definitions.SWIR1_BAND_END
+        aligned_green_path = os.path.join(output_dir, aligned_green_filename)
+        aligned_swir1_path = os.path.join(output_dir, aligned_swir1_filename)
+        aligned_scene = sc.Scene(aligned_green_path, aligned_swir1_path)
+
+        align = alignment_ORB.start_scene_alignment(scene=scene,
+                                                    reference_scene=reference_scene,
+                                                    aligned_scene=aligned_scene)
+
 
     def parse_band_list(self, band_list, reference, processed_output_dir):
         """Applies the alignment process to the list of bands."""
@@ -110,13 +110,6 @@ class ProcessAlignment:
             TOTAL_TRANSFORMATIONS += 1
 
             try:
-                scene = strings.get_scene_name(file)
-                scene_data_handler = scene_data.SceneData(scene)
-
-                path = scene_data_handler.get_path()
-                row = scene_data_handler.get_row()
-                result_filename = strings.get_file_name(file)
-                outpur_dir = self.assign_directory(path=path, row=row, total_PR_dir=processed_output_dir)
 
                 task = ["python3", "data_processing/alignment_ORB.py",
                         reference, file, result_filename, outpur_dir]
@@ -138,9 +131,7 @@ class ProcessAlignment:
         green_bands = self.get_bands_endwith(bands_list, definitions.GREEN_BAND_END)
         swir1_bands = self.get_bands_endwith(bands_list, definitions.SWIR1_BAND_END)
 
-        bands = (green_bands, swir1_bands)
-
-        return bands
+        return green_bands, swir1_bands
 
     def get_bands_endwith(self, bands_list, endwith):
         """Gets a list of B3 and B6 bands and separates them in two lists of B3 and B6 bands."""
@@ -197,13 +188,40 @@ class ProcessAlignment:
         writer.start()
 
     @staticmethod
-    def assign_directory(path, row, total_PR_dir):
+    def make_band_pairs(green_band_list, swir1_band_list) -> list:
+        """
+        Go through the green list and swir1 list of bands and pair them up to create the scene object.
+        :param green_band_list: List of all green bands from the path row directory.
+        :param swir1_band_list: List of all swir1 bands from the path row directory.
+        :return: A list with Scene objects.
+        """
+        scenes = []
+        for green in green_band_list:
+            # check to see if the scene name is the same
+            green_scene = strings.get_scene_name(green)
+
+            for swir1 in swir1_band_list:
+                swir1_scene = strings.get_scene_name(swir1)
+
+                if green_scene == swir1_scene:
+                    scene = sc.Scene(green, swir1)
+                    scenes.append(scene)
+
+        return scenes
+
+    @staticmethod
+    def assign_path_row_directory(scene, total_PR_dir):
         """Assigns the scene to the correct path and row output directory."""
+        scene_data_handler = scene_data.SceneData(scene)
+
+        path = scene_data_handler.get_path()
+        row = scene_data_handler.get_row()
         path_row = (path, row)
         output_directory = None
 
         for path_row_key, path_row_dir in total_PR_dir.items():
             if path_row == path_row_key:
+                print("Made ", path_row, " directory.")
                 output_directory = path_row_dir
                 break
 
