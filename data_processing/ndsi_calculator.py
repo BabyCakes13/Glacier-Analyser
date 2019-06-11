@@ -2,7 +2,6 @@
 import numpy
 import os
 from osgeo import gdal
-import definitions
 
 
 class NDSI:
@@ -92,6 +91,3 @@ class NDSI:
         geotransform = self.green_tiff.GetGeoTransform()
 
         return rows, columns, geotransform
-
-# TODO make it calculate the NDSI for any pair checking the scene name. If I have 4 images
-
