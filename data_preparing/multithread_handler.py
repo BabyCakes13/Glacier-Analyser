@@ -3,8 +3,6 @@ import definitions
 import signal
 import subprocess
 
-#COMMANDS = ('data_processing/alignment_ORB.py', '--download')
-
 
 class Multithread:
     def __init__(self, max_threads=definitions.MAX_THREADS, handler=None):
@@ -47,27 +45,9 @@ class Multithread:
         while len(self.process_queue) > 0:
             self.check_process_done()
 
-#    @staticmethod
-#    def display_results(sp, command):
-#        # align
-#        if command == COMMANDS[0]:
-#        elif command == COMMANDS[1]:
+    def kill_all_humans(self):
+        for task_name, sp in self.process_queue:
+            sp.send_signal(signal.SIGINT)
 
 
 #TODO:  move this at downloading          print(green("downloading..."))
-
-#    def check_task_type(self):
-#        """
-#        Check the type of command inputted so the wait processes done knows what to do in each case.
-#        :return: The command if found, None otherwise.
-#        """
-#        for task in self.task:
-#            for command in COMMANDS:
-#                if command == task:
-#                    return task
-#        return None
-
-    def kill_all_humans(self):
-        for task_name, sp in self.process_queue:
-            print(red("INTRERUPTED"))
-            sp.send_signal(signal.SIGINT)

@@ -1,11 +1,10 @@
 from __future__ import print_function
 import cv2
 import numpy as np
-import os
 
 #This is a workaround to allow importing scene both if imported from main and if called directly
 import sys
-sys.path.append(sys.path[0] +'/..')
+sys.path.append(sys.path[0] + '/..')
 from data_processing import scene as sc
 
 DISPLAY = False
@@ -22,6 +21,7 @@ EUCLIDIAN_DISTANCE = 200  # the allowed distance between two points so that the 
 ROWS_NUMBER = 8  # the number of rows the full image will be split into for box matching
 COLUMNS_NUMBER = 8  # the number of columns the full image will be split into for box matching
 
+
 class SatImage:
     def __init__(self, green, swir):
         self.green = green
@@ -36,6 +36,7 @@ class SatImage:
     def write(self, filename):
         cv2.imwrite(filename.green_band, self.green)
         cv2.imwrite(filename.swir1_band, self.swir)
+
 
 class ProcessImage:
     """Class which handles ORB alignment of two images."""
@@ -58,6 +59,7 @@ class ProcessImage:
         self.aligned_16bit.write(self.aligned_scene)
         return self.aligned_16bit
 
+
 class AlignORB:
     def __init__(self, input_img, reference_img):
         # transform from scientific notation to decimal for easy check
@@ -66,17 +68,8 @@ class AlignORB:
         self.input_img = input_img
         self.reference_img = reference_img
 
-        if DISPLAY:
-            self.display_satimage("INPUT", self.input_img)
-            self.display_satimage("REFERENCE", self.reference_img)
-            #self.display_image_flush()
-
         image_normalized = self.normalize(input_img)
         reference_normalized = self.normalize(reference_img)
-
-        #self.display_satimage("NORMALIZED_INPUT",     image_normalized)
-        #self.display_satimage("NORMALIZED_REFERENCE", reference_normalized)
-        #self.display_image_flush()
 
         image_normnalized_8bit = self.downsample(image_normalized)
         reference_normnalized_8bit = self.downsample(reference_normalized)
@@ -84,25 +77,24 @@ class AlignORB:
         self.align_input = image_normnalized_8bit
         self.align_reference = reference_normnalized_8bit
 
-        #self.display_satimage("ALIGN_INPUT",     self.align_input)
-        #self.display_satimage("ALIGN_REFERENCE", self.align_reference)
-        #self.display_image_flush()
+        if DISPLAY:
+            self.display_satimage("INPUT", self.input_img)
+            self.display_satimage("REFERENCE", self.reference_img)
+            self.display_image_flush()
+
+            self.display_satimage("ALIGN_INPUT",     self.align_input)
+            self.display_satimage("ALIGN_REFERENCE", self.align_reference)
+            self.display_image_flush()
 
     def downsample(self, image_16bit):
         image_8bit_green = (image_16bit.green >> 8).astype(np.uint8)
-        image_8bit_swir  = (image_16bit.swir  >> 8).astype(np.uint8)
+        image_8bit_swir = (image_16bit.swir >> 8).astype(np.uint8)
+
         return SatImage(image_8bit_green, image_8bit_swir)
 
     def normalize(self, image, bits=16):
-        #self.display_image("green", image.green)
-        #self.display_image("swir",  image.swir)
-
-        normalized_image_8bit_green = cv2.normalize(image.green, None, 0, (1<<bits)-1, cv2.NORM_MINMAX)
-        normalized_image_8bit_swir = cv2.normalize(image.swir,  None, 0, (1<<bits)-1, cv2.NORM_MINMAX)
-
-        #self.display_image("NORMALIZED_INPUT",     normalized_image_8bit_green)
-        #self.display_image("NORMALIZED_REFERENCE", normalized_image_8bit_swir)
-        #self.display_image_flush()
+        normalized_image_8bit_green = cv2.normalize(image.green, None, 0, (1 << bits)-1, cv2.NORM_MINMAX)
+        normalized_image_8bit_swir = cv2.normalize(image.swir,  None, 0, (1 << bits)-1, cv2.NORM_MINMAX)
 
         return SatImage(normalized_image_8bit_green, normalized_image_8bit_swir)
 
@@ -171,9 +163,6 @@ class AlignORB:
         keypoints_img_swir,  descriptors_img_swir  = self.boxedDetectAndCompute(self.align_input.swir)
         keypoints_ref_green, descriptors_ref_green = self.boxedDetectAndCompute(self.align_reference.green)
         keypoints_ref_swir,  descriptors_ref_swir  = self.boxedDetectAndCompute(self.align_reference.swir)
-
-        #print("kpts object ", keypoints_img_green)
-        #print("descr object ", descriptors_img_green)
 
         keypoints_img_all   = keypoints_img_green + keypoints_img_swir
         keypoints_ref_all   = keypoints_ref_green + keypoints_ref_swir
@@ -366,7 +355,6 @@ class AlignORB:
         """
         cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
         cv2.resizeWindow(window_name, 1000, 1000)
-        #cv2.moveWindow(window_name, 10, 10)
         cv2.imshow(window_name, image)
 
     @staticmethod
@@ -377,54 +365,6 @@ class AlignORB:
         """
         while cv2.waitKey() != 27:
             pass
-
-
-def start_dir_alignment(reference_path, image_path, result_filename, output_directory):
-    """
-    Starts the alignment process.
-    :param reference_path: Path to the reference image.
-    :param image_path: Path to the current image.
-    :param result_filename: Result name.
-    :param output_directory: Path to the output directory to write the images.
-    :return: The status of the alignment.
-    """
-    result_path = os.path.join(output_directory, result_filename)
-    pruned_matches_path = os.path.join(output_directory, "matched_" + result_filename)
-
-    # print_current_images(reference_path, image_path, result_path)
-
-    # prepare the images for alignment
-    normalised_reference_8bit, current_image_8bit = open_SatImage(reference_path, image_path)
-
-    # align
-    aligner = AlignORB(normalised_reference_8bit, current_image_8bit, result_filename)
-    VALID, pruned_matches_image = aligner.align()
-
-    # write the valid images and all matches
-    if VALID:
-        cv2.imwrite(result_path, aligner.result_8bit)
-    cv2.imwrite(pruned_matches_path, pruned_matches_image)
-
-    if DISPLAY:
-        aligner.display_image("Reference", aligner.reference_8bit)
-        aligner.display_image("Current Image", aligner.current_8bit)
-        aligner.display_image("Result", aligner.result_8bit)
-        aligner.display_image_flush()
-
-    cv2.destroyAllWindows()
-
-    return VALID
-
-def start_scene_alignment(scene, reference_scene, aligned_scene):
-    aligner = AlignORB(scene, reference_scene, aligned_scene)
-
-
-def open_SatImage(image_scene):
-    """
-    Prepare the image for the alignment by changing depth for descriptor and normalisation.
-    :param image_path: The full path to the input image.
-    :return: Returns the necessary images for alignment calculation.
-    """
 
 
 if __name__ == "__main__":
@@ -447,8 +387,6 @@ if __name__ == "__main__":
             VALID = True
     except KeyboardInterrupt:
         sys.exit(3)
-
-    print("VAAALID ", VALID)
 
     if VALID:
         sys.exit(0)
