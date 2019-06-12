@@ -6,7 +6,7 @@ from collections import defaultdict
 from data_gathering import scene_data
 from data_preparing import path_row_grouping as prg
 from data_preparing import multithread_handler
-from data_preparing import scene as sc
+from data_processing import scene as sc
 from data_processing import alignment_ORB
 from data_processing import alignment_validator
 from util import strings
@@ -15,6 +15,7 @@ DEBUG = False
 VALID_TRANSFORMATIONS = 0
 TOTAL_TRANSFORMATIONS = 0
 
+MULTITHREADED=True
 
 class ProcessAlignment:
     def __init__(self, little_dir, big_input_dir, output_dir, months, max_threads=definitions.MAX_THREADS):
@@ -29,6 +30,9 @@ class ProcessAlignment:
         self.max_threads = max_threads
 
         self.INTERRUPT_SIGNAL = False
+
+        self.mh = multithread_handler.Multithread(max_threads=self.max_threads,
+                                                  handler = self.process_handler)
 
     def start(self):
         """Checks the type of the input directory and calls the aligner."""
@@ -86,6 +90,18 @@ class ProcessAlignment:
         print(blue("Homography is being written..."))
         self.write_homography_result(glacier=glacier)
 
+    #TODO: refactor below with map for each returncode
+    def process_handler(self, task_name, return_code):
+        if return_code == 0:
+            print(green("SUCCESS " + task_name))
+        elif return_code == 3:
+            print(yellow("INTERRRUPTED " + task_name))
+        elif return_code == 1:
+            print(red("FAILURE " + task_name))
+        else:
+            print(magenta("SOME OTHER ERROR " + task_name))
+
+
     def process_scene(self, scene, reference_scene,  total_PR_output_dir):
         output_dir = self.assign_path_row_directory(scene=scene,  total_PR_dir=total_PR_output_dir)
         aligned_green_filename = scene.get_scene_name() + definitions.GREEN_BAND_END
@@ -94,14 +110,23 @@ class ProcessAlignment:
         aligned_swir1_path = os.path.join(output_dir, aligned_swir1_filename)
         aligned_scene = sc.Scene(aligned_green_path, aligned_swir1_path)
 
-        align = alignment_ORB.ProcessImage(scene=scene,
-                                           reference_scene=reference_scene,
-                                           aligned_scene=aligned_scene)
-        align.align()
+        try:
+            task = ["python3", "data_processing/alignment_ORB.py",
+                    scene.green_band, scene.swir1_band,
+                    reference_scene.green_band, reference_scene.swir1_band,
+                    aligned_scene.green_band, aligned_scene.swir1_band,]
+
+            self.mh.start_processing(task=task, task_name=scene.get_scene_name())
+
+        except KeyboardInterrupt:
+            print("Keyboard interrupt.")
+            self.INTERRUPT_SIGNAL = True
+            start_multithreaded_process.wait_all_process_done()
+
+
 
     def parse_band_list(self, band_list, reference, processed_output_dir):
         """Applies the alignment process to the list of bands."""
-        process_queue = []
         global TOTAL_TRANSFORMATIONS
 
         # for each band except the reference

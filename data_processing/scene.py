@@ -1,7 +1,6 @@
 import os
 import definitions
 
-
 class Scene:
     def __init__(self, green_band, swir1_band):
         """

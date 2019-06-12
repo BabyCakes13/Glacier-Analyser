@@ -2,9 +2,13 @@ from __future__ import print_function
 import cv2
 import numpy as np
 import os
-import sys
 
-DISPLAY = True
+#This is a workaround to allow importing scene both if imported from main and if called directly
+import sys
+sys.path.append(sys.path[0] +'/..')
+from data_processing import scene as sc
+
+DISPLAY = False
 DEBUG_OUTLIERS = False
 DEBUG_TRANSFORM_MATRIX = True
 
@@ -48,7 +52,11 @@ class ProcessImage:
     def align(self):
         a = AlignORB(self.image_16bit, self.reference_16bit)
         self.aligned_16bit = a.align()
+        if self.aligned_16bit is None:
+            return None
+
         self.aligned_16bit.write(self.aligned_scene)
+        return self.aligned_16bit
 
 class AlignORB:
     def __init__(self, input_img, reference_img):
@@ -58,9 +66,10 @@ class AlignORB:
         self.input_img = input_img
         self.reference_img = reference_img
 
-        self.display_satimage("INPUT", self.input_img)
-        self.display_satimage("REFERENCE", self.reference_img)
-        #self.display_image_flush()
+        if DISPLAY:
+            self.display_satimage("INPUT", self.input_img)
+            self.display_satimage("REFERENCE", self.reference_img)
+            #self.display_image_flush()
 
         image_normalized = self.normalize(input_img)
         reference_normalized = self.normalize(reference_img)
@@ -211,8 +220,9 @@ class AlignORB:
 
         aligned = SatImage(aligned_result_green, aligned_result_swir)
 
-        self.display_satimage("OUTPUT", aligned)
-        self.display_image_flush()
+        if DISPLAY:
+            self.display_satimage("OUTPUT", aligned)
+            self.display_image_flush()
 
         return aligned
 
@@ -421,10 +431,24 @@ if __name__ == "__main__":
     """
     Handle multi process.
     """
+    scene           = sc.Scene(sys.argv[1], sys.argv[2])
+    reference_scene = sc.Scene(sys.argv[3], sys.argv[4])
+    aligned_scene   = sc.Scene(sys.argv[5], sys.argv[6])
+
     try:
-        VALID = start_dir_alignment(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+        align = ProcessImage(scene=scene,
+                             reference_scene=reference_scene,
+                             aligned_scene=aligned_scene)
+        aligned_image = align.align()
+
+        if aligned_image is None:
+            VALID = False
+        else:
+            VALID = True
     except KeyboardInterrupt:
         sys.exit(3)
+
+    print("VAAALID ", VALID)
 
     if VALID:
         sys.exit(0)
