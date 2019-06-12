@@ -172,11 +172,7 @@ class AlignORB:
         matcher = cv2.DescriptorMatcher_create(cv2.DESCRIPTOR_MATCHER_BRUTEFORCE_HAMMING)
         matches = matcher.match(descriptors_ref_all, descriptors_img_all)
 
-        print("matches count: ", len(matches))
-
         matches = self.pruneLowScoreMatches(matches)
-
-        print("matches count: ", len(matches))
 
         reference_points, image_points, pruned_matches_image = \
             self.pruneMatchesByDistance(matches, keypoints_ref_all, keypoints_img_all)
@@ -386,7 +382,7 @@ if __name__ == "__main__":
         else:
             VALID = True
     except KeyboardInterrupt:
-        sys.exit(3)
+        sys.exit(2)
 
     if VALID:
         sys.exit(0)

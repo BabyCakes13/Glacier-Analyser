@@ -3,10 +3,9 @@ from colors import *
 import json
 import os
 import shutil
-import time
 import subprocess
 import definitions
-from data_preparing import multithread_handler
+from data_preparing import multiprocess_handler as mh
 
 
 class Downloader:
@@ -14,18 +13,18 @@ class Downloader:
 
     def __init__(self, input_csv=definitions.GLACIER_DATASET_PATH,
                  download_dir=definitions.DEFAULT_DOWNLOAD_DIR,
-                 max_threads=definitions.MAX_THREADS,
-                 months=definitions.VALID_MONTHS):
+                 max_processes=definitions.MAX_PROCESSES):
         """Initialises variables needed for the processes."""
         self.glacier_csv = input_csv
         self.download_dir = download_dir
-        self.months = months
-        self.max_threads = max_threads
-        self.process_queue = []
+        self.max_processes = max_processes
+
+        self.mh = mh.Multiprocess(max_processes=self.max_processes,
+                                  handler=self.process_handler)
 
         self.INTERRUPT_SIGNAL = False
 
-        print("Input: " + str(input_csv))
+        print(blue("Download csv file: ") + str(input_csv))
 
     def start(self):
         """Opens the csv file and starts the searching and downloading process."""
@@ -46,20 +45,6 @@ class Downloader:
 
         return search_arglist
 
-    def check_months(self, json_query_path, scene_number):
-        """Checks if the month of the scene from the query is valid with the opted month list."""
-        print("JSON: ", json_query_path)
-
-        with open(json_query_path, "r") as json_query:
-            data = json.load(json_query)
-
-        datetime = data["features"][scene_number]['properties']["datetime"]
-        month = int(datetime[5:7])
-
-        if month in self.months:
-            return True
-        return False
-
     @staticmethod
     def create_download_arglist(json_query_filename, dirname):
         """Creates the sat-load argument list."""
@@ -69,16 +54,20 @@ class Downloader:
 
         return download_arglist
 
+    @staticmethod
+    def process_handler(task_name, return_code):
+        return_codes = definitions.RETURN_CODES
+        return_code = return_codes[return_code]
+        print(return_code, " ", task_name)
+
     def parse_rows(self, csv_reader):
         """Parses and processes each row in the CSV file."""
-        process_queue_download = []
         for row in csv_reader:
 
             directory_id = row['wgi_glacier_id'] + "_" + row['lon'] + "_" + row['lat']
             directory_name = os.path.join(self.download_dir, directory_id)
             json_query_filename = os.path.join(directory_name, definitions.JSON_QUERY)
 
-            start_multithreaded_process_download = None
             try:
                 if os.path.exists(directory_name):
                     shutil.rmtree(directory_name)
@@ -88,22 +77,21 @@ class Downloader:
 
             try:
                 search_task = self.create_search_arglist(row, json_query_filename)
-                print(blue(search_task))
-
+                print(yellow(search_task))
+                # sync, will wait to finish
                 search = subprocess.call(search_task)
 
+                # async, will not wait to finish
                 download_task = self.create_download_arglist(json_query_filename, directory_name)
-                print(yellow(download_task))
-                start_multithreaded_process_download = \
-                    multithread_handler.Multithread(task=download_task,
-                                                    target_file=json_query_filename,
-                                                    process_queue=process_queue_download,
-                                                    max_threads=self.max_threads)
-                process_queue_download = start_multithreaded_process_download.start_processing()
+                print(blue(download_task))
+
+                self.mh.start_processing(task=download_task, task_name=json_query_filename)
 
             except KeyboardInterrupt:
                 print("Keyboard interrupt.")
                 self.INTERRUPT_SIGNAL = True
-                start_multithreaded_process_download.wait_all_process_done()
+                self.mh.kill_all_humans()
+                self.mh.wait_all_process_done()
                 break
+
 

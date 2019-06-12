@@ -1,4 +1,5 @@
 """Module which holds definitions."""
+from colors import *
 import os
 import datetime
 
@@ -44,5 +45,11 @@ DEFAULT_END_DATE = datetime.datetime.now().strftime('%Y-%m-%d')
 # download parameters
 DEFAULT_CLOUD_COVERAGE = "5"
 BBOX_SIZE = 0.000001
-MAX_THREADS = 4
-VALID_MONTHS = [6, 7, 8]
+
+# processing
+MAX_PROCESSES = 4
+RETURN_CODES = {
+    0: (green("SUCCESS")),
+    1: (red("FAILURE")),
+    2: (yellow("INTERRUPTED"))
+}
