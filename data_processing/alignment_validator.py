@@ -1,7 +1,7 @@
 import csv
 import os
 import definitions
-from data_processing import process_alignment
+from data_processing import process
 from util import strings
 
 
@@ -21,18 +21,18 @@ class HomographyCSV:
 
     def generate_csv_item(self):
         """Generates the csv item with the corresponding attributes."""
-        if process_alignment.VALID_TRANSFORMATIONS == 0:
+        if process.VALID_TRANSFORMATIONS == 0:
             ratio = 0
         else:
-            ratio = process_alignment.VALID_TRANSFORMATIONS / process_alignment.TOTAL_TRANSFORMATIONS
+            ratio = process.VALID_TRANSFORMATIONS / process.TOTAL_TRANSFORMATIONS
         item = [
             self.glacier_id,
             definitions.MAX_FEATURES,
             definitions.GOOD_MATCH_PERCENT,
             definitions.ALLOWED_ERROR,
             definitions.ALLOWED_INTEGRAL,
-            process_alignment.VALID_TRANSFORMATIONS,
-            process_alignment.TOTAL_TRANSFORMATIONS,
+            process.VALID_TRANSFORMATIONS,
+            process.TOTAL_TRANSFORMATIONS,
             ratio
         ]
         return item

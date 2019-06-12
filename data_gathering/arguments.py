@@ -1,7 +1,7 @@
 """Argument parser"""
 import argparse
 from data_gathering import download
-from data_processing import process_alignment
+from data_processing import process
 import definitions
 
 
@@ -95,7 +95,7 @@ def set_process_function(args):
     """The default function for process sub parser."""
     print("Setting up process...")
 
-    process_align = process_alignment.Process(args.input, args.bigdir, args.output, args.j)
+    process_align = process.Process(args.input, args.bigdir, args.output, args.j)
     process_align.start()
 
     print("Finished process.")
