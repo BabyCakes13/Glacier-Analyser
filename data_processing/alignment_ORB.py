@@ -4,12 +4,12 @@ import numpy as np
 import os
 import sys
 
-DISPLAY = False
+DISPLAY = True
 DEBUG_OUTLIERS = False
 DEBUG_TRANSFORM_MATRIX = True
 
 MAX_FEATURES = 5000  # number of feature points taken
-GOOD_MATCH_PERCENT = 0.50
+GOOD_MATCH_PERCENT = 0.25
 ALLOWED_ERROR = 0.01  # the allowed rotation
 ALLOWED_INTEGRAL = 100  # the allowed translation
 EUCLIDIAN_DISTANCE = 200  # the allowed distance between two points so that the match line is as straight as possible
@@ -18,23 +18,87 @@ EUCLIDIAN_DISTANCE = 200  # the allowed distance between two points so that the 
 ROWS_NUMBER = 8  # the number of rows the full image will be split into for box matching
 COLUMNS_NUMBER = 8  # the number of columns the full image will be split into for box matching
 
-
-class AlignORB:
-    """Class which handles ORB alignment of two images."""
-    def __init__(self, scene, reference_scene, aligned_scene):
-        green_16bit, green_8bit, normalized_green_8bit = resize_depth(scene.green_band)
-        swir1_16bit, swir1_8bit, normalized_swir1_8bit = resize_depth(scene.swir1_band)
-
-        green_reference_16bit, green_reference_8bit, normalized_green_reference_8bit = \
-            resize_depth(reference_scene.green_band)
-        swir1_reference_16bit, swir1_reference_8bit, swir1_reference_normalized_8bit = \
-            resize_depth(reference_scene.swir1_band)
-
-        self.result_8bit = None
-        self.matches = None
+class SatImage:
+    def __init__(self, green, swir):
+        self.green = green
+        self.swir = swir
 
     @staticmethod
-    def boxedDetectAndCompute(image, rows, columns):
+    def read(image_scene):
+        img = SatImage(cv2.imread(image_scene.green_band, cv2.IMREAD_LOAD_GDAL),
+                       cv2.imread(image_scene.swir1_band, cv2.IMREAD_LOAD_GDAL))
+        return img
+
+    def write(self, filename):
+        cv2.imwrite(filename.green_band, self.green)
+        cv2.imwrite(filename.swir1_band, self.swir)
+
+class ProcessImage:
+    """Class which handles ORB alignment of two images."""
+    def __init__(self, scene, reference_scene, aligned_scene):
+
+        self.image_16bit = SatImage.read(scene)
+        self.reference_16bit = SatImage.read(reference_scene)
+        self.aligned_16bit = None
+
+        self.scene = scene
+        self.reference_scene = reference_scene
+        self.aligned_scene = aligned_scene
+
+    def align(self):
+        a = AlignORB(self.image_16bit, self.reference_16bit)
+        self.aligned_16bit = a.align()
+        self.aligned_16bit.write(self.aligned_scene)
+
+class AlignORB:
+    def __init__(self, input_img, reference_img):
+        # transform from scientific notation to decimal for easy check
+        np.set_printoptions(suppress=True, precision=4)
+
+        self.input_img = input_img
+        self.reference_img = reference_img
+
+        self.display_satimage("INPUT", self.input_img)
+        self.display_satimage("REFERENCE", self.reference_img)
+        #self.display_image_flush()
+
+        image_normalized = self.normalize(input_img)
+        reference_normalized = self.normalize(reference_img)
+
+        #self.display_satimage("NORMALIZED_INPUT",     image_normalized)
+        #self.display_satimage("NORMALIZED_REFERENCE", reference_normalized)
+        #self.display_image_flush()
+
+        image_normnalized_8bit = self.downsample(image_normalized)
+        reference_normnalized_8bit = self.downsample(reference_normalized)
+
+        self.align_input = image_normnalized_8bit
+        self.align_reference = reference_normnalized_8bit
+
+        #self.display_satimage("ALIGN_INPUT",     self.align_input)
+        #self.display_satimage("ALIGN_REFERENCE", self.align_reference)
+        #self.display_image_flush()
+
+    def downsample(self, image_16bit):
+        image_8bit_green = (image_16bit.green >> 8).astype(np.uint8)
+        image_8bit_swir  = (image_16bit.swir  >> 8).astype(np.uint8)
+        return SatImage(image_8bit_green, image_8bit_swir)
+
+    def normalize(self, image, bits=16):
+        #self.display_image("green", image.green)
+        #self.display_image("swir",  image.swir)
+
+        normalized_image_8bit_green = cv2.normalize(image.green, None, 0, (1<<bits)-1, cv2.NORM_MINMAX)
+        normalized_image_8bit_swir = cv2.normalize(image.swir,  None, 0, (1<<bits)-1, cv2.NORM_MINMAX)
+
+        #self.display_image("NORMALIZED_INPUT",     normalized_image_8bit_green)
+        #self.display_image("NORMALIZED_REFERENCE", normalized_image_8bit_swir)
+        #self.display_image_flush()
+
+        return SatImage(normalized_image_8bit_green, normalized_image_8bit_swir)
+
+    @staticmethod
+    def boxedDetectAndCompute(image, rows=ROWS_NUMBER, columns=COLUMNS_NUMBER):
         """
         Splits the image in n boxes and applies feature finding in each, so that the points are evenly distributed,
         avoiding image distortion in the case there are feature points only in one part of the image.
@@ -71,7 +135,17 @@ class AlignORB:
 
         return keypoints, descriptors
 
-    def align(self):
+    def pruneLowScoreMatches(self, matches):
+        # best matches first
+        matches.sort(key=lambda x: x.distance, reverse=False)
+
+        # remove matches with low score
+        numGoodMatches = int(len(matches) * GOOD_MATCH_PERCENT)
+        matches = matches[:numGoodMatches]
+
+        return matches
+
+    def getAlignAffineTransform(self):
         """
         The main aligning method. Find the feature key points in each image by splitting the image in boxes, so that the
         features are evenly distributed across the whole image, avoiding clusters of points in just one region, which
@@ -82,44 +156,65 @@ class AlignORB:
         :return: Returns the result of validating the affine matrix and the pruned matches image for writing it to the
         disk.
         """
-        # transform from scientific notation to decimal for easy check
-        np.set_printoptions(suppress=True, precision=4)
 
         # detect and compute the feature points by splitting the image in boxes for good feature spread
-        reference_keypoints, descriptors_ref = \
-            self.boxedDetectAndCompute(self.reference_8bit, ROWS_NUMBER, COLUMNS_NUMBER)
-        image_keypoints, descriptors_img = \
-            self.boxedDetectAndCompute(self.current_8bit, ROWS_NUMBER, COLUMNS_NUMBER)
+        keypoints_img_green, descriptors_img_green = self.boxedDetectAndCompute(self.align_input.green)
+        keypoints_img_swir,  descriptors_img_swir  = self.boxedDetectAndCompute(self.align_input.swir)
+        keypoints_ref_green, descriptors_ref_green = self.boxedDetectAndCompute(self.align_reference.green)
+        keypoints_ref_swir,  descriptors_ref_swir  = self.boxedDetectAndCompute(self.align_reference.swir)
+
+        #print("kpts object ", keypoints_img_green)
+        #print("descr object ", descriptors_img_green)
+
+        keypoints_img_all   = keypoints_img_green + keypoints_img_swir
+        keypoints_ref_all   = keypoints_ref_green + keypoints_ref_swir
+        descriptors_img_all = np.concatenate((descriptors_img_green, descriptors_img_swir), axis=0)
+        descriptors_ref_all = np.concatenate((descriptors_ref_green, descriptors_ref_swir), axis=0)
 
         matcher = cv2.DescriptorMatcher_create(cv2.DESCRIPTOR_MATCHER_BRUTEFORCE_HAMMING)
-        matches = matcher.match(descriptors_ref, descriptors_img)
+        matches = matcher.match(descriptors_ref_all, descriptors_img_all)
 
-        # best matches first
-        matches.sort(key=lambda x: x.distance, reverse=False)
+        print("matches count: ", len(matches))
 
-        # remove matches with low score
-        numGoodMatches = int(len(matches) * GOOD_MATCH_PERCENT)
-        matches = matches[:numGoodMatches]
+        matches = self.pruneLowScoreMatches(matches)
 
-        reference_points, image_points, pruned_matches_image = self.prune_matches(matches,
-                                                                                  reference_keypoints,
-                                                                                  image_keypoints)
+        print("matches count: ", len(matches))
+
+        reference_points, image_points, pruned_matches_image = \
+            self.pruneMatchesByDistance(matches, keypoints_ref_all, keypoints_img_all)
+
+        if DISPLAY:
+            self.display_image("MATCHES", pruned_matches_image)
+
         # create the affine transformation matrix and inliers
-        height, width = self.reference_8bit.shape
-        inliers = None
-        affine, inliers = cv2.estimateAffine2D(image_points, reference_points, inliers, cv2.LMEDS, confidence=0.99)
-
-        # warp the affine matrix to the current image
-        self.result_8bit = cv2.warpAffine(self.current_8bit, affine, (width, height))
-        VALID = self.validate_transform(affine)
+        affine, inliers = cv2.estimateAffine2D(image_points, reference_points, None, cv2.RANSAC)#LMEDS, confidence=0.99)
 
         # check application mode
         if DEBUG_OUTLIERS:
             self.affine_creation_debug_on(inliers, reference_points, image_points)
-        if DISPLAY:
-            self.display_on(pruned_matches_image)
 
-        return VALID, pruned_matches_image
+        if not self.validate_transform(affine):
+            return None
+
+        return affine
+
+    def align(self):
+
+        affine = self.getAlignAffineTransform()
+        if affine is None:
+            return None
+
+        # warp the affine matrix to the current image
+        height, width = self.reference_img.green.shape
+        aligned_result_green = cv2.warpAffine(self.input_img.green, affine, (width, height))
+        aligned_result_swir  = cv2.warpAffine(self.input_img.swir, affine, (width, height))
+
+        aligned = SatImage(aligned_result_green, aligned_result_swir)
+
+        self.display_satimage("OUTPUT", aligned)
+        self.display_image_flush()
+
+        return aligned
 
     @staticmethod
     def affine_creation_debug_on(inliers, image_points, reference_points):
@@ -139,16 +234,7 @@ class AlignORB:
                   "  x  ", reference_point[0] - image_point[0],
                   "  y  ", reference_point[1] - image_point[1])
 
-    def display_on(self, pruned_matches_image):
-        """
-        If the display mode is on, draw the best matches on the screen.
-        :param pruned_matches_image: The image which contains the pruned matches
-        :return: Nothing
-        """
-        # draw the best matches
-        self.display_image('PRUNED MATCHES', pruned_matches_image)
-
-    def prune_matches(self, matches, reference_keypoints, image_keypoints):
+    def pruneMatchesByDistance(self, matches, reference_keypoints, image_keypoints):
         """
         Method which prunes the feature points pairs which are not valid (too far away from each other in the euclidean
         distance. This ensures that the remaining feature points are valid matches and the match line as straight as
@@ -180,8 +266,8 @@ class AlignORB:
         image_points = np.array(image_points)
 
         # draw the match image
-        pruned_matches_image = cv2.drawMatches(self.reference_8bit, reference_keypoints,
-                                               self.current_8bit, image_keypoints,
+        pruned_matches_image = cv2.drawMatches(self.align_reference.green, reference_keypoints,
+                                               self.align_input.green, image_keypoints,
                                                matches_pruned,
                                                None, matchColor=(0, 255, 255), singlePointColor=(100, 0, 0),
                                                flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
@@ -256,6 +342,11 @@ class AlignORB:
         return comparison
 
     @staticmethod
+    def display_satimage(window_prefix, satimage):
+        AlignORB.display_image(window_prefix + "_green", satimage.green)
+        AlignORB.display_image(window_prefix + "_swir", satimage.swir)
+
+    @staticmethod
     def display_image(window_name, image):
         """
         Displays an image in a cv2 window.
@@ -265,7 +356,7 @@ class AlignORB:
         """
         cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
         cv2.resizeWindow(window_name, 1000, 1000)
-        cv2.moveWindow(window_name, 10, 10)
+        #cv2.moveWindow(window_name, 10, 10)
         cv2.imshow(window_name, image)
 
     @staticmethod
@@ -293,7 +384,7 @@ def start_dir_alignment(reference_path, image_path, result_filename, output_dire
     # print_current_images(reference_path, image_path, result_path)
 
     # prepare the images for alignment
-    normalised_reference_8bit, current_image_8bit = resize_depth(reference_path, image_path)
+    normalised_reference_8bit, current_image_8bit = open_SatImage(reference_path, image_path)
 
     # align
     aligner = AlignORB(normalised_reference_8bit, current_image_8bit, result_filename)
@@ -314,25 +405,16 @@ def start_dir_alignment(reference_path, image_path, result_filename, output_dire
 
     return VALID
 
-
 def start_scene_alignment(scene, reference_scene, aligned_scene):
-
-
-
     aligner = AlignORB(scene, reference_scene, aligned_scene)
 
 
-def resize_depth(image_path):
+def open_SatImage(image_scene):
     """
     Prepare the image for the alignment by changing depth for descriptor and normalisation.
     :param image_path: The full path to the input image.
     :return: Returns the necessary images for alignment calculation.
     """
-    image_16bit = cv2.imread(image_path, cv2.IMREAD_LOAD_GDAL)
-    image_8bit = (image_16bit >> 8).astype(np.uint8)
-    normalized_image_8bit = cv2.normalize(image_8bit, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8UC2)
-
-    return image_16bit, image_8bit, normalized_image_8bit
 
 
 if __name__ == "__main__":

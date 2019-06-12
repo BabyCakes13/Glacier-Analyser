@@ -78,7 +78,7 @@ class ProcessAlignment:
                 break
 
             for scene in scenes:
-                self.process_scene(scene=scene, reference_scene=scenes[0])
+                self.process_scene(scene=scene, reference_scene=scenes[0],  total_PR_output_dir=total_PR_output_dir)
 
             if self.INTERRUPT_SIGNAL:
                 break
@@ -86,18 +86,18 @@ class ProcessAlignment:
         print(blue("Homography is being written..."))
         self.write_homography_result(glacier=glacier)
 
-    def process_scene(self, scene, reference_scene):
-        output_dir = self.assign_path_row_directory(scene=scene)
-        aligned_green_filename = scene + definitions.GREEN_BAND_END
-        aligned_swir1_filename = scene + definitions.SWIR1_BAND_END
+    def process_scene(self, scene, reference_scene,  total_PR_output_dir):
+        output_dir = self.assign_path_row_directory(scene=scene,  total_PR_dir=total_PR_output_dir)
+        aligned_green_filename = scene.get_scene_name() + definitions.GREEN_BAND_END
+        aligned_swir1_filename = scene.get_scene_name() + definitions.SWIR1_BAND_END
         aligned_green_path = os.path.join(output_dir, aligned_green_filename)
         aligned_swir1_path = os.path.join(output_dir, aligned_swir1_filename)
         aligned_scene = sc.Scene(aligned_green_path, aligned_swir1_path)
 
-        align = alignment_ORB.start_scene_alignment(scene=scene,
-                                                    reference_scene=reference_scene,
-                                                    aligned_scene=aligned_scene)
-
+        align = alignment_ORB.ProcessImage(scene=scene,
+                                           reference_scene=reference_scene,
+                                           aligned_scene=aligned_scene)
+        align.align()
 
     def parse_band_list(self, band_list, reference, processed_output_dir):
         """Applies the alignment process to the list of bands."""
@@ -212,7 +212,7 @@ class ProcessAlignment:
     @staticmethod
     def assign_path_row_directory(scene, total_PR_dir):
         """Assigns the scene to the correct path and row output directory."""
-        scene_data_handler = scene_data.SceneData(scene)
+        scene_data_handler = scene_data.SceneData(scene.get_scene_name())
 
         path = scene_data_handler.get_path()
         row = scene_data_handler.get_row()
