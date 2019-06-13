@@ -46,7 +46,7 @@ class NDSI:
 
     @staticmethod
     def get_snow_image(ndsi, threshold=0.5):
-        snow = ndsi
+        snow = ndsi.copy()
         snow[snow <= threshold] = -1
         return snow
 
