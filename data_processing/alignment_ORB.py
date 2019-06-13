@@ -1,12 +1,12 @@
 from __future__ import print_function
 import cv2
+from colors import *
 import numpy as np
 
-#This is a workaround to allow importing scene both if imported from main and if called directly
+# This is a workaround to allow importing scene both if imported from main and if called directly
 import sys
 sys.path.append(sys.path[0] + '/..')
 from data_processing import scene as sc
-from data_processing.numpyscene import SatImage
 from data_processing.ndsi_calculator import NDSI
 
 DEBUG_OUTLIERS = False
@@ -22,38 +22,53 @@ EUCLIDIAN_DISTANCE = 200  # the allowed distance between two points so that the 
 ROWS_NUMBER = 8  # the number of rows the full image will be split into for box matching
 COLUMNS_NUMBER = 8  # the number of columns the full image will be split into for box matching
 
+
 class ProcessImage:
     """Class which handles ORB alignment of two images."""
-    def __init__(self, scene, reference_scene, aligned_scene):
-        self.image_16bit = SatImage.read(scene)
-        self.reference_16bit = SatImage.read(reference_scene)
+    def __init__(self, scene:sc.Scene, reference_scene: sc.Scene, aligned_scene: sc.Scene):
+        self.image_16bit = sc.SatImage.read(scene)
+        self.reference_16bit = sc.SatImage.read(reference_scene)
+        self.ndsi_16bit = None
         self.aligned_16bit = None
 
         self.scene = scene
         self.reference_scene = reference_scene
         self.aligned_scene = aligned_scene
 
+    def ndsi(self):
+        """
+        NDSI first. Then align scene with reference, then align aligned with ndsi.
+        :return:
+        """
+        ndsi_image = NDSI.calculate_NDSI(self.image_16bit)
+        DISPLAY.image("ndsi", ndsi_image)
+
+        # snow image is for contrast
+        snow_image = NDSI.get_snow_image(ndsi_image, 0.5)
+        DISPLAY.image("snow", snow_image)
+
+        print(blue("Snow pixels: "), blue(NDSI.get_snow_pixels(ndsi_image)))
+        print(blue("Snow ratio: "), blue(NDSI.get_snow_pixels_ratio(ndsi_image)))
+
     def align(self):
-        a = AlignORB(self.image_16bit, self.reference_16bit)
-        self.aligned_16bit = a.align()
+        """
+        Align scene with reference, then ndsi with aligned (the new reference )
+        :return:
+        """
+        first = AlignORB(self.image_16bit, self.reference_16bit)
+        self.aligned_16bit = first.align()
         if self.aligned_16bit is None:
             return None
-
-        print("before ", type(self.aligned_16bit))
 
         self.aligned_16bit.write(self.aligned_scene)
         return self.aligned_16bit
 
-    def ndsi(self):
-        print("after ", type(self.aligned_16bit))
-        ndsi_image = NDSI.calculate_NDSI(self.aligned_16bit)
-        DISPLAY.image("ndsi", ndsi_image)
-        snow_image = NDSI.getSnowImage(ndsi_image, 0.5)
-        DISPLAY.image("snow", snow_image)
-        print ("NDSI::::::::: ", NDSI.getGlacierPixels(snow_image))
 
 class AlignORB:
-    def __init__(self, input_img, reference_img):
+    """
+    Class which gets two images as input and alignes the image based on the reference.
+    """
+    def __init__(self, input_img: sc.SatImage, reference_img: sc.SatImage):
         # transform from scientific notation to decimal for easy check
         np.set_printoptions(suppress=True, precision=4)
 
@@ -76,16 +91,27 @@ class AlignORB:
         DISPLAY.satimage("ALIGN_REFERENCE", self.align_reference)
 
     def downsample(self, image_16bit):
+        """
+        Chanfes the depth of the inputted image to 8 bit.
+        :param image_16bit:
+        :return:
+        """
         image_8bit_green = (image_16bit.green >> 8).astype(np.uint8)
         image_8bit_swir = (image_16bit.swir >> 8).astype(np.uint8)
 
-        return SatImage(image_8bit_green, image_8bit_swir)
+        return sc.SatImage(image_8bit_green, image_8bit_swir)
 
     def normalize(self, image, bits=16):
+        """
+        Normalizes the input image to be between 0 and the inputted bit range.
+        :param image:
+        :param bits:
+        :return:
+        """
         normalized_image_8bit_green = cv2.normalize(image.green, None, 0, (1 << bits)-1, cv2.NORM_MINMAX)
         normalized_image_8bit_swir = cv2.normalize(image.swir,  None, 0, (1 << bits)-1, cv2.NORM_MINMAX)
 
-        return SatImage(normalized_image_8bit_green, normalized_image_8bit_swir)
+        return sc.SatImage(normalized_image_8bit_green, normalized_image_8bit_swir)
 
     @staticmethod
     def boxedDetectAndCompute(image, rows=ROWS_NUMBER, columns=COLUMNS_NUMBER):
@@ -169,7 +195,7 @@ class AlignORB:
         DISPLAY.image("MATCHES", pruned_matches_image)
 
         # create the affine transformation matrix and inliers
-        affine, inliers = cv2.estimateAffine2D(image_points, reference_points, None, cv2.RANSAC)#LMEDS, confidence=0.99)
+        affine, inliers = cv2.estimateAffine2D(image_points, reference_points, None, cv2.RANSAC)
 
         # check application mode
         if DEBUG_OUTLIERS:
@@ -191,7 +217,7 @@ class AlignORB:
         aligned_result_green = cv2.warpAffine(self.input_img.green, affine, (width, height))
         aligned_result_swir  = cv2.warpAffine(self.input_img.swir, affine, (width, height))
 
-        aligned = SatImage(aligned_result_green, aligned_result_swir)
+        aligned = sc.SatImage(aligned_result_green, aligned_result_swir)
 
         DISPLAY.satimage("OUTPUT", aligned)
 
@@ -322,12 +348,13 @@ class AlignORB:
 
         return comparison
 
+
 class DISPLAY:
-    DOIT=True
+    DOIT = True
     @staticmethod
     def satimage(window_prefix, satimage):
         if not DISPLAY.DOIT:
-            pass
+            return
         DISPLAY.image(window_prefix + "_green", satimage.green)
         DISPLAY.image(window_prefix + "_swir", satimage.swir)
 
@@ -340,7 +367,7 @@ class DISPLAY:
         :return: Nothing.
         """
         if not DISPLAY.DOIT:
-            pass
+            return
 
         if normalize:
             image = cv2.normalize(image, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1)
@@ -356,7 +383,7 @@ class DISPLAY:
         :return: Nothing.
         """
         if not DISPLAY.DOIT:
-            pass
+            return
         while cv2.waitKey() != 27:
             pass
 
@@ -373,14 +400,15 @@ if __name__ == "__main__":
         process = ProcessImage(scene=scene,
                                reference_scene=reference_scene,
                                aligned_scene=aligned_scene)
-        aligned_image = process.align()
+        """aligned_image = process.align()
 
         if aligned_image is None:
             VALID = False
         else:
             VALID = True
-
-            ndsi = process.ndsi()
+            process.ndsi()"""
+        VALID = True
+        process.ndsi()
 
     except KeyboardInterrupt:
         sys.exit(2)
