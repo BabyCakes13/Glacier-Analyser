@@ -47,3 +47,9 @@ class SatImage:
     def write(self, filename):
         cv2.imwrite(filename.green_band, self.green)
         cv2.imwrite(filename.swir1_band, self.swir)
+
+
+class SatImageWithNDSI(SatImage):
+    def __init__(self, green, swir, ndsi):
+        SatImage.__init__(self, green, swir)
+        self.ndsi = ndsi
