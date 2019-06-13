@@ -125,7 +125,7 @@ class Process:
             self.mh.wait_all_process_done()
 
     @staticmethod
-    def process_handler(return_code):
+    def process_handler(task_name, return_code):
         return_codes = definitions.RETURN_CODES
         return_code = return_codes[return_code]
         print(return_code)
