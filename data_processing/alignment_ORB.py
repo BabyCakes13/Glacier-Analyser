@@ -28,7 +28,6 @@ class ProcessImage:
     def __init__(self, scene:sc.Scene, reference_scene: sc.Scene, aligned_scene: sc.Scene):
         self.image_16bit = sc.SatImage.read(scene)
         self.reference_16bit = sc.SatImage.read(reference_scene)
-        self.ndsi_16bit = None
         self.aligned_16bit = None
 
         self.scene = scene
@@ -40,7 +39,18 @@ class ProcessImage:
         NDSI first. Then align scene with reference, then align aligned with ndsi.
         :return:
         """
-        ndsi_image = NDSI.calculate_NDSI(self.image_16bit)
+        ndsi_image = None
+        if self.aligned_16bit is not None:
+            self.aligned_16bit = sc.SatImageWithNDSI(self.aligned_16bit.green,
+                                                     self.aligned_16bit.swir,
+                                                     NDSI.calculate_NDSI(self.aligned_16bit))
+            ndsi_image = self.aligned_16bit.ndsi
+        else:
+            self.image_16bit = sc.SatImageWithNDSI(self.image_16bit.green,
+                                                     self.image_16bit.swir,
+                                                     NDSI.calculate_NDSI(self.image_16bit))
+            ndsi_image = self.image_16bit.ndsi
+
         DISPLAY.image("ndsi", ndsi_image)
 
         # snow image is for contrast
@@ -49,6 +59,8 @@ class ProcessImage:
 
         print(blue("Snow pixels: "), blue(NDSI.get_snow_pixels(ndsi_image)))
         print(blue("Snow ratio: "), blue(NDSI.get_snow_pixels_ratio(ndsi_image)))
+
+        return ndsi_image
 
     def align(self):
         """
@@ -217,7 +229,11 @@ class AlignORB:
         aligned_result_green = cv2.warpAffine(self.input_img.green, affine, (width, height))
         aligned_result_swir  = cv2.warpAffine(self.input_img.swir, affine, (width, height))
 
-        aligned = sc.SatImage(aligned_result_green, aligned_result_swir)
+        if isinstance(self.input_img, sc.SatImageWithNDSI):
+            aligned_result_ndsi  = cv2.warpAffine(self.input_img.ndsi, affine, (width, height))
+            aligned = sc.SatImageWithNDSI(aligned_result_green, aligned_result_swir, aligned_result_ndsi)
+        else:
+            aligned = sc.SatImage(aligned_result_green, aligned_result_swir)
 
         DISPLAY.satimage("OUTPUT", aligned)
 
@@ -358,6 +374,13 @@ class DISPLAY:
         DISPLAY.image(window_prefix + "_green", satimage.green)
         DISPLAY.image(window_prefix + "_swir", satimage.swir)
 
+    def satimagewithndsi(window_prefix, satimagewithndsi):
+        if not DISPLAY.DOIT:
+            return
+        DISPLAY.image(window_prefix + "_green", satimagewithndsi.green)
+        DISPLAY.image(window_prefix + "_swir", satimagewithndsi.swir)
+        DISPLAY.image(window_prefix + "_ndsi", satimagewithndsi.ndsi)
+
     @staticmethod
     def image(window_name, image, normalize=True):
         """
@@ -400,15 +423,17 @@ if __name__ == "__main__":
         process = ProcessImage(scene=scene,
                                reference_scene=reference_scene,
                                aligned_scene=aligned_scene)
-        """aligned_image = process.align()
+
+        ndsi_image = process.ndsi()
+        aligned_image = process.align()
+
+        DISPLAY.satimagewithndsi("OUTPUT SCENE", process.aligned_16bit)
+        DISPLAY.satimage("REFERENCE SCENE", process.reference_16bit)
 
         if aligned_image is None:
             VALID = False
         else:
             VALID = True
-            process.ndsi()"""
-        VALID = True
-        process.ndsi()
 
     except KeyboardInterrupt:
         sys.exit(2)
