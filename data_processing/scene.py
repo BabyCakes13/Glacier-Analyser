@@ -64,3 +64,51 @@ class SatImageWithNDSI(SatImage):
         normalized = cv2.normalize(self.ndsi, None, 0, (1 << 16) - 1, cv2.NORM_MINMAX, cv2.CV_16UC1)
 
         cv2.imwrite(ndsipath, normalized)
+
+
+class DISPLAY:
+    DOIT = False
+    @staticmethod
+    def satimage(window_prefix, satimage):
+        if not DISPLAY.DOIT:
+            return
+        DISPLAY.image(window_prefix + "_green", satimage.green)
+        DISPLAY.image(window_prefix + "_swir", satimage.swir)
+
+    @staticmethod
+    def satimage_with_ndsi(window_prefix, satimagewithndsi):
+        if not DISPLAY.DOIT:
+            return
+        DISPLAY.image(window_prefix + "_green", satimagewithndsi.green)
+        DISPLAY.image(window_prefix + "_swir", satimagewithndsi.swir)
+        DISPLAY.image(window_prefix + "_ndsi", satimagewithndsi.ndsi)
+
+    @staticmethod
+    def image(window_name, image, normalize=True):
+        """
+        Displays an image in a cv2 window.
+        :param normalize: Check if wanting it in 8bit.
+        :param window_name: Name of the cv2 window.
+        :param image: cv2 image.
+        :return: Nothing.
+        """
+        if not DISPLAY.DOIT:
+            return
+
+        if normalize:
+            image = cv2.normalize(image, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1)
+
+        cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+        cv2.resizeWindow(window_name, 1000, 1000)
+        cv2.imshow(window_name, image)
+
+    @staticmethod
+    def wait():
+        """
+        Flushes the display image after pressing exit key.
+        :return: Nothing.
+        """
+        if not DISPLAY.DOIT:
+            return
+        while cv2.waitKey() != 27:
+            pass

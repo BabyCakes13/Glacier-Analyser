@@ -51,11 +51,11 @@ class ProcessImage:
                                                      NDSI.calculate_NDSI(self.image_16bit))
             ndsi_image = self.image_16bit.ndsi
 
-        DISPLAY.image("ndsi", ndsi_image)
+        sc.DISPLAY.image("ndsi", ndsi_image)
 
         # snow image is for contrast
         snow_image = NDSI.get_snow_image(ndsi_image, 0.5)
-        DISPLAY.image("snow", snow_image)
+        sc.DISPLAY.image("snow", snow_image)
 
         print(blue("Snow pixels: "), blue(NDSI.get_snow_pixels(ndsi_image)))
         print(blue("Snow ratio: "), blue(NDSI.get_snow_pixels_ratio(ndsi_image)))
@@ -100,11 +100,11 @@ class AlignORB:
         self.align_input = image_normnalized_8bit
         self.align_reference = reference_normnalized_8bit
 
-        DISPLAY.satimage("INPUT", self.input_img)
-        DISPLAY.satimage("REFERENCE", self.reference_img)
+        sc.DISPLAY.satimage("INPUT", self.input_img)
+        sc.DISPLAY.satimage("REFERENCE", self.reference_img)
 
-        DISPLAY.satimage("ALIGN_INPUT",     self.align_input)
-        DISPLAY.satimage("ALIGN_REFERENCE", self.align_reference)
+        sc.DISPLAY.satimage("ALIGN_INPUT",     self.align_input)
+        sc.DISPLAY.satimage("ALIGN_REFERENCE", self.align_reference)
 
     def downsample(self, image_16bit):
         """
@@ -208,7 +208,7 @@ class AlignORB:
         reference_points, image_points, pruned_matches_image = \
             self.pruneMatchesByDistance(matches, keypoints_ref_all, keypoints_img_all)
 
-        DISPLAY.image("MATCHES", pruned_matches_image)
+        sc.DISPLAY.image("MATCHES", pruned_matches_image)
 
         # create the affine transformation matrix and inliers
         affine, inliers = cv2.estimateAffine2D(image_points, reference_points, None, cv2.RANSAC)
@@ -239,7 +239,7 @@ class AlignORB:
         else:
             aligned = sc.SatImage(aligned_result_green, aligned_result_swir)
 
-        DISPLAY.satimage("OUTPUT", aligned)
+        sc.DISPLAY.satimage("OUTPUT", aligned)
 
         return aligned
 
@@ -368,53 +368,6 @@ class AlignORB:
 
         return comparison
 
-
-class DISPLAY:
-    DOIT = True
-    @staticmethod
-    def satimage(window_prefix, satimage):
-        if not DISPLAY.DOIT:
-            return
-        DISPLAY.image(window_prefix + "_green", satimage.green)
-        DISPLAY.image(window_prefix + "_swir", satimage.swir)
-
-    def satimagewithndsi(window_prefix, satimagewithndsi):
-        if not DISPLAY.DOIT:
-            return
-        DISPLAY.image(window_prefix + "_green", satimagewithndsi.green)
-        DISPLAY.image(window_prefix + "_swir", satimagewithndsi.swir)
-        DISPLAY.image(window_prefix + "_ndsi", satimagewithndsi.ndsi)
-
-    @staticmethod
-    def image(window_name, image, normalize=True):
-        """
-        Displays an image in a cv2 window.
-        :param window_name: Name of the cv2 window.
-        :param image: cv2 image.
-        :return: Nothing.
-        """
-        if not DISPLAY.DOIT:
-            return
-
-        if normalize:
-            image = cv2.normalize(image, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1)
-
-        cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
-        cv2.resizeWindow(window_name, 1000, 1000)
-        cv2.imshow(window_name, image)
-
-    @staticmethod
-    def wait():
-        """
-        Flushes the display image after pressing exit key.
-        :return: Nothing.
-        """
-        if not DISPLAY.DOIT:
-            return
-        while cv2.waitKey() != 27:
-            pass
-
-
 if __name__ == "__main__":
     """
     Handle multi process.
@@ -432,8 +385,8 @@ if __name__ == "__main__":
         aligned_image = process.align()
         process.write()
 
-        DISPLAY.satimagewithndsi("OUTPUT SCENE", process.aligned_16bit)
-        DISPLAY.satimage("REFERENCE SCENE", process.reference_16bit)
+        sc.DISPLAY.satimage_with_ndsi("OUTPUT SCENE", process.aligned_16bit)
+        sc.DISPLAY.satimage("REFERENCE SCENE", process.reference_16bit)
 
         if aligned_image is None:
             VALID = False
@@ -443,7 +396,7 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         sys.exit(2)
 
-    DISPLAY.wait()
+    sc.DISPLAY.wait()
 
     if VALID:
         sys.exit(0)
