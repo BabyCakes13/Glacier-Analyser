@@ -72,9 +72,13 @@ class ProcessImage:
         if self.aligned_16bit is None:
             return None
 
-        self.aligned_16bit.write(self.aligned_scene)
         return self.aligned_16bit
 
+    def write(self):
+        if self.aligned_16bit is not None:
+            self.aligned_16bit.write(self.aligned_scene)
+        else:
+            self.image_16bit.write(self.aligned_scene)
 
 class AlignORB:
     """
@@ -426,6 +430,7 @@ if __name__ == "__main__":
 
         ndsi_image = process.ndsi()
         aligned_image = process.align()
+        process.write()
 
         DISPLAY.satimagewithndsi("OUTPUT SCENE", process.aligned_16bit)
         DISPLAY.satimage("REFERENCE SCENE", process.reference_16bit)
