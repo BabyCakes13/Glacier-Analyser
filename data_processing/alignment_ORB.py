@@ -368,6 +368,7 @@ class AlignORB:
 
         return comparison
 
+
 if __name__ == "__main__":
     """
     Handle multi process.

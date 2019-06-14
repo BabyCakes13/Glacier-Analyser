@@ -1,6 +1,7 @@
 import cv2
 import os
 import definitions
+from colors import *
 
 
 class Scene:
@@ -22,7 +23,7 @@ class Scene:
         scene = None
 
         if band.endswith(definitions.GREEN_BAND_END):
-            split = band.split(definitions.SWIR1_BAND_END)
+            split = band.split(definitions.GREEN_BAND_END)
             scene = split[0]
         else:
             print("The file is not the green band.")
@@ -58,6 +59,7 @@ class SatImageWithNDSI(SatImage):
         SatImage.write(self, filename)
 
         path = os.path.split(filename.green_band)[0]
+        print(red(path))
         ndsipath = os.path.join(path, filename.get_scene_name() + "_NDSI.TIF")
 
         print("write this ", ndsipath)
