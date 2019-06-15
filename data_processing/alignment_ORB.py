@@ -1,5 +1,6 @@
 from __future__ import print_function
 import cv2
+import os
 from colors import *
 import numpy as np
 
@@ -7,20 +8,23 @@ import numpy as np
 import sys
 sys.path.append(sys.path[0] + '/..')
 from data_processing import scene as sc
-from data_processing.ndsi_calculator import NDSI
+from data_processing import ndsi_calculator as nc
+import definitions
 
 DEBUG_OUTLIERS = False
-DEBUG_TRANSFORM_MATRIX = True
+DEBUG_TRANSFORM_MATRIX = False
 
 MAX_FEATURES = 5000  # number of feature points taken
 GOOD_MATCH_PERCENT = 0.25
-ALLOWED_ERROR = 0.01  # the allowed rotation
-ALLOWED_INTEGRAL = 100  # the allowed translation
+ALLOWED_ROTATION = 0.01  # the allowed rotation
+ALLOWED_TRANSLATION = 100  # the allowed translation
 EUCLIDIAN_DISTANCE = 200  # the allowed distance between two points so that the match line is as straight as possible
 
 # the number of boxes the image will be split into
 ROWS_NUMBER = 8  # the number of rows the full image will be split into for box matching
 COLUMNS_NUMBER = 8  # the number of columns the full image will be split into for box matching
+
+NDSI_CSV = 'ndsi.csv'
 
 
 class ProcessImage:
@@ -37,48 +41,43 @@ class ProcessImage:
     def ndsi(self):
         """
         NDSI first. Then align scene with reference, then align aligned with ndsi.
-        :return:
+        :return: sc.SatImage
         """
-        ndsi_image = None
         if self.aligned_16bit is not None:
             self.aligned_16bit = sc.SatImageWithNDSI(self.aligned_16bit.green,
                                                      self.aligned_16bit.swir,
-                                                     NDSI.calculate_NDSI(self.aligned_16bit))
-            ndsi_image = self.aligned_16bit.ndsi
+                                                     nc.NDSI.calculate_NDSI(self.aligned_16bit))
+            image_with_ndsi_16bit = self.aligned_16bit
         else:
             self.image_16bit = sc.SatImageWithNDSI(self.image_16bit.green,
-                                                     self.image_16bit.swir,
-                                                     NDSI.calculate_NDSI(self.image_16bit))
-            ndsi_image = self.image_16bit.ndsi
+                                                   self.image_16bit.swir,
+                                                   nc.NDSI.calculate_NDSI(self.image_16bit))
+            image_with_ndsi_16bit = self.image_16bit
 
-        sc.DISPLAY.image("ndsi", ndsi_image)
-
-        # snow image is for contrast
-        snow_image = NDSI.get_snow_image(ndsi_image, 0.5)
-        sc.DISPLAY.image("snow", snow_image)
-
-        print(blue("Snow pixels: "), blue(NDSI.get_snow_pixels(ndsi_image)))
-        print(blue("Snow ratio: "), blue(NDSI.get_snow_pixels_ratio(ndsi_image)))
-
-        return ndsi_image
+        return image_with_ndsi_16bit
 
     def align(self):
         """
         Align scene with reference, then ndsi with aligned (the new reference )
         :return:
         """
-        first = AlignORB(self.image_16bit, self.reference_16bit)
-        self.aligned_16bit = first.align()
+        align = AlignORB(self.image_16bit, self.reference_16bit)
+        self.aligned_16bit = align.align()
         if self.aligned_16bit is None:
             return None
 
         return self.aligned_16bit
 
     def write(self):
-        if self.aligned_16bit is not None:
+        """
+        Write images to disk and to the csv
+        :return:
+        """
+        if self.aligned_16bit:
             self.aligned_16bit.write(self.aligned_scene)
         else:
-            self.image_16bit.write(self.aligned_scene)
+            print(red("Aligned 16 bit is none. Not writing."))
+
 
 class AlignORB:
     """
@@ -167,7 +166,8 @@ class AlignORB:
 
         return keypoints, descriptors
 
-    def pruneLowScoreMatches(self, matches):
+    @staticmethod
+    def prune_low_score_matches(matches):
         # best matches first
         matches.sort(key=lambda x: x.distance, reverse=False)
 
@@ -177,7 +177,7 @@ class AlignORB:
 
         return matches
 
-    def getAlignAffineTransform(self):
+    def get_align_affine_transformation(self):
         """
         The main aligning method. Find the feature key points in each image by splitting the image in boxes, so that the
         features are evenly distributed across the whole image, avoiding clusters of points in just one region, which
@@ -197,13 +197,17 @@ class AlignORB:
 
         keypoints_img_all   = keypoints_img_green + keypoints_img_swir
         keypoints_ref_all   = keypoints_ref_green + keypoints_ref_swir
-        descriptors_img_all = np.concatenate((descriptors_img_green, descriptors_img_swir), axis=0)
-        descriptors_ref_all = np.concatenate((descriptors_ref_green, descriptors_ref_swir), axis=0)
+        try:
+            descriptors_img_all = np.concatenate((descriptors_img_green, descriptors_img_swir), axis=0)
+            descriptors_ref_all = np.concatenate((descriptors_ref_green, descriptors_ref_swir), axis=0)
+        except ValueError:
+            print(red("The imaged are zero valued."))
+            return None
 
         matcher = cv2.DescriptorMatcher_create(cv2.DESCRIPTOR_MATCHER_BRUTEFORCE_HAMMING)
         matches = matcher.match(descriptors_ref_all, descriptors_img_all)
 
-        matches = self.pruneLowScoreMatches(matches)
+        matches = self.prune_low_score_matches(matches)
 
         reference_points, image_points, pruned_matches_image = \
             self.pruneMatchesByDistance(matches, keypoints_ref_all, keypoints_img_all)
@@ -224,7 +228,7 @@ class AlignORB:
 
     def align(self):
 
-        affine = self.getAlignAffineTransform()
+        affine = self.get_align_affine_transformation()
         if affine is None:
             return None
 
@@ -362,9 +366,9 @@ class AlignORB:
         :param height: Height of the transform matrix.
         :return: The comparison numpy matrix.
         """
-        comparison = np.full((width, height), ALLOWED_ERROR)
-        comparison[0, 2] = ALLOWED_INTEGRAL
-        comparison[1, 2] = ALLOWED_INTEGRAL
+        comparison = np.full((width, height), ALLOWED_ROTATION)
+        comparison[0, 2] = ALLOWED_TRANSLATION
+        comparison[1, 2] = ALLOWED_TRANSLATION
 
         return comparison
 
@@ -373,6 +377,7 @@ if __name__ == "__main__":
     """
     Handle multi process.
     """
+    VALID = True
     scene           = sc.Scene(sys.argv[1], sys.argv[2])
     reference_scene = sc.Scene(sys.argv[3], sys.argv[4])
     aligned_scene   = sc.Scene(sys.argv[5], sys.argv[6])
@@ -386,14 +391,8 @@ if __name__ == "__main__":
         aligned_image = process.align()
         process.write()
 
-        sc.DISPLAY.satimage_with_ndsi("OUTPUT SCENE", process.aligned_16bit)
-        sc.DISPLAY.satimage("REFERENCE SCENE", process.reference_16bit)
-
         if aligned_image is None:
             VALID = False
-        else:
-            VALID = True
-
     except KeyboardInterrupt:
         sys.exit(2)
 

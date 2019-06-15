@@ -62,7 +62,7 @@ class SatImageWithNDSI(SatImage):
         print(red(path))
         ndsipath = os.path.join(path, filename.get_scene_name() + "_NDSI.TIF")
 
-        print("write this ", ndsipath)
+        print("create this ", ndsipath)
         normalized = cv2.normalize(self.ndsi, None, 0, (1 << 16) - 1, cv2.NORM_MINMAX, cv2.CV_16UC1)
 
         cv2.imwrite(ndsipath, normalized)

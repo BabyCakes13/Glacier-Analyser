@@ -81,13 +81,13 @@ class OutputDirHandler:
         :param current_dir: The full path to the current glacier directory.
         :return: A tuple formed of the two maps.
         """
-        self.make_glacier_dir()
+
         pr_dirs_map = self.get_pr_dir_map()
         pr_bands_map = self.get_pr_bands_map()
 
         return pr_dirs_map, pr_bands_map
 
-    def make_glacier_dir(self) -> None:
+    def make_glacier_dir(self):
         """
         Creates and returns the path to the directory with the current glacier name.
         :return: None
@@ -98,6 +98,8 @@ class OutputDirHandler:
         if os.path.exists(glacier_dir):
             shutil.rmtree(glacier_dir)
         os.mkdir(glacier_dir)
+
+        return glacier_dir
 
     def get_glacier(self) -> str:
         """
@@ -130,8 +132,9 @@ class OutputDirHandler:
         :param path_row: Path and row of image.
         :return:
         """
+        glacier_dir = self.make_glacier_dir()
         path_row_dir_filename = str(path_row[0]) + "_" + str(path_row[1])
-        path_row_dir = os.path.join(self.output_dir, path_row_dir_filename)
+        path_row_dir = os.path.join(glacier_dir, path_row_dir_filename)
 
         if os.path.exists(path_row_dir):
             shutil.rmtree(path_row_dir)

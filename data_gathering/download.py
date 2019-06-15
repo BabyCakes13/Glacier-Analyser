@@ -1,6 +1,5 @@
 import csv
 from colors import *
-import json
 import os
 import shutil
 import subprocess
