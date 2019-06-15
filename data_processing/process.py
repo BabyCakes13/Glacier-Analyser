@@ -114,7 +114,6 @@ class Process:
         :param aligned_scene: The scene to be aligned.
         :param scene: The scene object representing the scene which will be aligned based on the reference.
         :param reference_scene: The reference scene to which the rest will be aligned.
-        :param pr_dirs_map: The map which contains all the path and row pairs with their full path to the output dir for
         creating the output aligned image create path.
         :return:
         """

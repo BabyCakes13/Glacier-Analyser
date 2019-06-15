@@ -53,7 +53,8 @@ MAX_PROCESSES = 4
 RETURN_CODES = {
     0: (green("SUCCESS")),
     1: (red("FAILURE")),
-    2: (yellow("INTERRUPTED"))
+    2: (yellow("INTERRUPTED")),
+    3: (cyan("OTHER ERROR")),
 }
 
 # print codes

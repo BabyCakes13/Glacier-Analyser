@@ -36,36 +36,43 @@ class SatImage:
     Satellite image holding a scene.
     """
     def __init__(self, green, swir):
+        print("init satimage")
         self.green = green
         self.swir = swir
 
     @staticmethod
     def read(image_scene):
+        print("read satimage")
         img = SatImage(cv2.imread(image_scene.green_band, cv2.IMREAD_LOAD_GDAL),
                        cv2.imread(image_scene.swir1_band, cv2.IMREAD_LOAD_GDAL))
         return img
 
     def write(self, filename):
+        print("write satimage")
         cv2.imwrite(filename.green_band, self.green)
         cv2.imwrite(filename.swir1_band, self.swir)
 
 
 class SatImageWithNDSI(SatImage):
     def __init__(self, green, swir, ndsi):
+        print("init satimagendsi")
         SatImage.__init__(self, green, swir)
         self.ndsi = ndsi
 
     def write(self, filename):
+        print("write satimagendsi")
+        print(filename.green_band)
+        print(filename.swir1_band)
         SatImage.write(self, filename)
 
+        print("Done writing satimage.")
         path = os.path.split(filename.green_band)[0]
-        print(red(path))
-        ndsipath = os.path.join(path, filename.get_scene_name() + "_NDSI.TIF")
-
-        print("create this ", ndsipath)
+        ndsi_path = os.path.join(path, filename.get_scene_name() + "_NDSI.TIF")
         normalized = cv2.normalize(self.ndsi, None, 0, (1 << 16) - 1, cv2.NORM_MINMAX, cv2.CV_16UC1)
 
-        cv2.imwrite(ndsipath, normalized)
+        print("ndsi path: ", ndsi_path)
+
+        cv2.imwrite(ndsi_path, normalized)
 
 
 class DISPLAY:

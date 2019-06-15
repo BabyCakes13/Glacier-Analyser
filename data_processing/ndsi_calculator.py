@@ -15,14 +15,14 @@ class NDSI:
     # says that NDSI = (Band green - band SWIR) / (Band green + Band SWIR)
     @staticmethod
     def calculate_NDSI(satimage, math_dtype=numpy.float32):
-
+        print("calculate_NDSI")
+        # change image bit depth to 32 bit to allow math without saturation
         green_nan = satimage.green.astype(math_dtype)
         swir_nan = satimage.swir.astype(math_dtype)
 
         green_nan[green_nan == 0] = numpy.nan
         swir_nan[swir_nan == 0] = numpy.nan
 
-        # change image bit depth to 32 bit to allow math without saturation
         img = sc.SatImage(green_nan, swir_nan)
 
         # ignore division by zero because image has borders with 0 values
@@ -30,7 +30,7 @@ class NDSI:
 
         numerator = numpy.subtract(img.green, img.swir)
         if math_dtype == numpy.int32:
-            numerator = numpy.multiply(numerator, 0x7FFF) #TODO: why god why
+            numerator = numpy.multiply(numerator, 0x7FFF)
         denominator = numpy.add(img.green, img.swir)
         ndsi = numpy.divide(numerator, denominator)
 
@@ -40,23 +40,27 @@ class NDSI:
         if math_dtype == numpy.int32:
             ndsi = numpy.add(ndsi, 0x7FFF)
 
-        # print("ndsi data range is ", ndsi.min(), " ", ndsi.max())
-
         return ndsi
 
     @staticmethod
     def get_snow_image(ndsi, threshold=0.5):
+        print("get_snow_image")
+
         snow = ndsi.copy()
         snow[snow <= threshold] = -1
         return snow
 
     @staticmethod
     def get_snow_pixels(snowImage, threshold=0.5):
+        print("get_snow_pixels")
+
         snow_pixels = len(snowImage[snowImage > threshold])
         return snow_pixels
 
     @staticmethod
     def get_snow_pixels_ratio(snow_image, threshold=0.5):
+        print("get_snow_pixels_ratio")
+
         snow_pixels = snow_image[snow_image > threshold].size
         all_pixels = snow_image.size
         ratio = snow_pixels / all_pixels

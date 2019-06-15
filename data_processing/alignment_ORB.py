@@ -43,6 +43,7 @@ class ProcessImage:
         NDSI first. Then align scene with reference, then align aligned with ndsi.
         :return: sc.SatImage
         """
+        print("ndsi")
         if self.aligned_16bit is not None:
             self.aligned_16bit = sc.SatImageWithNDSI(self.aligned_16bit.green,
                                                      self.aligned_16bit.swir,
@@ -61,6 +62,7 @@ class ProcessImage:
         Align scene with reference, then ndsi with aligned (the new reference )
         :return:
         """
+        print("align")
         align = AlignORB(self.image_16bit, self.reference_16bit)
         self.aligned_16bit = align.align()
         if self.aligned_16bit is None:
@@ -73,7 +75,10 @@ class ProcessImage:
         Write images to disk and to the csv
         :return:
         """
+        print("write ProcessImage")
+        print(self.aligned_16bit)
         if self.aligned_16bit:
+            print("Is not none. Writing.")
             self.aligned_16bit.write(self.aligned_scene)
         else:
             print(red("Aligned 16 bit is none. Not writing."))
@@ -84,6 +89,7 @@ class AlignORB:
     Class which gets two images as input and alignes the image based on the reference.
     """
     def __init__(self, input_img: sc.SatImage, reference_img: sc.SatImage):
+        print("align init")
         # transform from scientific notation to decimal for easy check
         np.set_printoptions(suppress=True, precision=4)
 
@@ -111,6 +117,8 @@ class AlignORB:
         :param image_16bit:
         :return:
         """
+        print("downsample")
+
         image_8bit_green = (image_16bit.green >> 8).astype(np.uint8)
         image_8bit_swir = (image_16bit.swir >> 8).astype(np.uint8)
 
@@ -123,6 +131,7 @@ class AlignORB:
         :param bits:
         :return:
         """
+        print("normalize")
         normalized_image_8bit_green = cv2.normalize(image.green, None, 0, (1 << bits)-1, cv2.NORM_MINMAX)
         normalized_image_8bit_swir = cv2.normalize(image.swir,  None, 0, (1 << bits)-1, cv2.NORM_MINMAX)
 
@@ -138,6 +147,7 @@ class AlignORB:
         :param columns: Number of columns in which the image will be split
         :return: The keypoints and descriptors of the whole image
         """
+        print("box detect and computer")
         orb = cv2.ORB_create(nfeatures=MAX_FEATURES // rows // columns, scaleFactor=2, patchSize=100)
 
         # list of keypoints of the whole image
@@ -169,6 +179,7 @@ class AlignORB:
     @staticmethod
     def prune_low_score_matches(matches):
         # best matches first
+        print("prune matches")
         matches.sort(key=lambda x: x.distance, reverse=False)
 
         # remove matches with low score
@@ -188,7 +199,7 @@ class AlignORB:
         :return: Returns the result of validating the affine matrix and the pruned matches image for writing it to the
         disk.
         """
-
+        print("get align matrix")
         # detect and compute the feature points by splitting the image in boxes for good feature spread
         keypoints_img_green, descriptors_img_green = self.boxedDetectAndCompute(self.align_input.green)
         keypoints_img_swir,  descriptors_img_swir  = self.boxedDetectAndCompute(self.align_input.swir)
@@ -227,7 +238,7 @@ class AlignORB:
         return affine
 
     def align(self):
-
+        print("align in align")
         affine = self.get_align_affine_transformation()
         if affine is None:
             return None
@@ -276,6 +287,7 @@ class AlignORB:
         :return: Returns the reference and current image keypoint pairs which were left after the pruning, as well as
         the pruned matches cv2 image.
         """
+        print("prune matches by distance")
         # go through point matches and prune the bad results
         matches_pruned = []
         reference_points = []
@@ -317,6 +329,7 @@ class AlignORB:
         :return: If the distance is smaller than the allowed euclidean distance, returns True, else, the match is not
         valid and returns False
         """
+        print("validate euclidean")
         # coordinates of the keypoints for calculating the euclidean distance
         reference_x = reference_point[0]
         reference_y = reference_point[1]
@@ -335,6 +348,7 @@ class AlignORB:
         :param transform: The transformation matrix which will be wrapped around the current image.
         :return: The result of the validation.
         """
+        print("validat transform")
         # convert from scientific notation to decimal notation for better data interpretation
         np.set_printoptions(suppress=True, precision=4)
 
@@ -377,6 +391,7 @@ if __name__ == "__main__":
     """
     Handle multi process.
     """
+    print("main")
     VALID = True
     scene           = sc.Scene(sys.argv[1], sys.argv[2])
     reference_scene = sc.Scene(sys.argv[3], sys.argv[4])
@@ -395,6 +410,8 @@ if __name__ == "__main__":
             VALID = False
     except KeyboardInterrupt:
         sys.exit(2)
+    except Exception:
+        sys.exit(3)
 
     sc.DISPLAY.wait()
 
