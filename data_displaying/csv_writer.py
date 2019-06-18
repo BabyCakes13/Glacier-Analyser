@@ -1,14 +1,14 @@
 import csv
 import os
+
 import definitions
 from util import strings
-
 
 ALIGN_CSV = 'align'
 NDSI_CSV = 'ndsi'
 
 
-class CSV:
+class CSVWriter:
     def __init__(self, output, arguments, path=None, row=None):
         """
         Writes or appends to a csv based on the option (either align or process ndsi.
@@ -35,7 +35,10 @@ class CSV:
     def create(self) -> None:
         """Verifies if the first column, which represents the names of the columns, exist. If it doesn't, that means
                the csv file is not created yet. Create it if it doesn't exist, append if it does."""
-        if os.path.isfile(self.csv_path) is False:
+        if os.path.isfile(self.csv_path):
+            print("Is file.")
+            return
+        else:
             print(definitions.PRINT_CODES[0] + "Creating csv...")
             with open(self.csv_path, "w") as file:
                 writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -45,7 +48,7 @@ class CSV:
                     writer.writerow(self.get_default_align_csv())
                 # ndsi
                 elif NDSI_CSV in self.csv_name:
-                    writer.writerow(strings.get_default_ndsi_csv())
+                    writer.writerow(self.get_default_ndsi_csv())
                 else:
                     print(definitions.PRINT_CODES[1] + "There option is not valid. Not writing.")
                     return
@@ -58,6 +61,8 @@ class CSV:
         :return: None
         """
         result = self.arguments
+
+        print(result)
 
         with open(self.csv_path, "a") as file:
             writer = csv.writer(file)
@@ -78,9 +83,11 @@ class CSV:
         attributes = [
             'GLACIER_ID',
             'SCENE',
+            'YEAR',
+            'MONTH',
+            'DAY',
             'PATH',
             'ROW',
             'SNOW_RATIO'
         ]
         return attributes
-

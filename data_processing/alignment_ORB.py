@@ -10,7 +10,8 @@ import sys
 sys.path.append(sys.path[0] + '/..')
 from data_processing import scene as sc
 from data_processing import ndsi_calculator as nc
-from data_displaying import csv
+from data_displaying import csv_writer
+from data_gathering import scene_data as sd
 
 DEBUG_OUTLIERS = False
 DEBUG_TRANSFORM_MATRIX = False
@@ -72,6 +73,11 @@ class ProcessImage:
         glacier_dir = pathlib.Path(path).parents[1]
         parent_dir, glacier_id = os.path.split(glacier_dir)
 
+        h = sd.SceneData(scene=scene)
+        year = h.get_year()
+        month = h.get_month()
+        day = h.get_day()
+
         path_row = path_row.split("_")
         path = path_row[0]
         row = path_row[1]
@@ -79,15 +85,18 @@ class ProcessImage:
         arguments = [
             glacier_id,
             scene,
+            year,
+            month,
+            day,
             path,
             row,
             snow_ratio,
         ]
 
-        h = csv.CSV(output=glacier_dir,
-                    arguments=arguments,
-                    path=path,
-                    row=row)
+        h = csv_writer.CSVWriter(output=glacier_dir,
+                                 arguments=arguments,
+                                 path=path,
+                                 row=row)
         h.start()
 
     def align(self):

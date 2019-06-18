@@ -2,7 +2,7 @@ from colors import *
 import os
 import pathlib
 import definitions
-from data_displaying import csv
+from data_displaying import csv_writer
 from data_gathering import scene_data as sd
 from data_preparing import output_dir_handler as odh
 from data_preparing import multiprocess_handler as mh
@@ -259,7 +259,7 @@ class Process:
             ratio
         ]
 
-        h = csv.CSV(output=glacier_dir,
-                    arguments=arguments)
+        h = csv_writer.CSVWriter(output=glacier_dir,
+                                 arguments=arguments)
         h.start()
 
