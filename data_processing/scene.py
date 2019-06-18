@@ -1,7 +1,6 @@
 import cv2
 import os
 import definitions
-from colors import *
 
 
 class Scene:
@@ -59,10 +58,7 @@ class SatImageWithNDSI(SatImage):
         SatImage.write(self, filename)
 
         path = os.path.split(filename.green_band)[0]
-        print(red(path))
         ndsipath = os.path.join(path, filename.get_scene_name() + "_NDSI.TIF")
-
-        print("create this ", ndsipath)
         normalized = cv2.normalize(self.ndsi, None, 0, (1 << 16) - 1, cv2.NORM_MINMAX, cv2.CV_16UC1)
 
         cv2.imwrite(ndsipath, normalized)

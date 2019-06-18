@@ -17,9 +17,6 @@ GLACIER_DATASET_PATH = os.path.join(FILES_DIR, GLACIER_DATASET_FILENAME + '.csv'
 JSON_QUERY = 'query.json'
 DEFAULT_SCENE_NAME = None
 DEFAULT_BIG_DIR = None
-ALIGN_CSV = 'align.csv'
-NDSI_CSV = 'ndsi.csv'
-
 
 # bands
 GREEN_BAND_END = '_B3.TIF'
@@ -58,7 +55,7 @@ RETURN_CODES = {
 
 # print codes
 PRINT_CODES = [
-    "[INFO]",
-    red("[ERROR]"),
-    blue("[DONE]")
+    "[INFO] ",
+    red("[ERROR] "),
+    blue("[DONE] ")
 ]

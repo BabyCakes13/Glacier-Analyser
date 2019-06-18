@@ -1,6 +1,7 @@
 from __future__ import print_function
 import cv2
 import os
+import pathlib
 from colors import *
 import numpy as np
 
@@ -9,6 +10,7 @@ import sys
 sys.path.append(sys.path[0] + '/..')
 from data_processing import scene as sc
 from data_processing import ndsi_calculator as nc
+from data_displaying import csv
 import definitions
 
 DEBUG_OUTLIERS = False
@@ -24,7 +26,7 @@ EUCLIDIAN_DISTANCE = 200  # the allowed distance between two points so that the 
 ROWS_NUMBER = 8  # the number of rows the full image will be split into for box matching
 COLUMNS_NUMBER = 8  # the number of columns the full image will be split into for box matching
 
-NDSI_CSV = 'ndsi.csv'
+NDSI_CSV = 'ndsi'
 
 
 class ProcessImage:
@@ -52,9 +54,42 @@ class ProcessImage:
             self.image_16bit = sc.SatImageWithNDSI(self.image_16bit.green,
                                                    self.image_16bit.swir,
                                                    nc.NDSI.calculate_NDSI(self.image_16bit))
+            h = nc.NDSI()
+            ndsi = nc.NDSI.calculate_NDSI(self.image_16bit)
+            snow_image = h.get_snow_image(ndsi=ndsi)
+            snow_pixels_ratio = h.get_snow_pixels_ratio(snow_image=snow_image, threshold=0.5)
+
             image_with_ndsi_16bit = self.image_16bit
+            self.write_ndsi_csv(path=aligned_scene.green_band,
+                                scene=aligned_scene.get_scene_name(),
+                                snow_ratio=snow_pixels_ratio)
 
         return image_with_ndsi_16bit
+
+    @staticmethod
+    def write_ndsi_csv(path, scene, snow_ratio):
+        path_row_dir = pathlib.Path(path).parents[0]
+        glacier_dir, path_row = os.path.split(path_row_dir)
+        glacier_dir = pathlib.Path(path).parents[1]
+        parent_dir, glacier_id = os.path.split(glacier_dir)
+
+        path_row = path_row.split("_")
+        path = path_row[0]
+        row = path_row[1]
+
+        arguments = [
+            glacier_id,
+            scene,
+            path,
+            row,
+            snow_ratio,
+        ]
+
+        h = csv.CSV(output=glacier_dir,
+                    arguments=arguments,
+                    path=path,
+                    row=row)
+        h.start()
 
     def align(self):
         """
@@ -352,10 +387,10 @@ class AlignORB:
             print("Comparison \n", compare)
 
         if np.less_equal(difference, compare).all():
-            print("Transform is good.")
+            # print("Transform is good.")
             return True
         else:
-            print("Transform is bad.")
+            # print("Transform is bad.")
             return False
 
     @staticmethod
