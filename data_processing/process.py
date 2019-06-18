@@ -77,7 +77,7 @@ class Process:
         pr_dirs_map, pr_bands_map = h.prepare_path_row()
 
         for path_row, bands in pr_bands_map.items():
-            green_band_list, swir1_band_list = self.separate_bands_on_type(bands)
+            green_band_list, swir1_band_list = self.separate_and_sort_bands_on_type(bands)
             scenes = self.make_scenes(green_band_list=green_band_list,
                                       swir1_band_list=swir1_band_list)
             output_dir = self.assign_path_row_directory(path_row=path_row, pr_dirs_map=pr_dirs_map)
@@ -100,8 +100,9 @@ class Process:
                 break
 
             self.mh.wait_all_process_done()
-            self.write_align_csv(path_row=path_row,
-                                 output=output_dir)
+            # don't write alignment csv until the ndsi work is tested.
+            # self.write_align_csv(path_row=path_row,
+                                 # output=output_dir)
 
         if self.INTERRUPT_SIGNAL:
             return 2
@@ -160,14 +161,24 @@ class Process:
         aligned_scene = sc.Scene(aligned_green_path, aligned_swir1_path)
         return aligned_scene
 
-    def separate_bands_on_type(self, bands_list) -> tuple:
+    def separate_and_sort_bands_on_type(self, bands_list) -> tuple:
         """
-        Separated the list composed of both green and swir1 files into two separate green and swir1 lists.
+        Cut the list composed of both green and swir1 files into two separate green and swir1 lists. Sorts then based on
+        their time of the scene, for time analysis.
         :param bands_list: List composed of green and swir1 files.
         :return: Tuple formed of the separated green and swir1 files.
         """
         green_bands = self.get_bands_endwith(bands_list, definitions.GREEN_BAND_END)
         swir1_bands = self.get_bands_endwith(bands_list, definitions.SWIR1_BAND_END)
+
+        green_bands.sort()
+        swir1_bands.sort()
+
+        for band in green_bands:
+            print(band)
+
+        for band in green_bands:
+            print(band)
 
         return green_bands, swir1_bands
 
@@ -248,8 +259,7 @@ class Process:
             ratio
         ]
 
-        h = csv.CSV(csv_name=definitions.ALIGN_CSV,
-                    output=glacier_dir,
+        h = csv.CSV(output=glacier_dir,
                     arguments=arguments)
         h.start()
 

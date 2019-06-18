@@ -11,7 +11,6 @@ sys.path.append(sys.path[0] + '/..')
 from data_processing import scene as sc
 from data_processing import ndsi_calculator as nc
 from data_displaying import csv
-import definitions
 
 DEBUG_OUTLIERS = False
 DEBUG_TRANSFORM_MATRIX = False
@@ -418,6 +417,7 @@ if __name__ == "__main__":
     aligned_scene   = sc.Scene(sys.argv[5], sys.argv[6])
 
     try:
+        print("Scene: ", scene.get_scene_name())
         process = ProcessImage(scene=scene,
                                reference_scene=reference_scene,
                                aligned_scene=aligned_scene)
