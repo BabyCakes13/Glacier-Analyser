@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import pandas as pd
+from stat
 
 
 class CSVReader:
@@ -7,22 +8,34 @@ class CSVReader:
         self.csv = csv
 
     def read_csv(self):
-        d = pd.read_csv(self.csv)
-        year = d['RESULT']
-        sea_levels = d['CSIRO_SEALEVEL_INCHES']
-        plt.scatter(year, sea_levels, edgecolors='r')
-        plt.xlabel('Year')
-        plt.ylabel('Sea Level (inches)')
-        plt.title('Rise in Sealevel')
+        h = pd.read_csv(self.csv)
+        snow_coverage = h['SNOW_RATIO']
+        date = self.combine_year_month_day()
+
+        plt.xlabel('Years')
+        plt.ylabel('Results')
+        plt.title('Results over years.')
+        plt.xticks(rotation=90)
+
+        plt.plot(date, snow_coverage, linestyle='-', marker='o')
         plt.show()
+
+    def combine_year_month_day(self):
+        """
+        Combines the year, month and day for each result in the ndsi csv.
+        :return:
+        """
+        h = pd.read_csv(self.csv)
+        years = h['YEAR']
+        months = h['MONTH']
+        day = h['DAY']
+
+        combined = [str(a) + "-" + str(b) + "-" + str(c) for a, b, c in zip(years, months, day)]
+        return combined
 
 
 if __name__ == "__main__":
-    girls_grades = [89, 90, 70, 89, 100, 80, 90, 100, 80, 34]
-    boys_grades = [30, 29, 49, 48, 100, 48, 38, 45, 20, 30]
-    grades_range = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-    plt.scatter(grades_range, girls_grades, color='r')
-    plt.scatter(grades_range, boys_grades, color='g')
-    plt.xlabel('Grades Range')
-    plt.ylabel('Grades Scored')
-    plt.show()
+    # csv = CSVReader("/storage/maria/D/Programming/Facultate/test_12_06/AF5Q112C0025_69.552_35.438/ndsi_152_036.csv")
+    # csv = CSVReader("/storage/maria/D/Programming/Facultate/test_12_06/AF5Q112C0025_69.552_35.438/ndsi_153_035.csv")
+    csv = CSVReader("/storage/maria/D/Programming/Facultate/test_12_06/AF5Q112B0009_68.891_34.807/ndsi_153_036.csv")
+    csv.read_csv()
