@@ -115,8 +115,10 @@ class CSVReader:
                 output = model_fit.forecast(steps=COUNT)
             except:
                 #prepare next iteration of model estimating
-                history.append((test[index][0], observed))
-                continue
+                if(index < len(test)):
+                    observed = test[index][1]
+                    history.append((test[index][0], observed))
+                    continue
 
             last_model = model
             last_model_fit = model_fit
@@ -132,6 +134,7 @@ class CSVReader:
                 #prepare next iteration of model estimating
                 history.append((test[index][0], observed))
                 predictions.append((test[index][0], predicted))
+                print('predicted=%f, expected=%f' % (predicted, observed))
             else:
 
                 for predicted in output[0]:
@@ -141,7 +144,6 @@ class CSVReader:
                     index+=1
                 break
 
-            print('predicted=%f, expected=%f' % (predicted, observed))
 
         #self.plot_results("train", train)
         #self.plot_results("test", test)
