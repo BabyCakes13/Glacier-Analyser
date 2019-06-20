@@ -1,9 +1,18 @@
-import datetime
+#!/usr/bin/env python3
 
-import matplotlib.pyplot as plt
+import datetime
+import sys
+
+import matplotlib
+matplotlib.use('gtk3cairo')
+from matplotlib import pyplot as plt
+import collections
 import numpy as np
 import pandas as pd
 from statsmodels.tsa.arima_model import ARIMA
+
+from pandas.plotting import register_matplotlib_converters
+register_matplotlib_converters()
 
 # THRESHOLD = 1 # removes the big outliers
 THRESHOLD = 1  # removes also the zero values from the down level
@@ -12,8 +21,10 @@ THRESHOLD = 1  # removes also the zero values from the down level
 class CSVReader:
     def __init__(self, csv):
         self.csv = csv
-        x, y = self.read_csv()
-        self.plot_results(x, y)
+        self.data_sorted = self.read_csv()
+
+        #self.plot_results(data)
+        self.plot_show()
 
     def read_csv(self):
         """
@@ -23,24 +34,42 @@ class CSVReader:
         h = pd.read_csv(self.csv)
         snow = h['SNOW_RATIO']
         dates = self.create_datetime()
-        sorted(dates)
 
-        results = dict(zip(snow, dates))
-        snow_outliers = self.detect_outliers(snow, THRESHOLD)
-        results_normalized = {k: v for k, v in results.items() if k not in snow_outliers}
+        input_data = list(zip(dates, snow))
+        input_data.sort()
 
-        snow_normalized = list(results_normalized.keys())
-        dates_normalized = list(results_normalized.values())
+        self.plot_results ("Sorted INPUT data", input_data)
 
-        return dates_normalized, snow_normalized
+        #input_data = self.remove_zeros(input_data)
 
-    def plot_results(self, x, y):
+        #self.plot_results ("NO zeros", input_data)
+
+        input_data = self.remove_outliers(input_data, THRESHOLD)
+
+        self.plot_results ("Inliers", input_data)
+
+        self.make_arima(input_data)
+
+        return input_data
+
+    def remove_zeros(self, input, threshold = 0.002):
+        output = []
+
+        for d in input:
+            if d[1] > threshold:
+                output.append(d)
+
+        return output
+
+    def plot_results(self, title, data):
         plt.xlabel('Years')
         plt.ylabel('Results')
-        plt.title('Results over years.')
         plt.xticks(rotation=90)
 
-        plt.plot(x, y, linestyle='-', marker='o')
+        plt.plot(*zip(*data), linestyle='-', marker='o', label=title)
+
+    def plot_show(self):
+        plt.legend(loc='upper left')
         plt.show()
 
     def create_datetime(self):
@@ -60,23 +89,77 @@ class CSVReader:
 
         return dates
 
-    def make_arima(self, dates, snow):
-        train, test, history = self.make_test_train(snow)
-
+    def make_arima(self, dataset):
+        COUNT = 10
         predictions = []
-        dates = pd.date_range(dates[0], dates[len(dates) - 1], freq='MS')
-        for t in range(len(test)):
-            model = ARIMA(snow, order=(len(history), 2, 1), dates=dates)
-            model_fit = model.fit()
-            output = model_fit.forecast()
-            yhat = output[0]
-            obs = test[t]
-            history.append(obs)
-            predictions.append(yhat)
-            print('predicted=%f, expected=%f' % (yhat, obs))
-        plt.plot(test)
-        plt.plot(predictions, color='red')
-        plt.show()
+        train, test, history = self.make_test_train(dataset)
+
+        #TODO: this might be removed and just specify period to ARIMA directly
+        fake_dates = pd.date_range(history[0][0], periods=100, freq='M')
+        future_dates = pd.date_range(dataset[len(dataset) - 1][0], periods=COUNT+1, freq='M')
+
+        print(fake_dates)
+
+        print ("Fake dates count ", len(fake_dates), " values: ", fake_dates)
+        print ("Train datas count ", len(history), " values: ", history)
+
+        last_model = None
+        last_model_fit = None
+
+        for index in range(len(test) + COUNT):
+            print("estimating on: ", history)
+            real_dates, ndsi = zip(*history)
+            try:
+                model = ARIMA(ndsi, order=(5, 1, 0), dates=fake_dates)
+                model_fit = model.fit()
+                output = model_fit.forecast(steps=COUNT)
+            except:
+                #prepare next iteration of model estimating
+                history.append((test[index][0], observed))
+                continue
+
+            last_model = model
+            last_model_fit = model_fit
+
+            predicted = output[0][0]
+            error = output[1][0]
+
+            print("outpout is ", output)
+            print("predicted is ", predicted)
+
+            if(index < len(test)):
+                observed = test[index][1]
+                #prepare next iteration of model estimating
+                history.append((test[index][0], observed))
+                predictions.append((test[index][0], predicted))
+            else:
+
+                for predicted in output[0]:
+                    #prepare next iteration of model estimating
+                    history.append((future_dates[index - len(test)].date(), predicted))
+                    predictions.append((future_dates[index - len(test)].date(), predicted))
+                    index+=1
+                break
+
+            print('predicted=%f, expected=%f' % (predicted, observed))
+
+        #self.plot_results("train", train)
+        #self.plot_results("test", test)
+        self.plot_results("predicted", predictions)
+
+
+        #for t in range(len(test)):
+        #    model = ARIMA(snow, order=(len(history), 2, 1), dates=dates)
+        #    model_fit = model.fit()
+        #    output = model_fit.forecast()
+        #    yhat = output[0]
+        #    obs = test[t]
+        #    history.append(obs)
+        #    predictions.append(yhat)
+        #    print('predicted=%f, expected=%f' % (yhat, obs))
+        #plt.plot(test)
+        #plt.plot(predictions, color='red')
+        #plt.show()
 
     def make_stationary(self, dataset):
         snow = np.log(dataset)
@@ -118,34 +201,35 @@ class CSVReader:
         return train, test, history
 
     @staticmethod
-    def detect_outliers(dataset, threshold):
+    def remove_outliers(dataset, threshold):
         """
         Remove outliers from the datased based on the z-test with the specified threshold
         :param dataset: The set of data which will have its outliers removed.
         :param threshold: Threshold for detecting outliers.
         :return: A list formed of outliers from the dataset.
         """
-        outliers = []
-        mean_1 = np.mean(dataset)
-        std_1 = np.std(dataset)
+        inliers = []
+        dates,ndsi = zip(*dataset)
+        mean = np.mean(ndsi)
+        std = np.std(ndsi)
 
-        for snow in dataset:
-            z_score = (snow - mean_1) / std_1
-            if np.abs(z_score) > threshold:
-                outliers.append(snow)
+        for entry in dataset:
+            z_score = (entry[1] - mean) / std
+            if np.abs(z_score) < threshold:
+                inliers.append(entry)
 
-        return outliers
+        return inliers
 
 
 if __name__ == "__main__":
     # csv = CSVReader("/storage/maria/D/Programming/Facultate/test_12_06/AF5Q112C0025_69.552_35.438/ndsi_152_036.csv")
     # csv = CSVReader("/storage/maria/D/Programming/Facultate/test_12_06/AF5Q112C0025_69.552_35.438/ndsi_153_035.csv")
-    csv = CSVReader("/storage/maria/D/Programming/Facultate/test_12_06/AF5Q112B0009_68.891_34.807/ndsi_153_036.csv")
+    csv = CSVReader(sys.argv[1])
 
-    date, snow_coverage = csv.read_csv()
+    #date, snow_coverage = csv.read_csv()
     # csv.make_arima(snow_coverage)
     # csv.create_hardcoded_dates()
     # dates, snow = csv.create_dummy_dataset()
     # csv.make_arima(dates, snow)
 
-    csv.make_stationary(snow_coverage)
+    #csv.make_stationary(snow_coverage)
