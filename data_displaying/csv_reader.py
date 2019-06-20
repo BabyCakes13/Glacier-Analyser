@@ -6,6 +6,11 @@ import sys
 import matplotlib
 matplotlib.use('gtk3cairo')
 from matplotlib import pyplot as plt
+from matplotlib.lines import Line2D
+from matplotlib.patches import Rectangle
+from matplotlib.text import Text
+from matplotlib.image import AxesImage
+
 import collections
 import numpy as np
 import pandas as pd
@@ -21,6 +26,8 @@ THRESHOLD = 1  # removes also the zero values from the down level
 class CSVReader:
     def __init__(self, csv):
         self.csv = csv
+        self.fig, self.ax = plt.subplots()
+
         self.data_sorted = self.read_csv()
 
         #self.plot_results(data)
@@ -96,14 +103,41 @@ class CSVReader:
         return output
 
     def plot_results(self, title, data):
-        plt.xlabel('Years')
-        plt.ylabel('Results')
-        plt.xticks(rotation=90)
+        plt = self.ax
 
-        plt.plot(*zip(*data), linestyle='-', marker='o', label=title)
+        plt.set_xlabel('Years')
+        plt.set_ylabel('Results')
+        #plt.set_xticks(rotation=90)
+
+        plt.plot(*zip(*data), linestyle='-', marker='o', label=title, picker=20)
 
     def plot_show(self):
-        plt.legend(loc='upper left')
+        plot = self.ax
+
+        def onpick3(event):
+            if isinstance(event.artist, Line2D):
+                thisline = event.artist
+                xdata = thisline.get_xdata()
+                ydata = thisline.get_ydata()
+                ind = event.ind
+                print('onpick1 line:', np.column_stack([xdata[ind], ydata[ind]]))
+            elif isinstance(event.artist, Rectangle):
+                patch = event.artist
+                print('onpick1 patch:', patch.get_path())
+            elif isinstance(event.artist, Text):
+                text = event.artist
+                print('onpick1 text:', text.get_text())
+
+        def onpress(event):
+            print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
+                  ('double' if event.dblclick else 'single', event.button,
+                   event.x, event.y, event.xdata, event.ydata))
+
+        self.fig.canvas.mpl_connect('pick_event', onpick3)
+        self.fig.canvas.mpl_connect('button_press_event', onpress)
+
+        plot.legend(loc='upper left')
+
         plt.show()
 
     def create_datetime(self):
