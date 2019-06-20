@@ -4,23 +4,21 @@ import datetime
 import sys
 
 import matplotlib
+import numpy as np
+import pandas as pd
+from matplotlib.text import Text
+from statsmodels.tsa.arima_model import ARIMA
+
+# fixed the no background matplotlib bug
 matplotlib.use('gtk3cairo')
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.patches import Rectangle
-from matplotlib.text import Text
-from matplotlib.image import AxesImage
-
-import collections
-import numpy as np
-import pandas as pd
-from statsmodels.tsa.arima_model import ARIMA
 
 from pandas.plotting import register_matplotlib_converters
-register_matplotlib_converters()
 
-# THRESHOLD = 1 # removes the big outliers
-THRESHOLD = 1  # removes also the zero values from the down level
+# fixing the future pandas warning
+register_matplotlib_converters()
 
 
 class CSVReader:
@@ -28,11 +26,13 @@ class CSVReader:
         self.csv = csv
         self.fig, self.ax = plt.subplots()
 
-        self.data_sorted = self.read_csv()
-
     def start(self):
+        """
+        Method which is called on command line display argument.
+        :return: None
+        """
         input_data = self.read_csv()
-        self.make_arima(input_data)
+        self.make_arima(input_data, count=10)
         self.plot_show()
 
     def read_csv(self):
@@ -47,69 +47,48 @@ class CSVReader:
         input_data = list(zip(dates, snow))
         input_data.sort()
 
-        self.plot_results ("Sorted INPUT data", input_data)
+        self.plot_results("Input Data Sorted", input_data)
 
-        #input_data = self.remove_zeros(input_data)
+        # input_data = self.remove_zeros(input_data)
+        # self.plot_results ("NO zeros", input_data)
 
-        #self.plot_results ("NO zeros", input_data)
+        input_data = self.remove_outliers(input_data)
 
-        input_data = self.remove_outliers(input_data, THRESHOLD)
+        self.plot_results("Input Data Sorted Inliers", input_data)
 
-        self.plot_results("Inliers", input_data)
-
-        #input_data = self.interpolate(input_data)
-        #self.plot_results ("Interpolated", input_data)
+        # input_data = self.interpolate(input_data)
+        # self.plot_results ("Interpolated", input_data)
 
         return input_data
 
-    def interpolate(self, input):
-        interpolated_dates = pd.date_range(input[0][0], input[len(input)-1][0], freq='1Y')
-
+    def remove_zeros(self, input_data, minimum=0.002):
+        """
+        Keeps only values from the input data set if they are greater than the allowed minimum..
+        :param input_data:
+        :param minimum:
+        :return:
+        """
         output = []
 
-        dense_ndsi = []
-        for date in interpolated_dates:
-            for real_date, ndsi in input:
-
-                real_date = datetime.datetime(real_date.year, real_date.month, real_date.day)
-                delta = real_date - date
-
-                if(delta.days < 175 and delta.days > -175):
-                    dense_ndsi.append(ndsi)
-                else:
-                    dense_ndsi.append(np.nan)
-
-                print(" REAL: ", real_date, " FAKE: ", date, " delta: ", delta)
-
-        print(dense_ndsi)
-
-        s = pd.Series(dense_ndsi)
-        s.interpolate(method='linear', limit = 100)
-
-        print (s)
-
-        output = list(zip(interpolated_dates, s))
-
-        return output
-
-
-    def remove_zeros(self, input, threshold = 0.002):
-        output = []
-
-        for d in input:
-            if d[1] > threshold:
+        for d in input_data:
+            if d[1] > minimum:
                 output.append(d)
 
         return output
 
     def plot_results(self, title, data):
-        plt = self.ax
+        """
+        Plots the result in a matplotlib window.
+        :param title:
+        :param data:
+        :return:
+        """
+        plot = self.ax
 
-        plt.set_xlabel('Years')
-        plt.set_ylabel('Results')
-        #plt.set_xticks(rotation=90)
+        plot.set_xlabel('Years')
+        plot.set_ylabel('Results')
 
-        plt.plot(*zip(*data), linestyle='-', marker='o', label=title, picker=20)
+        plot.plot(*zip(*data), linestyle='-', marker='o', label=title, picker=20)
 
     def plot_show(self):
         plot = self.ax
@@ -157,121 +136,68 @@ class CSVReader:
 
         return dates
 
-    def make_arima(self, dataset):
-        COUNT = 10
+    def make_arima(self, dataset, count=0):
         predictions = []
+        output = None
         train, test, history = self.make_test_train(dataset)
 
-        #TODO: this might be removed and just specify period to ARIMA directly
+        # TODO: this might be removed and just specify period to ARIMA directly
         fake_dates = pd.date_range(history[0][0], periods=100, freq='M')
-        future_dates = pd.date_range(dataset[len(dataset) - 1][0], periods=COUNT+1, freq='M')
+        future_dates = pd.date_range(dataset[len(dataset) - 1][0], periods=count + 1, freq='M')
 
-        print(fake_dates)
-
-        print ("Fake dates count ", len(fake_dates), " values: ", fake_dates)
-        print ("Train datas count ", len(history), " values: ", history)
-
-        last_model = None
-        last_model_fit = None
-
-        for index in range(len(test) + COUNT):
+        for index in range(len(test) + count):
             print("estimating on: ", history)
             real_dates, ndsi = zip(*history)
             try:
                 model = ARIMA(ndsi, order=(5, 1, 0), dates=fake_dates)
                 model_fit = model.fit()
-                output = model_fit.forecast(steps=COUNT)
-            except:
-                #prepare next iteration of model estimating
-                if(index < len(test)):
+                output = model_fit.forecast(steps=count)
+            except Exception:
+                # prepare next iteration of model estimating
+                if index < len(test):
                     observed = test[index][1]
                     history.append((test[index][0], observed))
                     continue
 
-            last_model = model
-            last_model_fit = model_fit
-
             predicted = output[0][0]
             error = output[1][0]
 
-            print("outpout is ", output)
-            print("predicted is ", predicted)
+            print("OUTPUT: ", output)
+            print("PREDICTED: ", predicted)
+            print("ERROR: ", error)
 
-            if(index < len(test)):
+            if index < len(test):
                 observed = test[index][1]
-                #prepare next iteration of model estimating
+                # prepare next iteration of model estimating
                 history.append((test[index][0], observed))
                 predictions.append((test[index][0], predicted))
                 print('predicted=%f, expected=%f' % (predicted, observed))
             else:
-
                 for predicted in output[0]:
-                    #prepare next iteration of model estimating
+                    # prepare next iteration of model estimating
                     history.append((future_dates[index - len(test)].date(), predicted))
                     predictions.append((future_dates[index - len(test)].date(), predicted))
-                    index+=1
+                    index += 1
                 break
 
-
-        #self.plot_results("train", train)
-        #self.plot_results("test", test)
-        self.plot_results("predicted", predictions)
-
-
-        #for t in range(len(test)):
-        #    model = ARIMA(snow, order=(len(history), 2, 1), dates=dates)
-        #    model_fit = model.fit()
-        #    output = model_fit.forecast()
-        #    yhat = output[0]
-        #    obs = test[t]
-        #    history.append(obs)
-        #    predictions.append(yhat)
-        #    print('predicted=%f, expected=%f' % (yhat, obs))
-        #plt.plot(test)
-        #plt.plot(predictions, color='red')
-        #plt.show()
-
-    def make_stationary(self, dataset):
-        snow = np.log(dataset)
-        snow_diff = snow - snow.shift(1)
-        snow_diff.dropna().plot()
-
-    def create_hardcoded_dates(self):
-        dates, snow = self.read_csv()
-        frequency = pd.date_range(start=dates[0], end=dates[len(dates) - 1], freq='M')
-
-        frequency_dates = []
-        for i in range(0, len(snow)):
-            frequency_dates.append(frequency[i])
-
-        #        self.plot_results(frequency_dates, snow)
-        return frequency_dates
-
-    def create_dummy_dataset(self):
-        dates, snow = self.read_csv()
-        frequency = pd.date_range(start=dates[0], end=dates[len(dates) - 1], freq='M')
-
-        frequency_dates = []
-        for i in range(0, len(snow)):
-            frequency_dates.append(frequency[i])
-            snow[i] = i
-
-        print(len(snow))
-        print(len(frequency_dates))
-
-        self.plot_results(frequency_dates, snow)
-        return frequency_dates, snow
+        if len(predictions) > 0:
+            self.plot_results("predicted", predictions)
+        else:
+            print("No predictions.")
 
     @staticmethod
     def make_test_train(dataset):
-        size = int(len(dataset) * 0.66)
-        train, test = dataset[0:size], dataset[size:len(dataset)]
+        """
+        Split the input data set into training, testing and history
+        """
+        test_size = int(len(dataset) * 0.66)
+        train, test = dataset[0:test_size], dataset[test_size:len(dataset)]
         history = [x for x in train]
 
         return train, test, history
 
     @staticmethod
-    def remove_outliers(dataset, threshold):
+    def remove_outliers(dataset, threshold=1):
         """
         Remove outliers from the datased based on the z-test with the specified threshold
         :param dataset: The set of data which will have its outliers removed.
@@ -279,7 +205,7 @@ class CSVReader:
         :return: A list formed of outliers from the dataset.
         """
         inliers = []
-        dates,ndsi = zip(*dataset)
+        dates, ndsi = zip(*dataset)
         mean = np.mean(ndsi)
         std = np.std(ndsi)
 
@@ -290,16 +216,32 @@ class CSVReader:
 
         return inliers
 
+    @staticmethod
+    def interpolate(input_data):
+        """
+        Interpolation for later. # TODO
+        :param input_data:
+        :return:
+        """
+        interpolated_dates = pd.date_range(input_data[0][0], input_data[len(input_data) - 1][0], freq='1Y')
 
-if __name__ == "__main__":
-    # csv = CSVReader("/storage/maria/D/Programming/Facultate/test_12_06/AF5Q112C0025_69.552_35.438/ndsi_152_036.csv")
-    # csv = CSVReader("/storage/maria/D/Programming/Facultate/test_12_06/AF5Q112C0025_69.552_35.438/ndsi_153_035.csv")
-    csv = CSVReader(sys.argv[1])
+        dense_ndsi = []
+        for date in interpolated_dates:
+            for real_date, ndsi in input_data:
 
-    #date, snow_coverage = csv.read_csv()
-    # csv.make_arima(snow_coverage)
-    # csv.create_hardcoded_dates()
-    # dates, snow = csv.create_dummy_dataset()
-    # csv.make_arima(dates, snow)
+                real_date = datetime.datetime(real_date.year, real_date.month, real_date.day)
+                delta = real_date - date
 
-    #csv.make_stationary(snow_coverage)
+                if 175 > delta.days > -175:
+                    dense_ndsi.append(ndsi)
+                else:
+                    dense_ndsi.append(np.nan)
+
+                print(" REAL: ", real_date, " FAKE: ", date, " delta: ", delta)
+
+        s = pd.Series(dense_ndsi)
+        s.interpolate(method='linear', limit=100)
+
+        output = list(zip(interpolated_dates, s))
+
+        return output
