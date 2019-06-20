@@ -55,7 +55,7 @@ RETURN_CODES = {
 
 # print codes
 PRINT_CODES = [
-    "[INFO] ",
+    magenta("[INFO] "),
     red("[ERROR] "),
     blue("[DONE] ")
 ]

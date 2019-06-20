@@ -2,6 +2,7 @@
 import argparse
 from data_gathering import download
 from data_processing import process
+from data_displaying import csv_reader
 import definitions
 
 
@@ -15,6 +16,7 @@ class ArgsParser:
 
         self.add_download_arguments()
         self.add_process_arguments()
+        self.add_display_arguments()
 
     def add_download_arguments(self):
         """Adds arguments to the download sub parser."""
@@ -73,6 +75,16 @@ class ArgsParser:
                                     dest='j')
         process_parser.set_defaults(func=set_process_function)
 
+    def add_display_arguments(self):
+        process_parser = self.subparsers.add_parser('display',
+                                                    add_help=True)
+        process_parser.add_argument('--csv',
+                                    help='Path to the csv containing path row data for one glacier.',
+                                    default=None,
+                                    type=str,
+                                    dest='csv')
+        process_parser.set_defaults(func=set_display_function)
+
 
 def activate_arguments():
     """Instantiates an argument parser object and activates parsing."""
@@ -95,7 +107,17 @@ def set_process_function(args):
     """The default function for process sub parser."""
     print("Setting up process...")
 
+    """"""
     process_align = process.Process(args.input, args.bigdir, args.output, args.j)
     process_align.start()
 
     print("Finished process.")
+
+
+def set_display_function(args):
+    print("Setting up display...")
+
+    process_align = csv_reader.CSVReader(csv=args.csv)
+    process_align.start()
+
+    print("Finished display.")

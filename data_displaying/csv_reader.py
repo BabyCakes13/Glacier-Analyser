@@ -30,7 +30,9 @@ class CSVReader:
 
         self.data_sorted = self.read_csv()
 
-        #self.plot_results(data)
+    def start(self):
+        input_data = self.read_csv()
+        self.make_arima(input_data)
         self.plot_show()
 
     def read_csv(self):
@@ -53,9 +55,7 @@ class CSVReader:
 
         input_data = self.remove_outliers(input_data, THRESHOLD)
 
-        self.plot_results ("Inliers", input_data)
-
-        self.make_arima(input_data)
+        self.plot_results("Inliers", input_data)
 
         #input_data = self.interpolate(input_data)
         #self.plot_results ("Interpolated", input_data)
