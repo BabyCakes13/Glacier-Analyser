@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import datetime
-import sys
 
 import matplotlib
 import numpy as np
@@ -61,7 +60,8 @@ class CSVReader:
 
         return input_data
 
-    def remove_zeros(self, input_data, minimum=0.002):
+    @staticmethod
+    def remove_zeros(input_data, minimum=0.002):
         """
         Keeps only values from the input data set if they are greater than the allowed minimum..
         :param input_data:

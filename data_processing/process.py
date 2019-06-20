@@ -174,12 +174,6 @@ class Process:
         #green_bands.sort()
         #swir1_bands.sort()
 
-        for band in green_bands:
-            print(band)
-
-        for band in green_bands:
-            print(band)
-
         return green_bands, swir1_bands
 
     @staticmethod

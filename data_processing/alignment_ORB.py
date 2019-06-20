@@ -433,7 +433,7 @@ if __name__ == "__main__":
 
         ndsi_image = process.ndsi()
         aligned_image = process.align()
-        process.write()
+        # process.write() # does not write it to the disk
 
         if aligned_image is None:
             VALID = False

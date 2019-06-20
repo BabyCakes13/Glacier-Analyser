@@ -27,11 +27,9 @@ class OutputDirHandler:
                     path_row = self.get_path_row(file)
 
                     if (path_row not in pr_dir.keys()) and (path_row is not None):
+                        print("Made directory ", path_row)
                         path_row_dir = self.make_path_row_directory(path_row)
                         pr_dir[path_row] = path_row_dir
-
-        for key, value in pr_dir.items():
-            print(key, ": ", value)
 
         return pr_dir
 
