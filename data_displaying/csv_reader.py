@@ -1,12 +1,12 @@
-import matplotlib.pyplot as plt
-import pandas as pd
-import numpy as np
-from statsmodels.tsa.arima_model import ARIMA
 import datetime
 
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from statsmodels.tsa.arima_model import ARIMA
 
-THRESHOLD = 1 # removes the big outliers
-# THREHOLD = 0.5 # removes also the zero values from the down level
+# THRESHOLD = 1 # removes the big outliers
+THRESHOLD = 1  # removes also the zero values from the down level
 
 
 class CSVReader:
@@ -23,6 +23,7 @@ class CSVReader:
         h = pd.read_csv(self.csv)
         snow = h['SNOW_RATIO']
         dates = self.create_datetime()
+        sorted(dates)
 
         results = dict(zip(snow, dates))
         snow_outliers = self.detect_outliers(snow, THRESHOLD)
@@ -59,16 +60,14 @@ class CSVReader:
 
         return dates
 
-    def make_arima(self, series, dates):
-        size = int(len(series) * 0.80)
-        train, test = series[0:size], series[size:len(series)]
-        history = [x for x in train]
+    def make_arima(self, dates, snow):
+        train, test, history = self.make_test_train(snow)
+
         predictions = []
+        dates = pd.date_range(dates[0], dates[len(dates) - 1], freq='MS')
         for t in range(len(test)):
-            dates = self.create_datetime()
-            dates = pd.date_range(start='1973-05-01', end='1973-09-30', freq='D')
-            model = ARIMA(series, order=(len(history), 1, 1), dates=dates)
-            model_fit = model.fit(disp=0)
+            model = ARIMA(snow, order=(len(history), 2, 1), dates=dates)
+            model_fit = model.fit()
             output = model_fit.forecast()
             yhat = output[0]
             obs = test[t]
@@ -78,6 +77,45 @@ class CSVReader:
         plt.plot(test)
         plt.plot(predictions, color='red')
         plt.show()
+
+    def make_stationary(self, dataset):
+        snow = np.log(dataset)
+        snow_diff = snow - snow.shift(1)
+        snow_diff.dropna().plot()
+
+    def create_hardcoded_dates(self):
+        dates, snow = self.read_csv()
+        frequency = pd.date_range(start=dates[0], end=dates[len(dates) - 1], freq='M')
+
+        frequency_dates = []
+        for i in range(0, len(snow)):
+            frequency_dates.append(frequency[i])
+
+        #        self.plot_results(frequency_dates, snow)
+        return frequency_dates
+
+    def create_dummy_dataset(self):
+        dates, snow = self.read_csv()
+        frequency = pd.date_range(start=dates[0], end=dates[len(dates) - 1], freq='M')
+
+        frequency_dates = []
+        for i in range(0, len(snow)):
+            frequency_dates.append(frequency[i])
+            snow[i] = i
+
+        print(len(snow))
+        print(len(frequency_dates))
+
+        self.plot_results(frequency_dates, snow)
+        return frequency_dates, snow
+
+    @staticmethod
+    def make_test_train(dataset):
+        size = int(len(dataset) * 0.66)
+        train, test = dataset[0:size], dataset[size:len(dataset)]
+        history = [x for x in train]
+
+        return train, test, history
 
     @staticmethod
     def detect_outliers(dataset, threshold):
@@ -104,7 +142,10 @@ if __name__ == "__main__":
     # csv = CSVReader("/storage/maria/D/Programming/Facultate/test_12_06/AF5Q112C0025_69.552_35.438/ndsi_153_035.csv")
     csv = CSVReader("/storage/maria/D/Programming/Facultate/test_12_06/AF5Q112B0009_68.891_34.807/ndsi_153_036.csv")
 
-    snow_coverage, date = csv.read_csv()
-    
-    #csv.make_arima(snow_coverage, date)
+    date, snow_coverage = csv.read_csv()
+    # csv.make_arima(snow_coverage)
+    # csv.create_hardcoded_dates()
+    # dates, snow = csv.create_dummy_dataset()
+    # csv.make_arima(dates, snow)
 
+    csv.make_stationary(snow_coverage)
