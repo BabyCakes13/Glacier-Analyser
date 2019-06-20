@@ -171,8 +171,8 @@ class Process:
         green_bands = self.get_bands_endwith(bands_list, definitions.GREEN_BAND_END)
         swir1_bands = self.get_bands_endwith(bands_list, definitions.SWIR1_BAND_END)
 
-        green_bands.sort()
-        swir1_bands.sort()
+        #green_bands.sort()
+        #swir1_bands.sort()
 
         for band in green_bands:
             print(band)
