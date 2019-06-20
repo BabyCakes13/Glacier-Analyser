@@ -4,6 +4,8 @@ import os
 import definitions
 from util import strings
 
+from filelock import Timeout, FileLock
+
 ALIGN_CSV = 'align'
 NDSI_CSV = 'ndsi'
 
@@ -64,9 +66,11 @@ class CSVWriter:
 
         print(result)
 
-        with open(self.csv_path, "a") as file:
-            writer = csv.writer(file)
-            writer.writerow(result)
+        lock = FileLock(self.csv_path + ".lock")
+        with lock:
+            with open(self.csv_path, "a") as file:
+                writer = csv.writer(file)
+                writer.writerow(result)
 
     @staticmethod
     def get_default_align_csv():
