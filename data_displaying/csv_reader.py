@@ -50,7 +50,41 @@ class CSVReader:
 
         self.make_arima(input_data)
 
+        #input_data = self.interpolate(input_data)
+        #self.plot_results ("Interpolated", input_data)
+
         return input_data
+
+    def interpolate(self, input):
+        interpolated_dates = pd.date_range(input[0][0], input[len(input)-1][0], freq='1Y')
+
+        output = []
+
+        dense_ndsi = []
+        for date in interpolated_dates:
+            for real_date, ndsi in input:
+
+                real_date = datetime.datetime(real_date.year, real_date.month, real_date.day)
+                delta = real_date - date
+
+                if(delta.days < 175 and delta.days > -175):
+                    dense_ndsi.append(ndsi)
+                else:
+                    dense_ndsi.append(np.nan)
+
+                print(" REAL: ", real_date, " FAKE: ", date, " delta: ", delta)
+
+        print(dense_ndsi)
+
+        s = pd.Series(dense_ndsi)
+        s.interpolate(method='linear', limit = 100)
+
+        print (s)
+
+        output = list(zip(interpolated_dates, s))
+
+        return output
+
 
     def remove_zeros(self, input, threshold = 0.002):
         output = []
