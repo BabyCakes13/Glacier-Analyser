@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import filedialog
 
+
 class StartPage:
     def __init__(self):
         self.master = Tk()
@@ -149,8 +150,15 @@ class DisplayPage:
 
 
 # download
-CSV_PATH = None
+NDSI_CSV = None
 DOWNLOAD_DIR = None
+
+# process
+INPUT_DIR = None
+OUTPUT_DIR = None
+
+# display
+NDSI_CSV = None
 
 
 class Page(Frame):
@@ -165,6 +173,7 @@ class Download(Page):
     """
     Download page class.
     """
+
     def __init__(self, *args, **kwargs):
         Page.__init__(self, *args, **kwargs)
 
@@ -233,8 +242,8 @@ class Download(Page):
         :param entries: CSV and output directory entries.
         :return: None
         """
-        global CSV_PATH, DOWNLOAD_DIR
-        CSV_PATH = self.csv_entry.get()
+        global NDSI_CSV, DOWNLOAD_DIR
+        NDSI_CSV = self.csv_entry.get()
         DOWNLOAD_DIR = self.download_dir_entry.get()
 
     @staticmethod
@@ -252,15 +261,126 @@ class Download(Page):
 class Process(Page):
     def __init__(self, *args, **kwargs):
         Page.__init__(self, *args, **kwargs)
-        label = Label(self, text="This is page 2")
-        label.pack(side="top", fill="both", expand=True)
+
+        self.create_buttons()
+        self.create_labels()
+
+        self.input_entry, self.output_entry = self.create_entries()
+
+    def create_buttons(self):
+        """
+        Button creator.
+        :return:
+        """
+        submit = Button(self, text="SUBMIT", command=self.get_input)
+        submit.grid(row=7, column=0)
+
+        browse = Button(self, text="BROWSE INPUT DIRECTORY", command=self.browse_input_directory)
+        browse.grid(row=2, column=0)
+
+        browse = Button(self, text="BROWSE OUTPUT DIRECTORY", command=self.browse_output_directory)
+        browse.grid(row=5, column=0)
+
+        # TODO show how many files have been processed till now and show loading button which finishes when it is done.
+
+    def create_labels(self):
+        """
+        Label creator.
+        :return:
+        """
+        input_dir = Label(self, text="Path to the directory which contains the images.")
+        output_dir = Label(self, text="Path to the directory which will contain the result images after processing.")
+
+        input_dir.grid(row=0, column=0)
+        output_dir.grid(row=3, column=0)
+
+    def create_entries(self):
+        """
+        Creates entries as input fields.
+        :return:
+        """
+        input_entry = Entry(self)
+        output_entry = Entry(self)
+
+        input_entry.grid(row=1, column=0)
+        output_entry.grid(row=4, column=0)
+
+        return input_entry, output_entry
+
+    def browse_input_directory(self):
+        filename = filedialog.askdirectory(initialdir="/", title="Select directory for input data.")
+        self.set_input(filename, self.input_entry)
+
+    def browse_output_directory(self):
+        filename = filedialog.askdirectory(initialdir="/", title="Select directory for output data.")
+        self.set_input(filename, self.output_entry)
+
+    def get_input(self):
+        global INPUT_DIR, OUTPUT_DIR
+        INPUT_DIR = self.input_entry.get()
+        OUTPUT_DIR = self.output_entry.get()
+
+    @staticmethod
+    def set_input(text, entry):
+        entry.delete(0, END)
+        entry.insert(0, text)
 
 
 class Display(Page):
     def __init__(self, *args, **kwargs):
         Page.__init__(self, *args, **kwargs)
-        label = Label(self, text="This is page 3")
-        label.pack(side="top", fill="both", expand=True)
+
+        self.create_labels()
+        self.create_buttons()
+
+        self.csv_entry = self.create_entries()
+
+    def create_buttons(self):
+        """
+        Button creator.
+        :return:
+        """
+        submit = Button(self, text="SUBMIT", command=self.get_input)
+        submit.grid(row=7, column=0)
+
+        browse = Button(self, text="BROWSE NDSI CSV", command=self.browse_csv)
+        browse.grid(row=2, column=0)
+
+        # TODO show how many files have been processed till now and show loading button which finishes when it is done.
+
+    def create_labels(self):
+        """
+        Label creator.
+        :return:
+        """
+        csv = Label(self, text="Path to the NDSI CSV results from the processing.")
+        csv.grid(row=0, column=0)
+
+    def create_entries(self):
+        """
+        Creates entries as input fields.
+        :return:
+        """
+        csv_entry = Entry(self)
+        csv_entry.grid(row=1, column=0)
+        return csv_entry
+
+    def browse_csv(self):
+        """
+        Search for the csv file which contains glacier download data.
+        :return: The path to the csv glacier inventory.
+        """
+        filename = filedialog.askopenfilename(initialdir="/", title="Select file", filetypes=(("CSV files", "*.csv"),))
+        self.set_input(filename, self.csv_entry)
+
+    def get_input(self):
+        global NDSI_CSV
+        NDSI_CSV = self.csv_entry.get()
+
+    @staticmethod
+    def set_input(text, entry):
+        entry.delete(0, END)
+        entry.insert(0, text)
 
 
 class MainView(Frame):
@@ -299,5 +419,5 @@ if __name__ == "__main__":
     root = Tk()
     main = MainView(root)
     main.pack(side="top", fill="both", expand=True)
-    root.wm_geometry("400x400")
+    root.wm_geometry("600x600")
     root.mainloop()
