@@ -26,6 +26,7 @@ class MainView(Frame):
         :return: None
         """
         button_frame = Frame(self)
+        button_frame.place(relx=.5, rely=.5, anchor="c")
         button_frame.pack(side="top", fill="x", expand=False)
 
         b1 = Button(button_frame, text="DOWNLOAD", command=self.download.lift, padx=15, pady=15)
@@ -42,6 +43,7 @@ class MainView(Frame):
         :return: None
         """
         container_frame = Frame(self)
+        container_frame.place(relx=.5, rely=.5, anchor="c")
         container_frame.pack(side="top", fill="both", expand=True)
 
         self.download.place(in_=container_frame, x=0, y=0, relwidth=1, relheight=1)
@@ -49,9 +51,22 @@ class MainView(Frame):
         self.display.place(in_=container_frame, x=0, y=0, relwidth=1, relheight=1)
 
 
+def position_master(master):
+    w = 500  # width for the Tk root
+    h = 300  # height for the Tk root
+
+    ws = master.winfo_screenwidth()  # width of the screen
+    hs = master.winfo_screenheight()  # height of the screen
+
+    x = (ws / 2) - (w / 2)
+    y = (hs / 2) - (h / 2)
+
+    master.geometry('%dx%d+%d+%d' % (w, h, x, y))
+
+
 if __name__ == "__main__":
-    root = Tk()
-    main = MainView(root)
+    master = Tk()
+    main = MainView(master)
+    position_master(master)
     main.pack(side="top", fill="both", expand=True)
-    root.wm_geometry("600x600")
-    root.mainloop()
+    master.mainloop()
