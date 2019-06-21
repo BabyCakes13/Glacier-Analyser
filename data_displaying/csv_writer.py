@@ -2,9 +2,8 @@ import csv
 import os
 
 import definitions
-from util import strings
 
-from filelock import Timeout, FileLock
+from filelock import FileLock
 
 ALIGN_CSV = 'align'
 NDSI_CSV = 'ndsi'

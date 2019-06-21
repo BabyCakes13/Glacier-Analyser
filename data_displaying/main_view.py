@@ -1,0 +1,57 @@
+from tkinter import *
+
+sys.path.append(sys.path[0] + '/..')
+from data_displaying import frame_process as fp, frame_download as fdw, frame_display as fds
+
+
+class MainView(Frame):
+    def __init__(self, *args, **kwargs):
+        """
+        Set the button frame and the container frame for the Main frame.
+        :param args: Any arguments
+        :param kwargs: Aby arguments
+        """
+        Frame.__init__(self, *args, **kwargs)
+        self.download = fdw.Download(self)
+        self.process = fp.Process(self)
+        self.display = fds.Display(self)
+
+        # call first so it it placed at top
+        self.create_buttons()
+        self.create_container()
+
+    def create_buttons(self) -> None:
+        """
+        Create buttons for the Main frame.
+        :return: None
+        """
+        button_frame = Frame(self)
+        button_frame.pack(side="top", fill="x", expand=False)
+
+        b1 = Button(button_frame, text="DOWNLOAD", command=self.download.lift, padx=15, pady=15)
+        b2 = Button(button_frame, text="PROCESS", command=self.process.lift, padx=15, pady=15)
+        b3 = Button(button_frame, text="DISPLAY", command=self.display.lift, padx=15, pady=15)
+
+        b1.pack(side="left", padx=10, pady=10)
+        b2.pack(side="left", padx=10, pady=10)
+        b3.pack(side="left", padx=10, pady=10)
+
+    def create_container(self) -> None:
+        """
+        Create the container for the Main page which hold all the other frames.
+        :return: None
+        """
+        container_frame = Frame(self)
+        container_frame.pack(side="top", fill="both", expand=True)
+
+        self.download.place(in_=container_frame, x=0, y=0, relwidth=1, relheight=1)
+        self.process.place(in_=container_frame, x=0, y=0, relwidth=1, relheight=1)
+        self.display.place(in_=container_frame, x=0, y=0, relwidth=1, relheight=1)
+
+
+if __name__ == "__main__":
+    root = Tk()
+    main = MainView(root)
+    main.pack(side="top", fill="both", expand=True)
+    root.wm_geometry("600x600")
+    root.mainloop()
