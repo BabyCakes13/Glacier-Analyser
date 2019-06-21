@@ -9,7 +9,7 @@ from matplotlib.text import Text
 from statsmodels.tsa.arima_model import ARIMA
 
 # fixed the no background matplotlib bug
-matplotlib.use('gtk3cairo')
+# matplotlib.use('gtk3cairo')
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.patches import Rectangle
@@ -149,7 +149,7 @@ class CSVReader:
             print("estimating on: ", history)
             real_dates, ndsi = zip(*history)
             try:
-                model = ARIMA(ndsi, order=(5, 1, 0), dates=fake_dates)
+                model = ARIMA(ndsi, order=(5, 2, 0), dates=fake_dates)
                 model_fit = model.fit()
                 output = model_fit.forecast(steps=count)
             except Exception:

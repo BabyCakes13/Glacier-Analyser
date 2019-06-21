@@ -53,16 +53,6 @@ class ArgsParser:
                                     default=definitions.DEFAULT_OUTPUT_DIR,
                                     type=str,
                                     dest='output')
-        process_parser.add_argument('--threshold',
-                                    help='Threshold of the NDSI calculator.',
-                                    default=definitions.THRESHOLD,
-                                    type=int,
-                                    dest='threshold')
-        process_parser.add_argument('--scene',
-                                    help='Scene for processing. If set, will process only this scene,',
-                                    default=definitions.DEFAULT_SCENE_NAME,
-                                    type=str,
-                                    dest='scene')
         process_parser.add_argument('--bigdir',
                                     help='Directory which contains all the glacier directories.',
                                     default=None,
