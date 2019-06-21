@@ -1,5 +1,5 @@
 from tkinter import *
-
+from tkinter import filedialog
 
 class StartPage:
     def __init__(self):
@@ -148,6 +148,11 @@ class DisplayPage:
         self.master.destroy()
 
 
+# download
+CSV_PATH = None
+DOWNLOAD_DIR = None
+
+
 class Page(Frame):
     def __init__(self, *args, **kwargs):
         Frame.__init__(self, *args, **kwargs)
@@ -157,29 +162,47 @@ class Page(Frame):
 
 
 class Download(Page):
-    csv_entry = None
-    output_dir_entry = None
-
+    """
+    Download page class.
+    """
     def __init__(self, *args, **kwargs):
         Page.__init__(self, *args, **kwargs)
 
         self.create_buttons()
         self.create_labels()
-        self.csv_entry, self.output_dir_entry = self.create_entries()
+
+        self.csv_entry, self.download_dir_entry = self.create_entries()
 
     def create_buttons(self):
-        submit = Button(self, text="SUBMIT", command=lambda: self.get_input([self.csv_entry,
-                                                                             self.output_dir_entry]))
-        submit.grid(row=5, column=0)
+        """
+        Button creator.
+        :return:
+        """
+        submit = Button(self, text="SUBMIT", command=self.get_input)
+        submit.grid(row=7, column=0)
+
+        browse = Button(self, text="BROWSE CSV", command=self.browse_csv)
+        browse.grid(row=2, column=0)
+
+        browse = Button(self, text="BROWSE OUTPUT DIRECTORY", command=self.browse_output_directory)
+        browse.grid(row=5, column=0)
 
     def create_labels(self):
+        """
+        Label creator.
+        :return:
+        """
         csv = Label(self, text="Path to the CSV file containing the glacier information.")
         output_dir = Label(self, text="Path to the directory which will contain the downloaded data.")
 
         csv.grid(row=0, column=0)
-        output_dir.grid(row=2, column=0)
+        output_dir.grid(row=3, column=0)
 
     def create_entries(self):
+        """
+        Creates entries as input fields.
+        :return:
+        """
         csv = Entry(self)
         output_dir = Entry(self)
 
@@ -188,9 +211,42 @@ class Download(Page):
 
         return csv, output_dir
 
-    def get_input(self, entries):
-        for entry in entries:
-            print(entry.get())
+    def browse_csv(self):
+        """
+        Search for the csv file which contains glacier download data.
+        :return: The path to the csv glacier inventory.
+        """
+        filename = filedialog.askopenfilename(initialdir="/", title="Select file", filetypes=(("CSV files", "*.csv"),))
+        self.set_input(filename, self.csv_entry)
+
+    def browse_output_directory(self):
+        """
+        Search for the csv file which contains glacier download data.
+        :return: The path to the csv glacier inventory.
+        """
+        filename = filedialog.askdirectory(initialdir="/", title="Select directory for download output.")
+        self.set_input(filename, self.download_dir_entry)
+
+    def get_input(self):
+        """
+        Gets the text which is set in the entries.
+        :param entries: CSV and output directory entries.
+        :return: None
+        """
+        global CSV_PATH, DOWNLOAD_DIR
+        CSV_PATH = self.csv_entry.get()
+        DOWNLOAD_DIR = self.download_dir_entry.get()
+
+    @staticmethod
+    def set_input(text, entry):
+        """
+        Sets text in an entry.
+        :param text:
+        :param entry:
+        :return:
+        """
+        entry.delete(0, END)
+        entry.insert(0, text)
 
 
 class Process(Page):
