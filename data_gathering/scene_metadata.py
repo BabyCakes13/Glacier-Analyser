@@ -1,27 +1,13 @@
 """Module which handles scene metadata. Works with .MTL file."""
-import pathlib
-import os
-import definitions
 from util import strings
 
 
 class SceneMetadata:
     """Class which deals with the scene MTL metadata file."""
+
     def __init__(self, metadata_path):
         """Sets up the metadata handler."""
         self.metadata = metadata_path
-
-    def get_metadata_file(self) -> pathlib.Path:
-        """Returns the full path to the metadata file."""
-        metadata = False
-        for file in os.listdir(self.input):
-            if file.endswith(definitions.METADATA_END):
-                metadata = os.path.join(self.input, file)
-
-        if not metadata:
-            raise SceneMetadataError("Metadata file was not found.")
-
-        return metadata
 
     def get_scene_set_attributes(self) -> dict:
         """Returns a dictionary with the set landsat scene attributes from the MTL file."""
@@ -57,6 +43,7 @@ def set_dictionary(dictionary, line, splitter) -> dict:
 
 class SceneMetadataError(Exception):
     """Raise for the case when the metadata file doesn't exist in the input directory."""
+
     def __init__(self, message):
         self.message = message
 
