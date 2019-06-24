@@ -17,13 +17,17 @@ class DifferenceMovement:
 
         mask1, mask2 = self.create_mask()
 
-        differentiate = self.differentiate()
-        differentiate = self.remove_background_color(differentiate,
+        self.img_diff = self.differentiate()
+        self.img_diff = self.remove_background_color(self.img_diff,
                                                      threshold1=mask1,
                                                      threshold2=mask2)
-        # movement = self.movement()
+        self.img_move = self.movement()
+        self.img_move = self.remove_background_color(self.img_move,
+                                                     threshold1=mask1,
+                                                     threshold2=mask2)
 
-        image('diff', differentiate)
+        image('different', self.img_diff)
+        image('move', self.img_move)
 
     def create_mask(self):
         """
