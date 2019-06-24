@@ -123,4 +123,3 @@ class ProcessResults:
 
 
 diff = DifferenceMovement(sys.argv[1], sys.argv[2])
-
