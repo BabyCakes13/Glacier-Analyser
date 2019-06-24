@@ -14,6 +14,11 @@ frame2 = cv2.imread(sys.argv[2], cv2.IMREAD_GRAYSCALE)
 frame1_c = cv2.cvtColor(frame1, cv2.COLOR_GRAY2BGR)
 hsv = np.zeros_like(frame1_c)
 
+#remove border areas resulted from alignment of actual image features
+ret1,thresh1 = cv2.threshold(frame1,1,255, cv2.THRESH_BINARY)
+ret2,thresh2 = cv2.threshold(frame2,1,255, cv2.THRESH_BINARY)
+frame1 = cv2.bitwise_and(frame1, thresh2)
+frame2 = cv2.bitwise_and(frame2, thresh1)
 image('frame1',frame1)
 image('frame2',frame2)
 
