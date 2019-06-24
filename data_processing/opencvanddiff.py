@@ -7,6 +7,12 @@ def image(window_name, image):
     cv2.resizeWindow(window_name, 1000, 1000)
     cv2.imshow(window_name, image)
 
+def scale(image, value):
+    image32 = image.astype(np.int32)
+    image32 = image32 * value
+    np.clip(image32, 0, 255, out=image32)
+    return image32.astype(np.uint8)
+
 
 frame1 = cv2.imread(sys.argv[1], cv2.IMREAD_GRAYSCALE)
 frame2 = cv2.imread(sys.argv[2], cv2.IMREAD_GRAYSCALE)
@@ -33,7 +39,9 @@ for col in range(COLS):
 
 hsv[...,1] = 255
 hsv[...,2] = cv2.normalize(mag,None,0,255,cv2.NORM_MINMAX)
-hsv[...,2] = hsv[...,2] * 2
+
+hsv[...,2] = scale(hsv[...,2], 3)
+
 bgr = cv2.cvtColor(hsv,cv2.COLOR_HSV2BGR)
 image('opencv',bgr)
 
