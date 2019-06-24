@@ -10,22 +10,34 @@ class DifferenceMovement:
     """
 
     def __init__(self, image1, image2):
+        np.seterr(divide='ignore', invalid='ignore')
+
         self.image1 = cv2.imread(image1, cv2.IMREAD_GRAYSCALE)
         self.image2 = cv2.imread(image2, cv2.IMREAD_GRAYSCALE)
 
-        self.image1, self.image2 = self.remove_bad_borders()
+        mask1, mask2 = self.create_mask()
 
-    def remove_bad_borders(self):
-        ret1, thresh1 = cv2.threshold(self.image1, 1, 255, cv2.THRESH_BINARY)
-        ret2, thresh2 = cv2.threshold(self.image2, 1, 255, cv2.THRESH_BINARY)
-        image1 = cv2.bitwise_and(self.image1, thresh2)
-        image2 = cv2.bitwise_and(self.image2, thresh1)
+        differentiate = self.differentiate()
+        differentiate = self.remove_background_color(differentiate,
+                                                     threshold1=mask1,
+                                                     threshold2=mask2)
+        # movement = self.movement()
 
-        return image1, image2
+        image('diff', differentiate)
 
-    def differenciate(self) -> np.ndarray:
+    def create_mask(self):
         """
-        Make a difference between two images, and apply a colormap the result.
+        Creates two masks which represent the black background of the satellite images.
+        :return: A tuple of two numpy arrays.
+        """
+        ret1, threshold1 = cv2.threshold(self.image1, 1, 255, cv2.THRESH_BINARY)
+        ret2, threshold2 = cv2.threshold(self.image2, 1, 255, cv2.THRESH_BINARY)
+
+        return threshold1, threshold2
+
+    def differentiate(self) -> np.ndarray:
+        """
+        Make a difference between the pixels of two images, and apply a colormap the result for nicer view.
         :return: np.ndarray
         """
         image1_16bit = np.int16(self.image1)
@@ -36,9 +48,28 @@ class DifferenceMovement:
         difference_normalized = cv2.normalize(difference, None, 0, 255, cv2.NORM_MINMAX)
         difference_8bit = np.uint8(difference_normalized)
 
-        cm_difference = cv2.applyColorMap(difference_8bit, cv2.COLORMAP_JET);
+        cm_difference = cv2.applyColorMap(difference_8bit, cv2.COLORMAP_JET)
 
         return cm_difference
+
+    @staticmethod
+    def remove_background_color(image, threshold1, threshold2) -> np.ndarray:
+        """
+        Removes green background color by applying a mask on each layer of the RGB image.
+        :param image: The numpy image to be enhanced.
+        :param threshold1: Threshold mask 1.
+        :param threshold2: Threshold mask 2.
+        :return: np.ndarray
+        """
+        image[..., 0] = cv2.bitwise_and(image[..., 0], threshold1)
+        image[..., 1] = cv2.bitwise_and(image[..., 1], threshold1)
+        image[..., 2] = cv2.bitwise_and(image[..., 2], threshold1)
+
+        image[..., 0] = cv2.bitwise_and(image[..., 0], threshold2)
+        image[..., 1] = cv2.bitwise_and(image[..., 1], threshold2)
+        image[..., 2] = cv2.bitwise_and(image[..., 2], threshold2)
+
+        return image
 
     def movement(self) -> np.ndarray:
         """
@@ -92,7 +123,4 @@ class ProcessResults:
 
 
 diff = DifferenceMovement(sys.argv[1], sys.argv[2])
-difference = diff.differenciate()
-image('difference', difference)
-movement = diff.movement()
-image('movement', movement)
+
