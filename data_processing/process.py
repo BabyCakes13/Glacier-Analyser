@@ -6,7 +6,7 @@ from data_displaying import csv_writer
 from data_gathering import scene_data as sd
 from data_preparing import output_dir_handler as odh
 from data_preparing import multiprocess_handler as mh
-from data_processing import scene as sc
+from data_processing import scenes as sc
 from util import strings
 
 DEBUG = False
@@ -145,7 +145,7 @@ class Process:
         print(return_code)
 
     @staticmethod
-    def create_aligned_scene(scene, output_dir) -> sc.Scene:
+    def create_aligned_scene(scene, output_dir) -> sc.PathScene:
         """
         Creates the necessary attributes for creating the aligned image scene.
         :param scene: The scene object.
@@ -158,7 +158,7 @@ class Process:
         aligned_green_path = os.path.join(output_dir, aligned_green_filename)
         aligned_swir1_path = os.path.join(output_dir, aligned_swir1_filename)
 
-        aligned_scene = sc.Scene(aligned_green_path, aligned_swir1_path)
+        aligned_scene = sc.PathScene(aligned_green_path, aligned_swir1_path)
         return aligned_scene
 
     def separate_and_sort_bands_on_type(self, bands_list) -> tuple:
@@ -205,7 +205,7 @@ class Process:
                 swir1_scene = strings.get_scene_name(swir1)
 
                 if green_scene == swir1_scene:
-                    scene = sc.Scene(green, swir1)
+                    scene = sc.PathScene(green, swir1)
                     scenes.append(scene)
 
         return scenes

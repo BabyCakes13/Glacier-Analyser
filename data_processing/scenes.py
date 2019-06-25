@@ -1,9 +1,18 @@
-import cv2
+"""
+Module which holds the two scene formats for a Landsat 8 scene.
+"""
 import os
+
+import cv2
+
 import definitions
 
 
-class Scene:
+class PathScene:
+    """
+    Class which holds the paths to green and swir1 band of a scene.
+    """
+
     def __init__(self, green_band, swir1_band):
         """
         Class holding the pair of B3 and B6 bands.
@@ -30,42 +39,74 @@ class Scene:
         return str(scene)
 
 
-class NumpyImage:
+class NumpyScene:
     """
-    Satellite image holding a scene.
+    Class which holds the numpy arrays containing the images for the green and swir1 bands.
     """
-    def __init__(self, green, swir):
+
+    def __init__(self, green, swir) -> None:
+        """
+        Initializes the green and swir1 images.
+        :param green: Green band.
+        :param swir: Swir1 band.
+        """
         self.green = green
         self.swir = swir
 
     @staticmethod
     def read(image_scene):
-        img = NumpyImage(cv2.imread(image_scene.green_band, cv2.IMREAD_LOAD_GDAL),
+        """
+        Reads a simple path scene and opens the images found in the path as GDAL images.
+        :param image_scene: The input scene.
+        :return: Returns the created NumpyScene image.
+        """
+        img = NumpyScene(cv2.imread(image_scene.green_band, cv2.IMREAD_LOAD_GDAL),
                          cv2.imread(image_scene.swir1_band, cv2.IMREAD_LOAD_GDAL))
         return img
 
-    def write(self, filename):
-        cv2.imwrite(filename.green_band, self.green)
-        cv2.imwrite(filename.swir1_band, self.swir)
+    def write(self, filepath) -> None:
+        """
+        Write numpy scene to the disk using the file's path.
+        :param filepath: Path from the PathScene scene.
+        :return: Nothing.
+        """
+        cv2.imwrite(filepath.green_band, self.green)
+        cv2.imwrite(filepath.swir1_band, self.swir)
 
 
-class NumpyImageWithNDSI(NumpyImage):
+class NumpySceneWithNDSI(NumpyScene):
+    """
+    Class which holds the numpy images with the NDSI image as well.
+    """
+
     def __init__(self, green, swir, ndsi):
-        NumpyImage.__init__(self, green, swir)
+        """
+        Initialize the green, swir1 and ndsi images for the scene.
+        :param green: Green image.
+        :param swir: Swir1 image.
+        :param ndsi: NDSI image.
+        """
+        NumpyScene.__init__(self, green, swir)
         self.ndsi = ndsi
 
-    def write(self, filename):
-        NumpyImage.write(self, filename)
+    def write(self, filepath) -> None:
+        """
+        Write the images to the disk using the path specified in the PathScene image.
+        :param filepath: Path to the scene.
+        :return: Nothing.
+        """
+        NumpyScene.write(self, filepath)
 
-        path = os.path.split(filename.green_band)[0]
-        ndsipath = os.path.join(path, filename.get_scene_name() + "_NDSI.TIF")
+        path = os.path.split(filepath.green_band)[0]
+        ndsi_path = os.path.join(path, filepath.get_scene_name() + "_NDSI.TIF")
         normalized = cv2.normalize(self.ndsi, None, 0, (1 << 16) - 1, cv2.NORM_MINMAX, cv2.CV_16UC1)
 
-        cv2.imwrite(ndsipath, normalized)
+        cv2.imwrite(ndsi_path, normalized)
 
 
 class DISPLAY:
     DOIT = False
+
     @staticmethod
     def satimage(window_prefix, satimage):
         if not DISPLAY.DOIT:

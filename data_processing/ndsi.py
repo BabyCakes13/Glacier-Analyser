@@ -1,7 +1,7 @@
 """Module which contains the class which creates the Normalised Difference Snow Index (NDSI) file."""
 import numpy as np
 
-from data_processing import scene as sc
+from data_processing import scenes as sc
 
 
 class NDSI:
@@ -31,7 +31,7 @@ class NDSI:
         swir_nan[swir_nan == 0] = np.nan
 
         # change image bit depth to 32 bit to allow math without saturation
-        img = sc.NumpyImage(green_nan, swir_nan)
+        img = sc.NumpyScene(green_nan, swir_nan)
 
         # ignore division by zero because image has borders with 0 values
         np.seterr(divide='ignore', invalid='ignore')

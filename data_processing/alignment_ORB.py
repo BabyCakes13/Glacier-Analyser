@@ -8,7 +8,7 @@ import numpy as np
 # This is a workaround to allow importing scene both if imported from main and if called directly
 import sys
 sys.path.append(sys.path[0] + '/..')
-from data_processing import scene as sc
+from data_processing import scenes as sc
 from data_processing import ndsi as nc
 from data_displaying import csv_writer
 from data_gathering import scene_data as sd
@@ -31,9 +31,9 @@ NDSI_CSV = 'ndsi'
 
 class ProcessImage:
     """Class which handles ORB alignment of two images."""
-    def __init__(self, scene:sc.Scene, reference_scene: sc.Scene, aligned_scene: sc.Scene):
-        self.image_16bit = sc.NumpyImage.read(scene)
-        self.reference_16bit = sc.NumpyImage.read(reference_scene)
+    def __init__(self, scene:sc.PathScene, reference_scene: sc.PathScene, aligned_scene: sc.PathScene):
+        self.image_16bit = sc.NumpyScene.read(scene)
+        self.reference_16bit = sc.NumpyScene.read(reference_scene)
         self.aligned_16bit = None
 
         self.scene = scene
@@ -46,12 +46,12 @@ class ProcessImage:
         :return: sc.SatImage
         """
         if self.aligned_16bit is not None:
-            self.aligned_16bit = sc.NumpyImageWithNDSI(self.aligned_16bit.green,
+            self.aligned_16bit = sc.NumpySceneWithNDSI(self.aligned_16bit.green,
                                                        self.aligned_16bit.swir,
                                                        nc.NDSI.calculate_NDSI(self.aligned_16bit))
             image_with_ndsi_16bit = self.aligned_16bit
         else:
-            self.image_16bit = sc.NumpyImageWithNDSI(self.image_16bit.green,
+            self.image_16bit = sc.NumpySceneWithNDSI(self.image_16bit.green,
                                                      self.image_16bit.swir,
                                                      nc.NDSI.calculate_NDSI(self.image_16bit))
             h = nc.NDSI()
@@ -126,7 +126,7 @@ class AlignORB:
     """
     Class which gets two images as input and alignes the image based on the reference.
     """
-    def __init__(self, input_img: sc.NumpyImage, reference_img: sc.NumpyImage):
+    def __init__(self, input_img: sc.NumpyScene, reference_img: sc.NumpyScene):
         # transform from scientific notation to decimal for easy check
         np.set_printoptions(suppress=True, precision=4)
 
@@ -157,7 +157,7 @@ class AlignORB:
         image_8bit_green = (image_16bit.green >> 8).astype(np.uint8)
         image_8bit_swir = (image_16bit.swir >> 8).astype(np.uint8)
 
-        return sc.NumpyImage(image_8bit_green, image_8bit_swir)
+        return sc.NumpyScene(image_8bit_green, image_8bit_swir)
 
     def normalize(self, image, bits=16):
         """
@@ -169,7 +169,7 @@ class AlignORB:
         normalized_image_8bit_green = cv2.normalize(image.green, None, 0, (1 << bits)-1, cv2.NORM_MINMAX)
         normalized_image_8bit_swir = cv2.normalize(image.swir,  None, 0, (1 << bits)-1, cv2.NORM_MINMAX)
 
-        return sc.NumpyImage(normalized_image_8bit_green, normalized_image_8bit_swir)
+        return sc.NumpyScene(normalized_image_8bit_green, normalized_image_8bit_swir)
 
     @staticmethod
     def boxedDetectAndCompute(image, rows=ROWS_NUMBER, columns=COLUMNS_NUMBER):
@@ -280,11 +280,11 @@ class AlignORB:
         aligned_result_green = cv2.warpAffine(self.input_img.green, affine, (width, height))
         aligned_result_swir  = cv2.warpAffine(self.input_img.swir, affine, (width, height))
 
-        if isinstance(self.input_img, sc.NumpyImageWithNDSI):
+        if isinstance(self.input_img, sc.NumpySceneWithNDSI):
             aligned_result_ndsi  = cv2.warpAffine(self.input_img.ndsi, affine, (width, height))
-            aligned = sc.NumpyImageWithNDSI(aligned_result_green, aligned_result_swir, aligned_result_ndsi)
+            aligned = sc.NumpySceneWithNDSI(aligned_result_green, aligned_result_swir, aligned_result_ndsi)
         else:
-            aligned = sc.NumpyImage(aligned_result_green, aligned_result_swir)
+            aligned = sc.NumpyScene(aligned_result_green, aligned_result_swir)
 
         sc.DISPLAY.satimage("OUTPUT", aligned)
 
@@ -421,9 +421,9 @@ if __name__ == "__main__":
     Handle multi process.
     """
     VALID = True
-    scene           = sc.Scene(sys.argv[1], sys.argv[2])
-    reference_scene = sc.Scene(sys.argv[3], sys.argv[4])
-    aligned_scene   = sc.Scene(sys.argv[5], sys.argv[6])
+    scene           = sc.PathScene(sys.argv[1], sys.argv[2])
+    reference_scene = sc.PathScene(sys.argv[3], sys.argv[4])
+    aligned_scene   = sc.PathScene(sys.argv[5], sys.argv[6])
 
     try:
         print("Scene: ", scene.get_scene_name())
