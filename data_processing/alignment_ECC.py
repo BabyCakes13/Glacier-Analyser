@@ -1,7 +1,9 @@
 from __future__ import print_function
+
+import os
+
 import cv2
 import numpy as np
-import os
 
 
 class Align:
@@ -90,7 +92,6 @@ def percentage(percent, image) -> tuple:
 
 
 def setup_alignment(reference_filename, image_filename, result_filename, processed_output_dir):
-
     # prepare the images for alignment
     normalised_reference_8bit, current_image_8bit, \
     scaled_normalised_reference_8bit, scaled_current_image_8bit = resize_depth(reference_filename, image_filename)
@@ -117,4 +118,3 @@ def resize_depth(reference_filename, image_filename):
     scaled_current_image_8bit = cv2.resize(current_image_8bit, percentage(20, current_image_8bit))
 
     return normalised_reference_8bit, current_image_8bit, scaled_normalised_reference_8bit, scaled_current_image_8bit
-

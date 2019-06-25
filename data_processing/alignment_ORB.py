@@ -93,7 +93,7 @@ class ProcessImage:
             snow_ratio,
         ]
 
-        h = csv_writer.CSVWriter(output=glacier_dir,
+        h = csv_writer.CSVWriter(output_dir=glacier_dir,
                                  arguments=arguments,
                                  path=path,
                                  row=row)
