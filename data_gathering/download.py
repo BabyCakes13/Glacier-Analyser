@@ -4,7 +4,7 @@ import os
 import shutil
 import subprocess
 import definitions
-from data_preparing import multiprocess_handler as mh
+from data_preparing import multiprocess as mh
 
 
 class Downloader:
@@ -89,7 +89,7 @@ class Downloader:
             except KeyboardInterrupt:
                 print("Keyboard interrupt.")
                 self.INTERRUPT_SIGNAL = True
-                self.mh.kill_all_humans()
+                self.mh.kill_all_processes()
                 self.mh.wait_all_process_done()
                 break
 

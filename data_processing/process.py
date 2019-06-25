@@ -5,7 +5,7 @@ import definitions
 from data_displaying import csv_writer
 from data_gathering import scene_data as sd
 from data_preparing import directory_handler as odh
-from data_preparing import multiprocess_handler as mh
+from data_preparing import multiprocess as mh
 from data_processing import scenes as sc
 from util import strings
 
@@ -122,16 +122,16 @@ class Process:
 
         try:
             task = ["python3", "data_processing/alignment_ORB.py",
-                    scene.green_band, scene.swir1_band,
-                    reference_scene.green_band, reference_scene.swir1_band,
-                    aligned_scene.green_band, aligned_scene.swir1_band]
+                    scene.green_path, scene.swir1_path,
+                    reference_scene.green_path, reference_scene.swir1_path,
+                    aligned_scene.green_path, aligned_scene.swir1_path]
 
             self.mh.start_processing(task=task, task_name=scene.get_scene_name())
 
         except KeyboardInterrupt:
             print(definitions.PRINT_CODES[1] + "Keyboard interrupt.")
             self.INTERRUPT_SIGNAL = True
-            self.mh.kill_all_humans()
+            self.mh.kill_all_processes()
             self.mh.wait_all_process_done()
 
     @staticmethod

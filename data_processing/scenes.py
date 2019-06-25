@@ -60,8 +60,8 @@ class NumpyScene:
         :param path_scene: The input scene.
         :return: Returns the created NumpyScene image.
         """
-        img = NumpyScene(cv2.imread(path_scene.green_band, cv2.IMREAD_LOAD_GDAL),
-                         cv2.imread(path_scene.swir1_band, cv2.IMREAD_LOAD_GDAL))
+        img = NumpyScene(cv2.imread(path_scene.green_path, cv2.IMREAD_LOAD_GDAL),
+                         cv2.imread(path_scene.swir1_path, cv2.IMREAD_LOAD_GDAL))
         return img
 
     def write(self, file_path) -> None:
@@ -70,8 +70,8 @@ class NumpyScene:
         :param file_path: Path from the PathScene scene.
         :return: Nothing.
         """
-        cv2.imwrite(file_path.green_band, self.green_numpy)
-        cv2.imwrite(file_path.swir1_band, self.swir1_numpy)
+        cv2.imwrite(file_path.green_path, self.green_numpy)
+        cv2.imwrite(file_path.swir1_path, self.swir1_numpy)
 
 
 class NumpySceneWithNDSI(NumpyScene):
@@ -97,7 +97,7 @@ class NumpySceneWithNDSI(NumpyScene):
         """
         NumpyScene.write(self, file_path)
 
-        path = os.path.split(file_path.green_band)[0]
+        path = os.path.split(file_path.green_path)[0]
         ndsi_path = os.path.join(path, file_path.get_scene_name() + "_NDSI.TIF")
         normalized = cv2.normalize(self.ndsi, None, 0, (1 << 16) - 1, cv2.NORM_MINMAX, cv2.CV_16UC1)
 
