@@ -8,12 +8,13 @@ from data_processing import process
 
 
 class ArgsParser:
-    """Class which handles the argument parser for the command line."""
-
+    """
+    Class which handles argument parsing for the command line interface.
+    """
     def __init__(self):
         """
-        Sets up the argument parser for the command line interface.
-        :return: None
+        Sets up the argument parser for the command line interface, creating subparsers for process, download and
+        display.
         """
         self.parser = argparse.ArgumentParser(add_help=True)
         self.subparsers = self.parser.add_subparsers()
@@ -22,7 +23,7 @@ class ArgsParser:
         self.add_process_arguments()
         self.add_display_arguments()
 
-    def add_download_arguments(self):
+    def add_download_arguments(self) -> None:
         """
         Adds arguments to the download sub parser.
         :return: None
