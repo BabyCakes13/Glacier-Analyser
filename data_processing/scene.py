@@ -30,7 +30,7 @@ class Scene:
         return str(scene)
 
 
-class SatImage:
+class NumpyImage:
     """
     Satellite image holding a scene.
     """
@@ -40,8 +40,8 @@ class SatImage:
 
     @staticmethod
     def read(image_scene):
-        img = SatImage(cv2.imread(image_scene.green_band, cv2.IMREAD_LOAD_GDAL),
-                       cv2.imread(image_scene.swir1_band, cv2.IMREAD_LOAD_GDAL))
+        img = NumpyImage(cv2.imread(image_scene.green_band, cv2.IMREAD_LOAD_GDAL),
+                         cv2.imread(image_scene.swir1_band, cv2.IMREAD_LOAD_GDAL))
         return img
 
     def write(self, filename):
@@ -49,13 +49,13 @@ class SatImage:
         cv2.imwrite(filename.swir1_band, self.swir)
 
 
-class SatImageWithNDSI(SatImage):
+class NumpyImageWithNDSI(NumpyImage):
     def __init__(self, green, swir, ndsi):
-        SatImage.__init__(self, green, swir)
+        NumpyImage.__init__(self, green, swir)
         self.ndsi = ndsi
 
     def write(self, filename):
-        SatImage.write(self, filename)
+        NumpyImage.write(self, filename)
 
         path = os.path.split(filename.green_band)[0]
         ndsipath = os.path.join(path, filename.get_scene_name() + "_NDSI.TIF")

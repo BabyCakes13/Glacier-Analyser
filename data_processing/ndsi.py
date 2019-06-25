@@ -1,5 +1,5 @@
 """Module which contains the class which creates the Normalised Difference Snow Index (NDSI) file."""
-import numpy
+import numpy as np
 
 from data_processing import scene as sc
 
@@ -14,42 +14,48 @@ class NDSI:
     # https://nsidc.org/support/faq/what-ndsi-snow-cover-and-how-does-it-compare-fsc
     # says that NDSI = (Band green - band SWIR) / (Band green + Band SWIR)
     @staticmethod
-    def calculate_NDSI(satimage, math_dtype=numpy.float32):
+    def calculate_NDSI(satimage, math_dtype=np.float32) -> np.ndarray:
+        """
+        Calculates the NDSI image as a np array, by converting to float32 for easy computation, treating the borders
+        as NaN in order to ignore those values, since after the alignment, the borders are 0 valued. The interval of
+        calculation is normalized in order to make 16bit fit float32.
+        :param satimage: Satellite image containing green and swir1 np images.
+        :param math_dtype: Data type for mathematical calculations.
+        :return: Returns the np array containing the result of the division.
+        """
 
         green_nan = satimage.green.astype(math_dtype)
         swir_nan = satimage.swir.astype(math_dtype)
 
-        green_nan[green_nan == 0] = numpy.nan
-        swir_nan[swir_nan == 0] = numpy.nan
+        green_nan[green_nan == 0] = np.nan
+        swir_nan[swir_nan == 0] = np.nan
 
         # change image bit depth to 32 bit to allow math without saturation
-        img = sc.SatImage(green_nan, swir_nan)
+        img = sc.NumpyImage(green_nan, swir_nan)
 
         # ignore division by zero because image has borders with 0 values
-        numpy.seterr(divide='ignore', invalid='ignore')
+        np.seterr(divide='ignore', invalid='ignore')
 
-        numerator = numpy.subtract(img.green, img.swir)
-        if math_dtype == numpy.int32:
-            numerator = numpy.multiply(numerator, 0x7FFF)
-        denominator = numpy.add(img.green, img.swir)
-        ndsi = numpy.divide(numerator, denominator)
+        numerator = np.subtract(img.green, img.swir)
+        if math_dtype == np.int32:
+            numerator = np.multiply(numerator, 0x7FFF)
+        denominator = np.add(img.green, img.swir)
+        ndsi = np.divide(numerator, denominator)
 
         # interpret each NaN value as 0
         ndsi[ndsi != ndsi] = -1
 
-        if math_dtype == numpy.int32:
-            ndsi = numpy.add(ndsi, 0x7FFF)
-
-        # print("ndsi data range is ", ndsi.min(), " ", ndsi.max())
+        if math_dtype == np.int32:
+            ndsi = np.add(ndsi, 0x7FFF)
 
         return ndsi
 
     @staticmethod
-    def get_snow_image(ndsi, threshold=0.5):
+    def get_snow_image(ndsi, threshold=0.5) -> np.ndarray:
         """
         Returns the image with maximum contrast in order to have everything which is not snow, black, and everything
         which is, shite. Aimed for visual interpretation.
-        :param ndsi: The ndsi numpy image.
+        :param ndsi: The ndsi np image.
         :param threshold: The threshold for computing the contrast.
         :return:
         """
@@ -58,7 +64,7 @@ class NDSI:
         return snow
 
     @staticmethod
-    def get_snow_pixels(snow_image, threshold=0.5):
+    def get_snow_pixels(snow_image, threshold=0.5) -> int:
         """
         Returns the number of snow pixels from the image, based on the threshold.
         :param snow_image: The contrast snow image.
@@ -69,7 +75,7 @@ class NDSI:
         return snow_pixels
 
     @staticmethod
-    def get_snow_pixels_ratio(snow_image, threshold=0.5):
+    def get_snow_pixels_ratio(snow_image, threshold=0.5) -> float:
         """
         Returns the snow pixel ratio for the ndsi image, as number of snow pixels divided to total number of pixels.
         :param snow_image: The image representing the contrasted ndsi.

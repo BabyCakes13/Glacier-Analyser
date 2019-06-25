@@ -9,7 +9,7 @@ import numpy as np
 import sys
 sys.path.append(sys.path[0] + '/..')
 from data_processing import scene as sc
-from data_processing import ndsi_calculator as nc
+from data_processing import ndsi as nc
 from data_displaying import csv_writer
 from data_gathering import scene_data as sd
 
@@ -32,8 +32,8 @@ NDSI_CSV = 'ndsi'
 class ProcessImage:
     """Class which handles ORB alignment of two images."""
     def __init__(self, scene:sc.Scene, reference_scene: sc.Scene, aligned_scene: sc.Scene):
-        self.image_16bit = sc.SatImage.read(scene)
-        self.reference_16bit = sc.SatImage.read(reference_scene)
+        self.image_16bit = sc.NumpyImage.read(scene)
+        self.reference_16bit = sc.NumpyImage.read(reference_scene)
         self.aligned_16bit = None
 
         self.scene = scene
@@ -46,14 +46,14 @@ class ProcessImage:
         :return: sc.SatImage
         """
         if self.aligned_16bit is not None:
-            self.aligned_16bit = sc.SatImageWithNDSI(self.aligned_16bit.green,
-                                                     self.aligned_16bit.swir,
-                                                     nc.NDSI.calculate_NDSI(self.aligned_16bit))
+            self.aligned_16bit = sc.NumpyImageWithNDSI(self.aligned_16bit.green,
+                                                       self.aligned_16bit.swir,
+                                                       nc.NDSI.calculate_NDSI(self.aligned_16bit))
             image_with_ndsi_16bit = self.aligned_16bit
         else:
-            self.image_16bit = sc.SatImageWithNDSI(self.image_16bit.green,
-                                                   self.image_16bit.swir,
-                                                   nc.NDSI.calculate_NDSI(self.image_16bit))
+            self.image_16bit = sc.NumpyImageWithNDSI(self.image_16bit.green,
+                                                     self.image_16bit.swir,
+                                                     nc.NDSI.calculate_NDSI(self.image_16bit))
             h = nc.NDSI()
             ndsi = nc.NDSI.calculate_NDSI(self.image_16bit)
             snow_image = h.get_snow_image(ndsi=ndsi)
@@ -126,7 +126,7 @@ class AlignORB:
     """
     Class which gets two images as input and alignes the image based on the reference.
     """
-    def __init__(self, input_img: sc.SatImage, reference_img: sc.SatImage):
+    def __init__(self, input_img: sc.NumpyImage, reference_img: sc.NumpyImage):
         # transform from scientific notation to decimal for easy check
         np.set_printoptions(suppress=True, precision=4)
 
@@ -157,7 +157,7 @@ class AlignORB:
         image_8bit_green = (image_16bit.green >> 8).astype(np.uint8)
         image_8bit_swir = (image_16bit.swir >> 8).astype(np.uint8)
 
-        return sc.SatImage(image_8bit_green, image_8bit_swir)
+        return sc.NumpyImage(image_8bit_green, image_8bit_swir)
 
     def normalize(self, image, bits=16):
         """
@@ -169,7 +169,7 @@ class AlignORB:
         normalized_image_8bit_green = cv2.normalize(image.green, None, 0, (1 << bits)-1, cv2.NORM_MINMAX)
         normalized_image_8bit_swir = cv2.normalize(image.swir,  None, 0, (1 << bits)-1, cv2.NORM_MINMAX)
 
-        return sc.SatImage(normalized_image_8bit_green, normalized_image_8bit_swir)
+        return sc.NumpyImage(normalized_image_8bit_green, normalized_image_8bit_swir)
 
     @staticmethod
     def boxedDetectAndCompute(image, rows=ROWS_NUMBER, columns=COLUMNS_NUMBER):
@@ -280,11 +280,11 @@ class AlignORB:
         aligned_result_green = cv2.warpAffine(self.input_img.green, affine, (width, height))
         aligned_result_swir  = cv2.warpAffine(self.input_img.swir, affine, (width, height))
 
-        if isinstance(self.input_img, sc.SatImageWithNDSI):
+        if isinstance(self.input_img, sc.NumpyImageWithNDSI):
             aligned_result_ndsi  = cv2.warpAffine(self.input_img.ndsi, affine, (width, height))
-            aligned = sc.SatImageWithNDSI(aligned_result_green, aligned_result_swir, aligned_result_ndsi)
+            aligned = sc.NumpyImageWithNDSI(aligned_result_green, aligned_result_swir, aligned_result_ndsi)
         else:
-            aligned = sc.SatImage(aligned_result_green, aligned_result_swir)
+            aligned = sc.NumpyImage(aligned_result_green, aligned_result_swir)
 
         sc.DISPLAY.satimage("OUTPUT", aligned)
 
