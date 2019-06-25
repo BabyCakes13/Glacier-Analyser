@@ -8,7 +8,7 @@ class NDSI:
     """Class which handles the creation of the Normalised Difference Snow Index (NDSI) file."""
 
     def __init__(self):
-        """Set the variables needed for computing the ndsi band and actually compute the ndsi band."""
+        """Pass creation to only used it as a class variable."""
         pass
 
     # https://nsidc.org/support/faq/what-ndsi-snow-cover-and-how-does-it-compare-fsc
@@ -30,7 +30,7 @@ class NDSI:
 
         numerator = numpy.subtract(img.green, img.swir)
         if math_dtype == numpy.int32:
-            numerator = numpy.multiply(numerator, 0x7FFF) #TODO: why god why
+            numerator = numpy.multiply(numerator, 0x7FFF)
         denominator = numpy.add(img.green, img.swir)
         ndsi = numpy.divide(numerator, denominator)
 
@@ -46,20 +46,38 @@ class NDSI:
 
     @staticmethod
     def get_snow_image(ndsi, threshold=0.5):
+        """
+        Returns the image with maximum contrast in order to have everything which is not snow, black, and everything
+        which is, shite. Aimed for visual interpretation.
+        :param ndsi: The ndsi numpy image.
+        :param threshold: The threshold for computing the contrast.
+        :return:
+        """
         snow = ndsi.copy()
         snow[snow <= threshold] = -1
         return snow
 
     @staticmethod
-    def get_snow_pixels(snowImage, threshold=0.5):
-        snow_pixels = len(snowImage[snowImage > threshold])
+    def get_snow_pixels(snow_image, threshold=0.5):
+        """
+        Returns the number of snow pixels from the image, based on the threshold.
+        :param snow_image: The contrast snow image.
+        :param threshold: The threshold for extracting the snow pixels.
+        :return:
+        """
+        snow_pixels = len(snow_image[snow_image > threshold])
         return snow_pixels
 
     @staticmethod
     def get_snow_pixels_ratio(snow_image, threshold=0.5):
+        """
+        Returns the snow pixel ratio for the ndsi image, as number of snow pixels divided to total number of pixels.
+        :param snow_image: The image representing the contrasted ndsi.
+        :param threshold: The threshold for calculating the number of snow pixels.
+        :return:
+        """
         snow_pixels = snow_image[snow_image > threshold].size
         all_pixels = snow_image.size
         ratio = snow_pixels / all_pixels
 
         return ratio
-
