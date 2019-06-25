@@ -14,18 +14,18 @@ class NDSI:
     # https://nsidc.org/support/faq/what-ndsi-snow-cover-and-how-does-it-compare-fsc
     # says that NDSI = (Band green - band SWIR) / (Band green + Band SWIR)
     @staticmethod
-    def calculate_NDSI(satimage, math_dtype=np.float32) -> np.ndarray:
+    def calculate_NDSI(numpy_scene, math_dtype=np.float32) -> np.ndarray:
         """
         Calculates the NDSI image as a np array, by converting to float32 for easy computation, treating the borders
         as NaN in order to ignore those values, since after the alignment, the borders are 0 valued. The interval of
         calculation is normalized in order to make 16bit fit float32.
-        :param satimage: Satellite image containing green and swir1 np images.
+        :param numpy_scene: Satellite image containing green and swir1 np images.
         :param math_dtype: Data type for mathematical calculations.
         :return: Returns the np array containing the result of the division.
         """
 
-        green_nan = satimage.green.astype(math_dtype)
-        swir_nan = satimage.swir.astype(math_dtype)
+        green_nan = numpy_scene.green.astype(math_dtype)
+        swir_nan = numpy_scene.swir.astype(math_dtype)
 
         green_nan[green_nan == 0] = np.nan
         swir_nan[swir_nan == 0] = np.nan
