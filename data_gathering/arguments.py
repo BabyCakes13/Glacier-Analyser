@@ -1,16 +1,20 @@
-"""Argument parser"""
+"""Module which handles the argument parsing for the application."""
 import argparse
+
+import definitions
+from data_displaying import csv_reader
 from data_gathering import download
 from data_processing import process
-from data_displaying import csv_reader
-import definitions
 
 
 class ArgsParser:
     """Class which handles the argument parser for the command line."""
 
     def __init__(self):
-        """Sets up the argument parser."""
+        """
+        Sets up the argument parser for the command line interface.
+        :return: None
+        """
         self.parser = argparse.ArgumentParser(add_help=True)
         self.subparsers = self.parser.add_subparsers()
 
@@ -19,7 +23,10 @@ class ArgsParser:
         self.add_display_arguments()
 
     def add_download_arguments(self):
-        """Adds arguments to the download sub parser."""
+        """
+        Adds arguments to the download sub parser.
+        :return: None
+        """
         download_parser = self.subparsers.add_parser('download',
                                                      add_help=True)
         download_parser.add_argument('--csv',
@@ -39,8 +46,11 @@ class ArgsParser:
                                      dest='j')
         download_parser.set_defaults(func=set_download_function)
 
-    def add_process_arguments(self):
-        """Adds arguments to the process sub parser."""
+    def add_process_arguments(self) -> None:
+        """
+        Adds arguments to the process sub parser.
+        :return: None
+        """
         process_parser = self.subparsers.add_parser('process',
                                                     add_help=True)
         process_parser.add_argument('--input',
@@ -65,7 +75,11 @@ class ArgsParser:
                                     dest='j')
         process_parser.set_defaults(func=set_process_function)
 
-    def add_display_arguments(self):
+    def add_display_arguments(self) -> None:
+        """
+        Adds display arguments to the parser.
+        :return: None
+        """
         process_parser = self.subparsers.add_parser('display',
                                                     add_help=True)
         process_parser.add_argument('--csv',
@@ -76,15 +90,22 @@ class ArgsParser:
         process_parser.set_defaults(func=set_display_function)
 
 
-def activate_arguments():
-    """Instantiates an argument parser object and activates parsing."""
+def activate_arguments() -> None:
+    """
+    Instantiates an argument parser object and activates parsing.
+    :return: None
+    """
     arguments = ArgsParser()
     args = arguments.parser.parse_args()
     args.func(args)
 
 
-def set_download_function(args):
-    """The default function for download sub parser."""
+def set_download_function(args) -> None:
+    """
+    The default function for download sub parser.
+    :param args:
+    :return:
+    """
     print("Setting up download...", args.csv)
 
     downloader = download.Downloader(args.csv, args.dir, args.j)
@@ -93,18 +114,26 @@ def set_download_function(args):
     print("Finished download.")
 
 
-def set_process_function(args):
-    """The default function for process sub parser."""
+def set_process_function(args) -> None:
+    """
+    The default function for process sub parser.
+    :param args: Arguments taken from the command line.
+    :return: None
+    """
     print("Setting up process...")
 
-    """"""
     process_align = process.Process(args.input, args.bigdir, args.output, args.j)
     process_align.start()
 
     print("Finished process.")
 
 
-def set_display_function(args):
+def set_display_function(args) -> None:
+    """
+       The default function for display sub parser.
+       :param args: Arguments taken from the command line.
+       :return: None
+       """
     print("Setting up display...")
 
     process_align = csv_reader.CSVReader(csv=args.csv)

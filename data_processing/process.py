@@ -4,7 +4,7 @@ import pathlib
 import definitions
 from data_displaying import csv_writer
 from data_gathering import scene_data as sd
-from data_preparing import output_dir_handler as odh
+from data_preparing import directory_handler as odh
 from data_preparing import multiprocess_handler as mh
 from data_processing import scenes as sc
 from util import strings
