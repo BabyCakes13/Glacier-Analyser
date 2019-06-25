@@ -70,7 +70,7 @@ class Process:
         TOTAL_PROCESSED = 0
 
         h = odh.OutputDirHandler(input_dir=current_dir, output_dir=self.output_dir)
-        pr_dirs_map, pr_bands_map = h.prepare_path_row()
+        pr_dirs_map, pr_bands_map = h.prepare_path_row_maps()
 
         for path_row, bands in pr_bands_map.items():
             green_band_list, swir1_band_list = self.separate_and_sort_bands_on_type(bands)

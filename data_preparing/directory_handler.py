@@ -1,18 +1,32 @@
-from collections import defaultdict
+"""
+Module which creates the processing output directories hierarchy.
+"""
+import os
 import re
 import shutil
-import os
+from collections import defaultdict
+
 import definitions
 from data_gathering import scene_information
 from util import strings
 
 
 class OutputDirHandler:
+    """
+    Class which creates the output folder hierarchy, as: glacier_dir/path_row1, glacier_dir/path_row2 and so on. The
+    path_row directories contain the processed images.
+    """
+
     def __init__(self, input_dir, output_dir):
+        """
+        Initializes the variables needed for folder hierarchy creation.
+        :param input_dir: Input directory which contains the files needed to be processed.
+        :param output_dir: Output directory which contains the files which will be processed.
+        """
         self.input_dir = input_dir
         self.output_dir = output_dir
 
-    def get_pr_dir_map(self) -> map:
+    def get_path_row_dir_map(self) -> map:
         """
         Create a map of all the found paths and rows pairs as keys,
         and the full path to their directory location as values.
@@ -24,7 +38,7 @@ class OutputDirHandler:
             for file in files:
                 if file.endswith('.TIF'):
                     file = os.path.join(root, file)
-                    path_row = self.get_path_row(file)
+                    path_row = self.get_scene_path_row(file)
 
                     if (path_row not in pr_dir.keys()) and (path_row is not None):
                         print("Made directory ", path_row)
@@ -33,9 +47,12 @@ class OutputDirHandler:
 
         return pr_dir
 
-    def get_pr_bands_map(self):
-        """Groups all the bands into their path/row map.
-        Each path_row touple will contain a list with all the filepaths of the bands which are from that path_row."""
+    def get_path_row_bands_map(self) -> dict:
+        """
+        Groups all the bands into their path/row map.
+        Each path_row touple will contain a list with all the filepaths of the bands which are from that path_row.
+        :return: dict
+        """
         all_pr = defaultdict(list)
 
         for file in os.listdir(self.input_dir):
@@ -53,10 +70,10 @@ class OutputDirHandler:
 
         return all_pr
 
-    def get_path_row(self, file):
+    def get_scene_path_row(self, file) -> tuple:
         """
         Determines the path and row of one scene based on the Landsat naming convention.
-        :param file:
+        :param file: The path to a Landsat image, which will have its scene extracted for path row find.
         :return: None if the scene is not found, a tuple containing the path and the row else.
         """
         path_row = None
@@ -70,22 +87,20 @@ class OutputDirHandler:
 
         return path_row
 
-    def prepare_path_row(self) -> tuple:
+    def prepare_path_row_maps(self) -> tuple:
         """
         Creates the two needed maps for dividing the files based on their paths and rows.
         pr_bands_map: map which has path_row as keys and a list with all the band from that directory which have the
         same paths and rows
         pr_dirs_map: map which has path_row as keys and a full path to their created directory as glacier_id/path_row
-        :param current_dir: The full path to the current glacier directory.
         :return: A tuple formed of the two maps.
         """
-
-        pr_dirs_map = self.get_pr_dir_map()
-        pr_bands_map = self.get_pr_bands_map()
+        pr_dirs_map = self.get_path_row_dir_map()
+        pr_bands_map = self.get_path_row_bands_map()
 
         return pr_dirs_map, pr_bands_map
 
-    def make_glacier_dir(self):
+    def make_glacier_dir(self) -> str:
         """
         Creates and returns the path to the directory with the current glacier name.
         :return: None
@@ -98,6 +113,23 @@ class OutputDirHandler:
         os.mkdir(glacier_dir)
 
         return glacier_dir
+
+    def make_path_row_directory(self, path_row) -> str:
+        """
+        Creates a directory of the form glacier_id/path_row which will keep the results. If the directory exists, it
+        will be overwritten.
+        :param path_row: Path and row of the scene, as tuple.
+        :return: String containing the path to the created path_row dir.
+        """
+        glacier_dir = self.make_glacier_dir()
+        path_row_dir_filename = str(path_row[0]) + "_" + str(path_row[1])
+        path_row_dir = os.path.join(glacier_dir, path_row_dir_filename)
+
+        if os.path.exists(path_row_dir):
+            shutil.rmtree(path_row_dir)
+        os.mkdir(path_row_dir)
+
+        return path_row_dir
 
     def get_glacier(self) -> str:
         """
@@ -123,19 +155,3 @@ class OutputDirHandler:
             if bool(re.match(pattern, scene)):
                 return True
         return False
-
-    def make_path_row_directory(self, path_row):
-        """
-        Creates a directory of the form glacier_id/path_row which will keep the results.
-        :param path_row: Path and row of image.
-        :return:
-        """
-        glacier_dir = self.make_glacier_dir()
-        path_row_dir_filename = str(path_row[0]) + "_" + str(path_row[1])
-        path_row_dir = os.path.join(glacier_dir, path_row_dir_filename)
-
-        if os.path.exists(path_row_dir):
-            shutil.rmtree(path_row_dir)
-        os.mkdir(path_row_dir)
-
-        return path_row_dir
