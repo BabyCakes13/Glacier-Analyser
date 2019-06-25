@@ -1,4 +1,5 @@
 import sys
+import os
 
 import cv2
 import numpy as np
@@ -9,7 +10,7 @@ class DifferenceMovement:
     Set the values for the numpy array images.
     """
 
-    def __init__(self, image1, image2):
+    def __init__(self, image1, image2, path):
         np.seterr(divide='ignore', invalid='ignore')
 
         self.image1 = cv2.imread(image1, cv2.IMREAD_GRAYSCALE)
@@ -28,6 +29,8 @@ class DifferenceMovement:
 
         image('different', self.img_diff)
         image('move', self.img_move)
+
+        self.write(path)
 
     def create_mask(self):
         """
@@ -93,17 +96,29 @@ class DifferenceMovement:
         hsv[..., 2] = self.scale(hsv[..., 2], 3)
 
         # brighten up
-        hsv[..., 2] = hsv[..., 2] * 2
         bgr = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
 
         return bgr
 
     @staticmethod
     def scale(image, value):
+        """
+        Remove unwanted brightness from tge image.
+        :param image:
+        :param value:
+        :return:
+        """
         image32 = image.astype(np.int32)
         image32 = image32 * value
         np.clip(image32, 0, 255, out=image32)
         return image32.astype(np.uint8)
+
+    def write(self, path):
+        image2_path = os.path.join(path, 'diff.TIF')
+        image1_path = os.path.join(path, 'move.TIF')
+
+        cv2.imwrite(image1_path, self.img_diff)
+        cv2.imwrite(image2_path, self.img_move)
 
 
 def image(window_name, image) -> None:
@@ -126,4 +141,4 @@ class ProcessResults:
         self.input_dir = input_dir
 
 
-diff = DifferenceMovement(sys.argv[1], sys.argv[2])
+diff = DifferenceMovement(sys.argv[1], sys.argv[2], sys.argv[3])
