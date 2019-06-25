@@ -1,5 +1,8 @@
-import sys
+"""
+Module which handles calculation of difference for object state and optical flow for image movement.
+"""
 import os
+import sys
 
 import cv2
 import numpy as np
@@ -7,10 +10,17 @@ import numpy as np
 
 class DifferenceMovement:
     """
-    Set the values for the numpy array images.
+    Class which handles creating the difference and movement images for an NDSI image.
     """
 
     def __init__(self, image1, image2, path):
+        """
+        The constructor handles the reading, creation of mask, calculation of difference and movement images and mask
+        applying on them.
+        :param image1: First image.
+        :param image2: Second image.
+        :param path: Path for image output writing.
+        """
         np.seterr(divide='ignore', invalid='ignore')
 
         self.image1 = cv2.imread(image1, cv2.IMREAD_GRAYSCALE)
@@ -32,7 +42,7 @@ class DifferenceMovement:
 
         self.write(path)
 
-    def create_mask(self):
+    def create_mask(self) -> tuple:
         """
         Creates two masks which represent the black background of the satellite images.
         :return: A tuple of two numpy arrays.
@@ -101,19 +111,27 @@ class DifferenceMovement:
         return bgr
 
     @staticmethod
-    def scale(image, value):
+    def scale(image, value) -> np.ndarray:
         """
-        Remove unwanted brightness from tge image.
-        :param image:
-        :param value:
-        :return:
+        Brighten and contrast up the optical flow image for visual interpretation;
+        Remove overflow brightness form the image resulting after optical flow computation.
+        Since the values are maximum 255, an overflow would turn those pixels black, aka the lowest level of brightness.
+        :param image: The overflowed image.
+        :param value: The value of brighten up.
+        :return: The improved image.
         """
         image32 = image.astype(np.int32)
         image32 = image32 * value
         np.clip(image32, 0, 255, out=image32)
+
         return image32.astype(np.uint8)
 
-    def write(self, path):
+    def write(self, path) -> None:
+        """
+        Write the two difference and movement images to disk, with the specified path.
+        :param path: Path to the output folder for writing.
+        :return: Nothing.
+        """
         image2_path = os.path.join(path, 'diff.TIF')
         image1_path = os.path.join(path, 'move.TIF')
 
@@ -131,6 +149,7 @@ def image(window_name, image) -> None:
     cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
     cv2.resizeWindow(window_name, 1000, 1000)
     cv2.imshow(window_name, image)
+
     while cv2.waitKey(0) & 0xff != 27:
         pass
     cv2.destroyAllWindows()
@@ -139,6 +158,8 @@ def image(window_name, image) -> None:
 class ProcessResults:
     def __init__(self, input_dir):
         self.input_dir = input_dir
+
+    # TODO
 
 
 diff = DifferenceMovement(sys.argv[1], sys.argv[2], sys.argv[3])
