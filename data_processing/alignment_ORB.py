@@ -46,13 +46,13 @@ class ProcessImage:
         :return: sc.SatImage
         """
         if self.aligned_16bit is not None:
-            self.aligned_16bit = sc.NumpySceneWithNDSI(self.aligned_16bit.green,
-                                                       self.aligned_16bit.swir,
+            self.aligned_16bit = sc.NumpySceneWithNDSI(self.aligned_16bit.green_numpy,
+                                                       self.aligned_16bit.swir1_numpy,
                                                        nc.NDSI.calculate_NDSI(self.aligned_16bit))
             image_with_ndsi_16bit = self.aligned_16bit
         else:
-            self.image_16bit = sc.NumpySceneWithNDSI(self.image_16bit.green,
-                                                     self.image_16bit.swir,
+            self.image_16bit = sc.NumpySceneWithNDSI(self.image_16bit.green_numpy,
+                                                     self.image_16bit.swir1_numpy,
                                                      nc.NDSI.calculate_NDSI(self.image_16bit))
             h = nc.NDSI()
             ndsi = nc.NDSI.calculate_NDSI(self.image_16bit)
@@ -60,7 +60,7 @@ class ProcessImage:
             snow_pixels_ratio = h.get_snow_pixels_ratio(snow_image=snow_image, threshold=0.5)
 
             image_with_ndsi_16bit = self.image_16bit
-            self.write_ndsi_csv(path=aligned_scene.green_band,
+            self.write_ndsi_csv(path=aligned_scene.green_path,
                                 scene=aligned_scene.get_scene_name(),
                                 snow_ratio=snow_pixels_ratio)
 
@@ -142,11 +142,11 @@ class AlignORB:
         self.align_input = image_normnalized_8bit
         self.align_reference = reference_normnalized_8bit
 
-        sc.DISPLAY.satimage("INPUT", self.input_img)
-        sc.DISPLAY.satimage("REFERENCE", self.reference_img)
+        sc.DISPLAY.numpy_scene("INPUT", self.input_img)
+        sc.DISPLAY.numpy_scene("REFERENCE", self.reference_img)
 
-        sc.DISPLAY.satimage("ALIGN_INPUT",     self.align_input)
-        sc.DISPLAY.satimage("ALIGN_REFERENCE", self.align_reference)
+        sc.DISPLAY.numpy_scene("ALIGN_INPUT", self.align_input)
+        sc.DISPLAY.numpy_scene("ALIGN_REFERENCE", self.align_reference)
 
     def downsample(self, image_16bit):
         """
@@ -233,10 +233,10 @@ class AlignORB:
         """
 
         # detect and compute the feature points by splitting the image in boxes for good feature spread
-        keypoints_img_green, descriptors_img_green = self.boxedDetectAndCompute(self.align_input.green)
-        keypoints_img_swir,  descriptors_img_swir  = self.boxedDetectAndCompute(self.align_input.swir)
-        keypoints_ref_green, descriptors_ref_green = self.boxedDetectAndCompute(self.align_reference.green)
-        keypoints_ref_swir,  descriptors_ref_swir  = self.boxedDetectAndCompute(self.align_reference.swir)
+        keypoints_img_green, descriptors_img_green = self.boxedDetectAndCompute(self.align_input.green_numpy)
+        keypoints_img_swir,  descriptors_img_swir  = self.boxedDetectAndCompute(self.align_input.swir1_numpy)
+        keypoints_ref_green, descriptors_ref_green = self.boxedDetectAndCompute(self.align_reference.green_numpy)
+        keypoints_ref_swir,  descriptors_ref_swir  = self.boxedDetectAndCompute(self.align_reference.swir1_numpy)
 
         keypoints_img_all   = keypoints_img_green + keypoints_img_swir
         keypoints_ref_all   = keypoints_ref_green + keypoints_ref_swir
@@ -276,9 +276,9 @@ class AlignORB:
             return None
 
         # warp the affine matrix to the current image
-        height, width = self.reference_img.green.shape
-        aligned_result_green = cv2.warpAffine(self.input_img.green, affine, (width, height))
-        aligned_result_swir  = cv2.warpAffine(self.input_img.swir, affine, (width, height))
+        height, width = self.reference_img.green_numpy.shape
+        aligned_result_green = cv2.warpAffine(self.input_img.green_numpy, affine, (width, height))
+        aligned_result_swir  = cv2.warpAffine(self.input_img.swir1_numpy, affine, (width, height))
 
         if isinstance(self.input_img, sc.NumpySceneWithNDSI):
             aligned_result_ndsi  = cv2.warpAffine(self.input_img.ndsi, affine, (width, height))
@@ -286,7 +286,7 @@ class AlignORB:
         else:
             aligned = sc.NumpyScene(aligned_result_green, aligned_result_swir)
 
-        sc.DISPLAY.satimage("OUTPUT", aligned)
+        sc.DISPLAY.numpy_scene("OUTPUT", aligned)
 
         return aligned
 
@@ -340,8 +340,8 @@ class AlignORB:
         image_points = np.array(image_points)
 
         # draw the match image
-        pruned_matches_image = cv2.drawMatches(self.align_reference.green, reference_keypoints,
-                                               self.align_input.green, image_keypoints,
+        pruned_matches_image = cv2.drawMatches(self.align_reference.green_numpy, reference_keypoints,
+                                               self.align_input.green_numpy, image_keypoints,
                                                matches_pruned,
                                                None, matchColor=(0, 255, 255), singlePointColor=(100, 0, 0),
                                                flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)

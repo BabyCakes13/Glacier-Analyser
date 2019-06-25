@@ -13,21 +13,21 @@ class PathScene:
     Class which holds the paths to green and swir1 band of a scene.
     """
 
-    def __init__(self, green_band, swir1_band):
+    def __init__(self, green_path, swir1_path):
         """
         Class holding the pair of B3 and B6 bands.
-        :param green_band: Full path to the green band.
-        :param swir1_band: Full path to the swir1 band.
+        :param green_path: Full path to the green band.
+        :param swir1_path: Full path to the swir1 band.
         """
-        self.green_band = green_band
-        self.swir1_band = swir1_band
+        self.green_path = green_path
+        self.swir1_path = swir1_path
 
     def get_scene_name(self) -> str:
         """
         Returns the scene name based on the green band.
         :return: Name of the scene
         """
-        input_dir, band = os.path.split(self.green_band)
+        input_dir, band = os.path.split(self.green_path)
         scene = None
 
         if band.endswith(definitions.GREEN_BAND_END):
@@ -44,34 +44,34 @@ class NumpyScene:
     Class which holds the numpy arrays containing the images for the green and swir1 bands.
     """
 
-    def __init__(self, green, swir) -> None:
+    def __init__(self, green_numpy, swir1_numpy) -> None:
         """
         Initializes the green and swir1 images.
-        :param green: Green band.
-        :param swir: Swir1 band.
+        :param green_numpy: Green band.
+        :param swir1_numpy: Swir1 band.
         """
-        self.green = green
-        self.swir = swir
+        self.green_numpy = green_numpy
+        self.swir1_numpy = swir1_numpy
 
     @staticmethod
-    def read(image_scene):
+    def read(path_scene):
         """
         Reads a simple path scene and opens the images found in the path as GDAL images.
-        :param image_scene: The input scene.
+        :param path_scene: The input scene.
         :return: Returns the created NumpyScene image.
         """
-        img = NumpyScene(cv2.imread(image_scene.green_band, cv2.IMREAD_LOAD_GDAL),
-                         cv2.imread(image_scene.swir1_band, cv2.IMREAD_LOAD_GDAL))
+        img = NumpyScene(cv2.imread(path_scene.green_band, cv2.IMREAD_LOAD_GDAL),
+                         cv2.imread(path_scene.swir1_band, cv2.IMREAD_LOAD_GDAL))
         return img
 
-    def write(self, filepath) -> None:
+    def write(self, file_path) -> None:
         """
         Write numpy scene to the disk using the file's path.
-        :param filepath: Path from the PathScene scene.
+        :param file_path: Path from the PathScene scene.
         :return: Nothing.
         """
-        cv2.imwrite(filepath.green_band, self.green)
-        cv2.imwrite(filepath.swir1_band, self.swir)
+        cv2.imwrite(file_path.green_band, self.green_numpy)
+        cv2.imwrite(file_path.swir1_band, self.swir1_numpy)
 
 
 class NumpySceneWithNDSI(NumpyScene):
@@ -79,51 +79,66 @@ class NumpySceneWithNDSI(NumpyScene):
     Class which holds the numpy images with the NDSI image as well.
     """
 
-    def __init__(self, green, swir, ndsi):
+    def __init__(self, green_numpy, swir1_numpy, ndsi_numpy):
         """
         Initialize the green, swir1 and ndsi images for the scene.
-        :param green: Green image.
-        :param swir: Swir1 image.
-        :param ndsi: NDSI image.
+        :param green_numpy: Green image.
+        :param swir1_numpy: Swir1 image.
+        :param ndsi_numpy: NDSI image.
         """
-        NumpyScene.__init__(self, green, swir)
-        self.ndsi = ndsi
+        NumpyScene.__init__(self, green_numpy, swir1_numpy)
+        self.ndsi = ndsi_numpy
 
-    def write(self, filepath) -> None:
+    def write(self, file_path) -> None:
         """
         Write the images to the disk using the path specified in the PathScene image.
-        :param filepath: Path to the scene.
+        :param file_path: Path to the scene.
         :return: Nothing.
         """
-        NumpyScene.write(self, filepath)
+        NumpyScene.write(self, file_path)
 
-        path = os.path.split(filepath.green_band)[0]
-        ndsi_path = os.path.join(path, filepath.get_scene_name() + "_NDSI.TIF")
+        path = os.path.split(file_path.green_band)[0]
+        ndsi_path = os.path.join(path, file_path.get_scene_name() + "_NDSI.TIF")
         normalized = cv2.normalize(self.ndsi, None, 0, (1 << 16) - 1, cv2.NORM_MINMAX, cv2.CV_16UC1)
 
         cv2.imwrite(ndsi_path, normalized)
 
 
 class DISPLAY:
-    DOIT = False
+    """
+    Class which enables image viewing by cv2 only if the do_it attribute is set.
+    """
+    do_it = False
 
     @staticmethod
-    def satimage(window_prefix, satimage):
-        if not DISPLAY.DOIT:
+    def numpy_scene(window_prefix, numpy_scene) -> None:
+        """
+        Displays the green and swir1 bands from the NumpyScene.
+        :param window_prefix: The prefix name of the window to be displayed.
+        :param numpy_scene: NumpyScene object.
+        :return: None.
+        """
+        if not DISPLAY.do_it:
             return
-        DISPLAY.image(window_prefix + "_green", satimage.green)
-        DISPLAY.image(window_prefix + "_swir", satimage.swir)
+        DISPLAY.image(window_prefix + "_green", numpy_scene.green)
+        DISPLAY.image(window_prefix + "_swir", numpy_scene.swir)
 
     @staticmethod
-    def satimage_with_ndsi(window_prefix, satimagewithndsi):
-        if not DISPLAY.DOIT:
+    def numpy_scene_with_ndsi(window_prefix, numpy_scene_with_ndsi) -> None:
+        """
+        Displays the green and swir1 bands from the NumpySceneWithNDSI.
+        :param window_prefix: The name of the window to be displayed.
+        :param numpy_scene_with_ndsi: NumpyScene object.
+        :return: 
+        """
+        if not DISPLAY.do_it:
             return
-        DISPLAY.image(window_prefix + "_green", satimagewithndsi.green)
-        DISPLAY.image(window_prefix + "_swir", satimagewithndsi.swir)
-        DISPLAY.image(window_prefix + "_ndsi", satimagewithndsi.ndsi)
+        DISPLAY.image(window_prefix + "_green", numpy_scene_with_ndsi.green)
+        DISPLAY.image(window_prefix + "_swir", numpy_scene_with_ndsi.swir)
+        DISPLAY.image(window_prefix + "_ndsi", numpy_scene_with_ndsi.ndsi)
 
     @staticmethod
-    def image(window_name, image, normalize=True):
+    def image(window_name, image, normalize=True) -> None:
         """
         Displays an image in a cv2 window.
         :param normalize: Check if wanting it in 8bit.
@@ -131,7 +146,7 @@ class DISPLAY:
         :param image: cv2 image.
         :return: Nothing.
         """
-        if not DISPLAY.DOIT:
+        if not DISPLAY.do_it:
             return
 
         if normalize:
@@ -142,12 +157,12 @@ class DISPLAY:
         cv2.imshow(window_name, image)
 
     @staticmethod
-    def wait():
+    def wait() -> None:
         """
         Flushes the display image after pressing exit key.
         :return: Nothing.
         """
-        if not DISPLAY.DOIT:
+        if not DISPLAY.do_it:
             return
         while cv2.waitKey() != 27:
             pass

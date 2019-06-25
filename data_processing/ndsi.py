@@ -36,10 +36,10 @@ class NDSI:
         # ignore division by zero because image has borders with 0 values
         np.seterr(divide='ignore', invalid='ignore')
 
-        numerator = np.subtract(img.green, img.swir)
+        numerator = np.subtract(img.green_numpy, img.swir1_numpy)
         if math_dtype == np.int32:
             numerator = np.multiply(numerator, 0x7FFF)
-        denominator = np.add(img.green, img.swir)
+        denominator = np.add(img.green_numpy, img.swir1_numpy)
         ndsi = np.divide(numerator, denominator)
 
         # interpret each NaN value as 0
