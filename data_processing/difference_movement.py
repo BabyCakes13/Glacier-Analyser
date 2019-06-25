@@ -13,52 +13,57 @@ class DifferenceMovement:
     Class which handles creating the difference and movement images for an NDSI image.
     """
 
-    def __init__(self, image1, image2, path):
+    def __init__(self, image1_path: str, image2_path: str, output_path: str):
         """
         The constructor handles the reading, creation of mask, calculation of difference and movement images and mask
         applying on them.
-        :param image1: First image.
-        :param image2: Second image.
-        :param path: Path for image output writing.
+        :param image1_path: First image.
+        :param image2_path: Second image.
+        :param output_path: Path for image output writing.
         """
         np.seterr(divide='ignore', invalid='ignore')
 
-        self.image1 = cv2.imread(image1, cv2.IMREAD_GRAYSCALE)
-        self.image2 = cv2.imread(image2, cv2.IMREAD_GRAYSCALE)
+        image1 = cv2.imread(image1_path, cv2.IMREAD_GRAYSCALE)
+        image2 = cv2.imread(image2_path, cv2.IMREAD_GRAYSCALE)
 
-        mask1, mask2 = self.create_mask()
+        mask1, mask2 = self.create_mask(image1=image1,
+                                        image2=image2)
 
-        self.img_diff = self.differentiate()
-        self.img_diff = self.remove_background_color(self.img_diff,
-                                                     threshold1=mask1,
-                                                     threshold2=mask2)
-        self.img_move = self.movement()
-        self.img_move = self.remove_background_color(self.img_move,
-                                                     threshold1=mask1,
-                                                     threshold2=mask2)
+        self.image_diff = self.differentiate(image1=image1,
+                                             image2=image2)
+        self.image_diff = self.remove_background_color(self.image_diff,
+                                                       mask1=mask1,
+                                                       mask2=mask2)
+        self.image_move = self.movement(image1=image1,
+                                        image2=image2)
+        self.image_move = self.remove_background_color(self.image_move,
+                                                       mask1=mask1,
+                                                       mask2=mask2)
 
-        image('different', self.img_diff)
-        image('move', self.img_move)
+        image('different', self.image_diff)
+        image('move', self.image_move)
 
-        self.write(path)
+        self.write(output_path)
 
-    def create_mask(self) -> tuple:
+    @staticmethod
+    def create_mask(image1, image2) -> tuple:
         """
         Creates two masks which represent the black background of the satellite images.
         :return: A tuple of two numpy arrays.
         """
-        ret1, threshold1 = cv2.threshold(self.image1, 1, 255, cv2.THRESH_BINARY)
-        ret2, threshold2 = cv2.threshold(self.image2, 1, 255, cv2.THRESH_BINARY)
+        ret1, threshold1 = cv2.threshold(image1, 1, 255, cv2.THRESH_BINARY)
+        ret2, threshold2 = cv2.threshold(image2, 1, 255, cv2.THRESH_BINARY)
 
         return threshold1, threshold2
 
-    def differentiate(self) -> np.ndarray:
+    @staticmethod
+    def differentiate(image1, image2) -> np.ndarray:
         """
         Make a difference between the pixels of two images, and apply a colormap the result for nicer view.
         :return: np.ndarray
         """
-        image1_16bit = np.int16(self.image1)
-        image2_16bit = np.int16(self.image2)
+        image1_16bit = np.int16(image1)
+        image2_16bit = np.int16(image2)
 
         difference = image1_16bit - image2_16bit
 
@@ -69,34 +74,15 @@ class DifferenceMovement:
 
         return cm_difference
 
-    @staticmethod
-    def remove_background_color(image, threshold1, threshold2) -> np.ndarray:
-        """
-        Removes green background color by applying a mask on each layer of the RGB image.
-        :param image: The numpy image to be enhanced.
-        :param threshold1: Threshold mask 1.
-        :param threshold2: Threshold mask 2.
-        :return: np.ndarray
-        """
-        image[..., 0] = cv2.bitwise_and(image[..., 0], threshold1)
-        image[..., 1] = cv2.bitwise_and(image[..., 1], threshold1)
-        image[..., 2] = cv2.bitwise_and(image[..., 2], threshold1)
-
-        image[..., 0] = cv2.bitwise_and(image[..., 0], threshold2)
-        image[..., 1] = cv2.bitwise_and(image[..., 1], threshold2)
-        image[..., 2] = cv2.bitwise_and(image[..., 2], threshold2)
-
-        return image
-
-    def movement(self) -> np.ndarray:
+    def movement(self, image1, image2) -> np.ndarray:
         """
         Apply Optical Flow algorithm in order to detect movement between two images.
         :return: np.ndarray
         """
-        image1_c = cv2.cvtColor(self.image1, cv2.COLOR_GRAY2BGR)
+        image1_c = cv2.cvtColor(image1, cv2.COLOR_GRAY2BGR)
         hsv = np.zeros_like(image1_c)
 
-        flow = cv2.calcOpticalFlowFarneback(self.image1, self.image2, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+        flow = cv2.calcOpticalFlowFarneback(image1, image2, None, 0.5, 3, 15, 3, 5, 1.2, 0)
         magnitude, angle = cv2.cartToPolar(flow[..., 0], flow[..., 1])
 
         # color map
@@ -109,6 +95,25 @@ class DifferenceMovement:
         bgr = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
 
         return bgr
+
+    @staticmethod
+    def remove_background_color(image, mask1, mask2) -> np.ndarray:
+        """
+        Removes green background color by applying a mask on each layer of the RGB image.
+        :param image: The numpy image to be enhanced.
+        :param mask1: Threshold mask 1.
+        :param mask2: Threshold mask 2.
+        :return: np.ndarray
+        """
+        image[..., 0] = cv2.bitwise_and(image[..., 0], mask1)
+        image[..., 1] = cv2.bitwise_and(image[..., 1], mask1)
+        image[..., 2] = cv2.bitwise_and(image[..., 2], mask1)
+
+        image[..., 0] = cv2.bitwise_and(image[..., 0], mask2)
+        image[..., 1] = cv2.bitwise_and(image[..., 1], mask2)
+        image[..., 2] = cv2.bitwise_and(image[..., 2], mask2)
+
+        return image
 
     @staticmethod
     def scale(image, value) -> np.ndarray:
@@ -135,8 +140,8 @@ class DifferenceMovement:
         image2_path = os.path.join(path, 'diff.TIF')
         image1_path = os.path.join(path, 'move.TIF')
 
-        cv2.imwrite(image1_path, self.img_diff)
-        cv2.imwrite(image2_path, self.img_move)
+        cv2.imwrite(image1_path, self.image_diff)
+        cv2.imwrite(image2_path, self.image_move)
 
 
 def image(window_name, image) -> None:
