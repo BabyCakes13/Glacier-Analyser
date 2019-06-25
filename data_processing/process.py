@@ -1,12 +1,8 @@
-from colors import *
 import os
 import pathlib
 import definitions
-from data_displaying import csv_writer
-from data_gathering import scene_data as sd
-from data_preparing import directory_handler as odh
-from data_preparing import multiprocess as mh
-from data_processing import scenes as sc
+from data_preparing import directory_handler as odh, csv_writer
+from data_processing import scenes as sc, multiprocess as mh
 from util import strings
 
 DEBUG = False

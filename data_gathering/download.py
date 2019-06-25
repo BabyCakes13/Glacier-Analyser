@@ -4,7 +4,7 @@ import os
 import shutil
 import subprocess
 import definitions
-from data_preparing import multiprocess as mh
+from data_processing import multiprocess as mh
 
 
 class Downloader:

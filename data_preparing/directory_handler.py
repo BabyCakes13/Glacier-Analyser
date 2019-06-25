@@ -3,7 +3,7 @@ import re
 import shutil
 import os
 import definitions
-from data_gathering import scene_data
+from data_gathering import scene_information
 from util import strings
 
 
@@ -43,7 +43,7 @@ class OutputDirHandler:
                 scene = strings.get_scene_name(file)
                 if self.validate_scene_name(scene) is False:
                     continue
-                h = scene_data.SceneData(scene)
+                h = scene_information.SceneInformation(scene)
 
                 path = h.get_path()
                 row = h.get_row()
@@ -62,7 +62,7 @@ class OutputDirHandler:
         path_row = None
         scene = strings.get_scene_name(file)
 
-        h = scene_data.SceneData(scene)
+        h = scene_information.SceneInformation(scene)
         if self.validate_scene_name(scene=scene):
             path = h.get_path()
             row = h.get_row()

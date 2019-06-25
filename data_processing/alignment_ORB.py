@@ -10,8 +10,8 @@ import sys
 sys.path.append(sys.path[0] + '/..')
 from data_processing import scenes as sc
 from data_processing import ndsi as nc
-from data_displaying import csv_writer
-from data_gathering import scene_data as sd
+from data_preparing import csv_writer
+from data_gathering import scene_information as sd
 
 DEBUG_OUTLIERS = False
 DEBUG_TRANSFORM_MATRIX = False
@@ -73,7 +73,7 @@ class ProcessImage:
         glacier_dir = pathlib.Path(path).parents[1]
         parent_dir, glacier_id = os.path.split(glacier_dir)
 
-        h = sd.SceneData(scene=scene)
+        h = sd.SceneInformation(scene=scene)
         year = h.get_year()
         month = h.get_month()
         day = h.get_day()
