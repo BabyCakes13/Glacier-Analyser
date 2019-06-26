@@ -1,5 +1,6 @@
 import os
 import pathlib
+
 import definitions
 from data_preparing import directory_handler as odh, csv_writer
 from data_processing import scenes as sc, multiprocess as mh
@@ -12,7 +13,7 @@ MULTIPROCESSED = True
 
 
 class Process:
-    def __init__(self, glacier_dir, big_glacier_dir, output_dir, max_processes=definitions.MAX_PROCESSES):
+    def __init__(self, big_glacier_dir, glacier_dir, output_dir, max_processes=definitions.MAX_PROCESSES):
         """
         The constructor of the Process class.
         :param glacier_dir: The glacier directory.
@@ -98,7 +99,7 @@ class Process:
             self.mh.wait_all_process_done()
             # don't write alignment csv until the ndsi work is tested.
             # self.write_align_csv(path_row=path_row,
-                                 # output=output_dir)
+            # output=output_dir)
 
         if self.INTERRUPT_SIGNAL:
             return 2
@@ -111,7 +112,6 @@ class Process:
         :param aligned_scene: The scene to be aligned.
         :param scene: The scene object representing the scene which will be aligned based on the reference.
         :param reference_scene: The reference scene to which the rest will be aligned.
-        :param pr_dirs_map: The map which contains all the path and row pairs with their full path to the output dir for
         creating the output aligned image create path.
         :return:
         """
@@ -249,4 +249,3 @@ class Process:
         h = csv_writer.CSVWriter(output_dir=glacier_dir,
                                  arguments=arguments)
         h.start()
-

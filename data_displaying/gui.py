@@ -52,8 +52,8 @@ class MainView(Frame):
 
 
 def position_master(master):
-    w = 500  # width for the Tk root
-    h = 300  # height for the Tk root
+    w = 1000  # width for the Tk root
+    h = 1000  # height for the Tk root
 
     ws = master.winfo_screenwidth()  # width of the screen
     hs = master.winfo_screenheight()  # height of the screen

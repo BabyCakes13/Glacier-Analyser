@@ -48,7 +48,7 @@ class Download(fh.Page):
         """
         csv = Label(self, text="Path to the CSV file containing the glacier information.")
         output_dir = Label(self, text="Path to the directory which will contain the downloaded data.")
-        max_processes = Label(self, text="The number of maximum processes which can run for calculation.")
+        max_processes = Label(self, text="The number of max processes which can run for search and download..")
 
         csv.grid(row=0, column=0)
         output_dir.grid(row=3, column=0)
