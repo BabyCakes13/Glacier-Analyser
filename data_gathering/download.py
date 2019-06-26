@@ -89,8 +89,12 @@ class Downloader:
         :return: None
         """
         return_codes = definitions.RETURN_CODES
-        return_code = return_codes[return_code]
-        print(return_code, " ", task_name)
+        try:
+            return_str = return_codes[return_code]
+        except KeyError:
+            return_str = "IDK"
+
+        print("Return code of ", task_name, " is ", return_code, " meaning ", return_str)
 
     def parse_rows(self, csv_reader) -> None:
         """
