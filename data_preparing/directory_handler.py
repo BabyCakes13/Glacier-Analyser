@@ -112,7 +112,10 @@ class OutputDirHandler:
         if os.path.exists(glacier_dir) and self.clearmeup is False:
             shutil.rmtree(glacier_dir)
             self.clearmeup = True
-        os.mkdir(glacier_dir)
+        try:
+            os.mkdir(glacier_dir)
+        except OSError:
+            pass
 
         return glacier_dir
 
@@ -127,9 +130,10 @@ class OutputDirHandler:
         path_row_dir_filename = str(path_row[0]) + "_" + str(path_row[1])
         path_row_dir = os.path.join(glacier_dir, path_row_dir_filename)
 
-        if os.path.exists(path_row_dir):
-            shutil.rmtree(path_row_dir)
-        os.mkdir(path_row_dir)
+        try:
+            os.mkdir(path_row_dir)
+        except OSError:
+            pass
 
         return path_row_dir
 
