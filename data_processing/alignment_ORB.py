@@ -1,6 +1,8 @@
 from __future__ import print_function
 import signal
 import sys
+import cProfile, pstats, io
+
 
 def interrupt_handler(signum, frame):
     sys.exit(2)
@@ -449,6 +451,11 @@ if __name__ == "__main__":
     """
     Handle multi process.
     """
+
+    pr = cProfile.Profile()
+    pr.enable()
+
+
     VALID = True
     scene           = sc.PathScene(sys.argv[1], sys.argv[2])
     reference_scene = sc.PathScene(sys.argv[3], sys.argv[4])
@@ -467,6 +474,13 @@ if __name__ == "__main__":
     else:
         print("Processing NDSI")
         process.write()
+
+    pr.disable()
+    s = io.StringIO()
+    sortby = 'cumulative'
+    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    ps.dump_stats(scene.get_scene_name() + ".prof")
+    print( s.getvalue())
 
     sc.DISPLAY.wait()
 
