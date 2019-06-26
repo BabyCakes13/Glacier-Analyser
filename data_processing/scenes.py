@@ -6,6 +6,7 @@ import os
 import cv2
 
 import definitions
+from osgeo import gdal
 
 
 class PathScene:
@@ -54,14 +55,32 @@ class NumpyScene:
         self.swir1_numpy = swir1_numpy
 
     @staticmethod
-    def read(path_scene):
+    def read(path_scene, open_with_GDAL = True):
         """
         Reads a simple path scene and opens the images found in the path as GDAL images.
         :param path_scene: The input scene.
         :return: Returns the created NumpyScene image.
         """
-        img = NumpyScene(cv2.imread(path_scene.green_path, cv2.IMREAD_LOAD_GDAL),
-                         cv2.imread(path_scene.swir1_path, cv2.IMREAD_LOAD_GDAL))
+        if open_with_GDAL:
+            # Read image
+            dataset_green = gdal.Open(path_scene.green_path)
+            green_image = dataset_green.ReadAsArray(xoff=0, yoff=0,
+                                                    xsize=dataset_green.RasterXSize,
+                                                    ysize=dataset_green.RasterYSize)
+
+            dataset_swir1 = gdal.Open(path_scene.swir1_path)
+            swir1_image = dataset_swir1.ReadAsArray(xoff=0, yoff=0,
+                                                    xsize=dataset_swir1.RasterXSize,
+                                                    ysize=dataset_swir1.RasterYSize)
+
+            print("open with gdal")
+        else:
+            green_image = cv2.imread(path_scene.green_path, cv2.IMREAD_LOAD_GDAL)
+            swir1_image = cv2.imread(path_scene.swir1_path, cv2.IMREAD_LOAD_GDAL)
+
+            print("open with opencv")
+
+        img = NumpyScene(green_image, swir1_image)
         return img
 
     def write(self, file_path) -> None:
