@@ -89,8 +89,8 @@ class Display(fh.Page):
         csv = self.get_input()
 
         if self.validate_input(csv=csv):
-            displayer = plot.Plot()
-            displayer.start(csv=csv)
+            displayer = plot.Plot(csv=csv)
+            displayer.start()
 
     @staticmethod
     def set_input(text, entry) -> None:

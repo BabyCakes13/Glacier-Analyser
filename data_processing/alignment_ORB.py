@@ -56,17 +56,20 @@ class ProcessImage:
         :return: sc.SatImage
         """
         if self.aligned_16bit is not None:
+            print("Here 1")
             self.aligned_16bit = sc.NumpySceneWithNDSI(self.aligned_16bit.green_numpy,
                                                        self.aligned_16bit.swir1_numpy,
                                                        nc.NDSI.calculate_NDSI(self.aligned_16bit))
             image_with_ndsi_16bit = self.aligned_16bit
         else:
+            print("Here 2")
             self.image_16bit = sc.NumpySceneWithNDSI(self.image_16bit.green_numpy,
                                                      self.image_16bit.swir1_numpy,
                                                      nc.NDSI.calculate_NDSI(self.image_16bit))
             h = nc.NDSI()
             ndsi = nc.NDSI.calculate_NDSI(self.image_16bit)
             snow_image = h.get_snow_image(ndsi=ndsi)
+
             snow_pixels_ratio = h.get_snow_pixels_ratio(snow_image=snow_image, threshold=0.5)
 
             image_with_ndsi_16bit = self.image_16bit
@@ -78,6 +81,7 @@ class ProcessImage:
 
     @staticmethod
     def write_ndsi_csv(path, scene, snow_ratio):
+        print("Writing NDSI.")
         path_row_dir = pathlib.Path(path).parents[0]
         glacier_dir, path_row = os.path.split(path_row_dir)
         glacier_dir = pathlib.Path(path).parents[1]
@@ -103,7 +107,8 @@ class ProcessImage:
             snow_ratio,
         ]
 
-        h = csv_writer.CSVWriter(output_dir=glacier_dir,
+        print(red(snow_ratio))
+        h = csv_writer.CSVWriter(output_dir=path_row_dir,
                                  arguments=arguments,
                                  path=path,
                                  row=row)
@@ -250,6 +255,11 @@ class AlignORB:
 
         keypoints_img_all   = keypoints_img_green + keypoints_img_swir
         keypoints_ref_all   = keypoints_ref_green + keypoints_ref_swir
+
+        if len(keypoints_img_all) == 0 or len(keypoints_ref_all) == 0:
+            print("There are no keypoints found.")
+            return None
+
         try:
             descriptors_img_all = np.concatenate((descriptors_img_green, descriptors_img_swir), axis=0)
             descriptors_ref_all = np.concatenate((descriptors_ref_green, descriptors_ref_swir), axis=0)
@@ -267,12 +277,21 @@ class AlignORB:
 
         sc.DISPLAY.image("MATCHES", pruned_matches_image)
 
+        print(len(reference_points))
+        print(len(image_points))
+
         # create the affine transformation matrix and inliers
-        affine, inliers = cv2.estimateAffine2D(image_points, reference_points, None, cv2.RANSAC)
+        try:
+            affine, inliers = cv2.estimateAffine2D(image_points, reference_points, None, cv2.RANSAC)
+        except Exception as e:
+            print(e)
+            return None
 
         # check application mode
         if DEBUG_OUTLIERS:
             self.affine_creation_debug_on(inliers, reference_points, image_points)
+        if affine is None:
+            return None
 
         if not self.validate_transform(affine):
             return None
@@ -442,10 +461,12 @@ if __name__ == "__main__":
 
     ndsi_image = process.ndsi()
     aligned_image = process.align()
-    process.write() # does not write it to the disk
 
     if aligned_image is None:
         VALID = False
+    else:
+        print("Processing NDSI")
+        process.write()
 
     sc.DISPLAY.wait()
 

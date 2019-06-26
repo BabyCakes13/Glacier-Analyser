@@ -13,7 +13,7 @@ class DifferenceMovement:
     Class which handles creating the difference and movement images for an NDSI image.
     """
 
-    def __init__(self, image1_path: str, image2_path: str, output_path: str):
+    def __init__(self, image1_path: str, image2_path: str, output_path: str, scene1, scene2):
         """
         The constructor handles the reading, creation of mask, calculation of difference and movement images and mask
         applying on them.
@@ -40,8 +40,8 @@ class DifferenceMovement:
                                                        mask1=mask1,
                                                        mask2=mask2)
 
-        image('different', self.image_diff)
-        image('move', self.image_move)
+        image('different ' + scene1 + " vs " + scene2, self.image_diff)
+        image('move ' + scene1 + " vs " + scene2, self.image_move)
 
         self.write(output_path)
 
@@ -158,13 +158,3 @@ def image(window_name, image) -> None:
     while cv2.waitKey(0) & 0xff != 27:
         pass
     cv2.destroyAllWindows()
-
-
-class ProcessResults:
-    def __init__(self, input_dir):
-        self.input_dir = input_dir
-
-    # TODO
-
-
-diff = DifferenceMovement(sys.argv[1], sys.argv[2], sys.argv[3])

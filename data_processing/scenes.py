@@ -140,22 +140,22 @@ class DISPLAY:
         """
         if not DISPLAY.do_it:
             return
-        DISPLAY.image(window_prefix + "_green", numpy_scene.green)
-        DISPLAY.image(window_prefix + "_swir", numpy_scene.swir)
+        DISPLAY.image(window_prefix + "_green", numpy_scene.green_numpy)
+        DISPLAY.image(window_prefix + "_swir", numpy_scene.swir1_numpy)
 
     @staticmethod
     def numpy_scene_with_ndsi(window_prefix, numpy_scene_with_ndsi) -> None:
         """
-        Displays the green and swir1 bands from the NumpySceneWithNDSI.
+        Displays the green_numpy and swir1 bands from the NumpySceneWithNDSI.
         :param window_prefix: The name of the window to be displayed.
         :param numpy_scene_with_ndsi: NumpyScene object.
         :return: 
         """
         if not DISPLAY.do_it:
             return
-        DISPLAY.image(window_prefix + "_green", numpy_scene_with_ndsi.green)
-        DISPLAY.image(window_prefix + "_swir", numpy_scene_with_ndsi.swir)
-        DISPLAY.image(window_prefix + "_ndsi", numpy_scene_with_ndsi.ndsi)
+        DISPLAY.image(window_prefix + "_green", numpy_scene_with_ndsi.green_numpy)
+        DISPLAY.image(window_prefix + "_swir", numpy_scene_with_ndsi.swir1_numpy)
+        DISPLAY.image(window_prefix + "_ndsi", numpy_scene_with_ndsi.ndsi_numpy)
 
     @staticmethod
     def image(window_name, image, normalize=True) -> None:

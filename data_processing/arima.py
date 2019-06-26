@@ -68,6 +68,6 @@ class Arima:
         """
         test_size = int(len(dataset) * 0.66)
         train, test = dataset[0:test_size], dataset[test_size:len(dataset)]
-        history = [x for x in train]
+        history = [(x, y) for (x, y) in train]
 
         return train, test, history

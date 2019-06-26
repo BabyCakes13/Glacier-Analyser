@@ -15,20 +15,26 @@ register_matplotlib_converters()
 class DatasetHandler:
     def __init__(self, csv):
         self.csv = csv
+        h = None
 
     def read_csv(self):
         """
         Reads the csv and organizes the data for plotting, removing outliers.
         :return:
         """
-        h = pd.read_csv(self.csv)
-        snow = h['SNOW_RATIO']
+        self.h = pd.read_csv(self.csv)
+        snow = self.h['SNOW_RATIO']
+        scene = self.h['SCENE']
         dates = self.create_datetime()
 
-        input_data = list(zip(dates, snow))
+        input_data = list(zip(dates, snow, scene))
         input_data.sort()
 
-        return input_data
+        dates, snow, scene = zip(*input_data)
+
+        input_data = list(zip(dates, snow))
+
+        return input_data, scene
 
     @staticmethod
     def remove_zeros(input_data, minimum=0.002):
