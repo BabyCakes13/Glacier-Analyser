@@ -159,7 +159,7 @@ def set_display_function(args) -> None:
        """
     print("Setting up display...")
 
-    displayer = plot.Plot(csv=args.csv)
-    displayer.start()
+    displayer = plot.Plot()
+    displayer.start(args.csv)
 
     print("Finished display.")

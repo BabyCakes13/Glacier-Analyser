@@ -85,3 +85,7 @@ class Plot:
         plot.legend(loc='upper left')
 
         plt.show()
+
+    def handle_scene_pick(self):
+        pass
+
