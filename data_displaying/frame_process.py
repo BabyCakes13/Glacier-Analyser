@@ -132,6 +132,7 @@ class Process(fh.Page):
     def stop_process(self):
         if self.sp:
             self.sp.send_signal(signal.SIGINT)
+            self.sp = None
 
     def start_process(self):
         big_glacier_dir, glacier_dir, output_dir, max_process = self.get_input()
@@ -144,7 +145,7 @@ class Process(fh.Page):
             task = ["python3", "./data_processing/process.py",
                     big_glacier_dir, glacier_dir,
                     output_dir, max_process]
-
+            self.stop_process()
             self.sp = subprocess.Popen(task)
 
     @staticmethod

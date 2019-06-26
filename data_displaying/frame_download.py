@@ -1,4 +1,7 @@
 import os
+import subprocess
+import signal
+
 from tkinter import *
 from tkinter import filedialog
 
@@ -19,6 +22,7 @@ class Download(fh.Page):
 
         self.create_buttons()
         self.create_labels()
+        self.sp = None
 
         self.csv_entry, self.download_dir_entry, self.max_processes_entry = self.create_entries()
 
@@ -33,8 +37,11 @@ class Download(fh.Page):
         browse = Button(self, text="BROWSE OUTPUT DIRECTORY", command=self.browse_output_directory)
         browse.grid(row=5, column=0)
 
-        submit = Button(self, text="DOWNLOAD", command=self.start_download)
+        submit = Button(self, text="START DOWNLOAD", command=self.start_download)
         submit.grid(row=9, column=0)
+
+        submit = Button(self, text="STOP DOWNLOAD", command=self.stop_download)
+        submit.grid(row=10, column=0)
 
     def create_labels(self):
         """
@@ -109,19 +116,25 @@ class Download(fh.Page):
             return False
         elif not max_processes.isdigit():
             return False
-        elif not 1 < int(max_processes) < 30:
+        elif not 1 <= int(max_processes) < 30:
             return False
 
         return True
+
+    def stop_download(self):
+        if self.sp:
+            self.sp.send_signal(signal.SIGINT)
+            self.sp = None
 
     def start_download(self):
         print("Hey you!")
         csv, download_dir, max_processes = self.get_input()
 
         if self.validate_input(csv, download_dir, max_processes):
-            max_processes = int(max_processes)
-            downloader = download.Downloader(csv, download_dir, max_processes)
-            downloader.start()
+            task = ["python3", "./data_gathering/download.py",
+                    csv, download_dir, max_processes]
+            self.stop_download()
+            self.sp = subprocess.Popen(task)
 
     @staticmethod
     def set_input(text, entry):

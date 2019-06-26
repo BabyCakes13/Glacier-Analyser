@@ -6,9 +6,15 @@ import signal
 
 from colors import *
 
+import sys
+sys.path.append(sys.path[0] + '/..')
+
 import definitions
 from data_processing import multiprocess as mh
 
+def interrupt_handler(signum, frame):
+    print ("exiting now")
+    raise KeyboardInterrupt
 
 class Downloader:
     """
@@ -31,8 +37,6 @@ class Downloader:
 
         self.mh = mh.Multiprocess(max_processes=self.max_processes,
                                   handler=self.process_handler)
-
-        self.INTERRUPT_SIGNAL = False
 
         print(blue("Download csv file: ") + str(input_csv_path))
 
@@ -137,8 +141,27 @@ class Downloader:
                 self.mh.start_processing(task=download_task, task_name=json_query_filename, ignore_SIGINT=True)
 
             except KeyboardInterrupt:
-                self.INTERRUPT_SIGNAL = True
+                print("exiting ... 4")
                 self.search_process.wait()
-                self.mh.kill_all_processes(signal.SIGKILL)
+                print("exiting ... 3")
+                self.mh.kill_all_processes(signal.SIGTERM)
+                print("exiting ... 2")
                 self.mh.wait_all_process_done()
+                print("exiting ... 1")
                 break
+
+if __name__ == "__main__":
+    """
+    Handle called from GUI.
+    """
+
+    csv_path = sys.argv[1]
+    download_dir = sys.argv[2]
+    max_processes=int(sys.argv[3])
+
+    signal.signal(signal.SIGINT, interrupt_handler)
+
+    downloader = Downloader(csv_path, download_dir, max_processes)
+    downloader.start()
+
+    print("exited")
