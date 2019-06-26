@@ -1,9 +1,19 @@
 from __future__ import print_function
-import cv2
-import os
-import pathlib
-from colors import *
-import numpy as np
+import signal
+import sys
+
+def interrupt_handler(signum, frame):
+    sys.exit(2)
+signal.signal(signal.SIGTERM, interrupt_handler)
+
+try:
+    import cv2
+    import os
+    import pathlib
+    from colors import *
+    import numpy as np
+except ImportError:
+    sys.exit(21)
 
 # This is a workaround to allow importing scene both if imported from main and if called directly
 import sys
@@ -425,20 +435,17 @@ if __name__ == "__main__":
     reference_scene = sc.PathScene(sys.argv[3], sys.argv[4])
     aligned_scene   = sc.PathScene(sys.argv[5], sys.argv[6])
 
-    try:
-        print("Scene: ", scene.get_scene_name())
-        process = ProcessImage(scene=scene,
-                               reference_scene=reference_scene,
-                               aligned_scene=aligned_scene)
+    print("Scene: ", scene.get_scene_name())
+    process = ProcessImage(scene=scene,
+                           reference_scene=reference_scene,
+                           aligned_scene=aligned_scene)
 
-        ndsi_image = process.ndsi()
-        aligned_image = process.align()
-        process.write() # does not write it to the disk
+    ndsi_image = process.ndsi()
+    aligned_image = process.align()
+    process.write() # does not write it to the disk
 
-        if aligned_image is None:
-            VALID = False
-    except KeyboardInterrupt:
-        sys.exit(2)
+    if aligned_image is None:
+        VALID = False
 
     sc.DISPLAY.wait()
 

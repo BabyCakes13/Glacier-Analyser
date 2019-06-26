@@ -1,6 +1,6 @@
 import os
 import pathlib
-
+import signal
 import definitions
 from data_preparing import directory_handler as odh, csv_writer
 from data_processing import scenes as sc, multiprocess as mh
@@ -122,12 +122,12 @@ class Process:
                     reference_scene.green_path, reference_scene.swir1_path,
                     aligned_scene.green_path, aligned_scene.swir1_path]
 
-            self.mh.start_processing(task=task, task_name=scene.get_scene_name())
+            self.mh.start_processing(task=task, task_name=scene.get_scene_name(), ignore_SIGINT=True)
 
         except KeyboardInterrupt:
             print(definitions.PRINT_CODES[1] + "Keyboard interrupt.")
             self.INTERRUPT_SIGNAL = True
-            self.mh.kill_all_processes()
+            self.mh.kill_all_processes(signal.SIGTERM)
             self.mh.wait_all_process_done()
 
     @staticmethod
@@ -137,8 +137,12 @@ class Process:
             VALID_ALIGNED += 1
 
         return_codes = definitions.RETURN_CODES
-        return_code = return_codes[return_code]
-        print(return_code)
+        try:
+            return_str = return_codes[return_code]
+        except KeyError:
+            return_str = "IDK"
+
+        print("Return code of ", task_name, " is ", return_code, " meaning ", return_str)
 
     @staticmethod
     def create_aligned_scene(scene, output_dir) -> sc.PathScene:
