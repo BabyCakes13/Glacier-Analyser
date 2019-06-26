@@ -6,37 +6,15 @@ import numpy as np
 import pandas as pd
 # fixed the no background matplotlib bug
 # matplotlib.use('gtk3cairo')
-from matplotlib import pyplot as plt
-from matplotlib.lines import Line2D
-from matplotlib.patches import Rectangle
-from matplotlib.text import Text
 from pandas.plotting import register_matplotlib_converters
 
 # fixing the future pandas warning
 register_matplotlib_converters()
 
-from data_processing import arima as ari
 
-
-class CSVReader:
+class DatasetHandler:
     def __init__(self, csv):
         self.csv = csv
-        self.fig, self.ax = plt.subplots()
-
-    def start(self):
-        """
-        Method which is called on command line display argument.
-        :return: None
-        """
-        input_data = self.read_csv()
-
-        arima = ari.Arima(input_data)
-        predictions = arima.start(count=10)
-
-        if len(predictions) > 0:
-            self.plot_results("predicted", predictions)
-
-        self.plot_show()
 
     def read_csv(self):
         """
@@ -49,18 +27,6 @@ class CSVReader:
 
         input_data = list(zip(dates, snow))
         input_data.sort()
-
-        self.plot_results("Input Data Sorted", input_data)
-
-        # input_data = self.remove_zeros(input_data)
-        # self.plot_results ("NO zeros", input_data)
-
-        input_data = self.remove_outliers(input_data)
-
-        self.plot_results("Input Data Sorted Inliers", input_data)
-
-        # input_data = self.interpolate(input_data)
-        # self.plot_results ("Interpolated", input_data)
 
         return input_data
 
@@ -79,49 +45,6 @@ class CSVReader:
                 output.append(d)
 
         return output
-
-    def plot_results(self, title, data):
-        """
-        Plots the result in a matplotlib window.
-        :param title:
-        :param data:
-        :return:
-        """
-        plot = self.ax
-
-        plot.set_xlabel('Years')
-        plot.set_ylabel('Results')
-
-        plot.plot(*zip(*data), linestyle='-', marker='o', label=title, picker=20)
-
-    def plot_show(self):
-        plot = self.ax
-
-        def onpick3(event):
-            if isinstance(event.artist, Line2D):
-                thisline = event.artist
-                xdata = thisline.get_xdata()
-                ydata = thisline.get_ydata()
-                ind = event.ind
-                print('onpick1 line:', np.column_stack([xdata[ind], ydata[ind]]))
-            elif isinstance(event.artist, Rectangle):
-                patch = event.artist
-                print('onpick1 patch:', patch.get_path())
-            elif isinstance(event.artist, Text):
-                text = event.artist
-                print('onpick1 text:', text.get_text())
-
-        def onpress(event):
-            print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
-                  ('double' if event.dblclick else 'single', event.button,
-                   event.x, event.y, event.xdata, event.ydata))
-
-        self.fig.canvas.mpl_connect('pick_event', onpick3)
-        self.fig.canvas.mpl_connect('button_press_event', onpress)
-
-        plot.legend(loc='upper left')
-
-        plt.show()
 
     def create_datetime(self):
         """

@@ -13,6 +13,7 @@ class Download(fh.Page):
     """
     Download page class.
     """
+
     def __init__(self, *args, **kwargs):
         fh.Page.__init__(self, *args, **kwargs)
 

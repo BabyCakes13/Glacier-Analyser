@@ -2,7 +2,7 @@
 import argparse
 
 import definitions
-from data_displaying import csv_reader
+from data_displaying import plot
 from data_displaying import gui
 from data_gathering import download
 from data_processing import process
@@ -159,7 +159,7 @@ def set_display_function(args) -> None:
        """
     print("Setting up display...")
 
-    displayer = csv_reader.CSVReader(csv=args.csv)
+    displayer = plot.Plot(csv=args.csv)
     displayer.start()
 
     print("Finished display.")

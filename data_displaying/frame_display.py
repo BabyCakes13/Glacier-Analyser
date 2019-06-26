@@ -6,7 +6,7 @@ import definitions
 
 sys.path.append(sys.path[0] + '/..')
 from data_displaying import page as fh
-from data_displaying import csv_reader
+from data_displaying import plot
 
 
 class Display(fh.Page):
@@ -89,8 +89,8 @@ class Display(fh.Page):
         csv = self.get_input()
 
         if self.validate_input(csv=csv):
-            displayer = csv_reader.CSVReader(csv=csv)
-            displayer.start()
+            displayer = plot.Plot()
+            displayer.start(csv=csv)
 
     @staticmethod
     def set_input(text, entry) -> None:
