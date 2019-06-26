@@ -145,7 +145,7 @@ def set_process_function(args) -> None:
     """
     print("Setting up process...")
 
-    processor = process.Process(args.input, args.bigdir, args.output, args.j)
+    processor = process.Process(args.bigdir, args.input, args.output, args.j)
     processor.start()
 
     print("Finished process.")
