@@ -64,7 +64,7 @@ def position_master(master):
     master.geometry('%dx%d+%d+%d' % (w, h, x, y))
 
 
-if __name__ == "__main__":
+def start():
     master = Tk()
     main = MainView(master)
     position_master(master)

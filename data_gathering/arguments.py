@@ -3,6 +3,7 @@ import argparse
 
 import definitions
 from data_displaying import csv_reader
+from data_displaying import gui
 from data_gathering import download
 from data_processing import process
 
@@ -11,6 +12,7 @@ class ArgsParser:
     """
     Class which handles argument parsing for the command line interface.
     """
+
     def __init__(self):
         """
         Sets up the argument parser for the command line interface, creating subparsers for process, download and
@@ -98,7 +100,27 @@ def activate_arguments() -> None:
     """
     arguments = ArgsParser()
     args = arguments.parser.parse_args()
+
+    # start gui mode
+    if check_no_arguments_passed(args):
+        gui.start()
+        return
+
+    # start cmd mode
     args.func(args)
+
+
+def check_no_arguments_passed(args) -> bool:
+    """
+    Checks if no arguments have been passed to the application.
+    :param args: Arguments form the command line.
+    :return: True if there were to arguments found, aka all have values of none, False if at least one has a value which
+    is not None. Used for determining whether to start the application in GUI mode or not.
+    """
+    for arg in vars(args):
+        if getattr(args, arg) is not None:
+            return False
+    return True
 
 
 def set_download_function(args) -> None:
