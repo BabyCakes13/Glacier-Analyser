@@ -1,15 +1,25 @@
 import os
 import pathlib
 import signal
+import sys
+sys.path.append(sys.path[0] + '/..')
 import definitions
 from data_preparing import directory_handler as odh, csv_writer
 from data_processing import scenes as sc, multiprocess as mh
 from util import strings
 
+def interrupt_handler(signum, frame):
+    INTERRUPT_SIGNAL = True
+    print ("exiting now")
+    sys.exit(5)
+
+signal.signal(signal.SIGINT, interrupt_handler)
+
 DEBUG = False
 VALID_ALIGNED = 0
 TOTAL_PROCESSED = 0
 MULTIPROCESSED = True
+INTERRUPT_SIGNAL = False
 
 
 class Process:
@@ -26,8 +36,6 @@ class Process:
         self.output_dir = output_dir
 
         self.max_processes = max_processes
-
-        self.INTERRUPT_SIGNAL = False
 
         self.mh = mh.Multiprocess(max_processes=self.max_processes,
                                   handler=self.process_handler)
@@ -53,10 +61,10 @@ class Process:
 
                 self.parse_directory(dir_fullpath)
 
-                if self.INTERRUPT_SIGNAL:
+                if INTERRUPT_SIGNAL:
                     break
 
-            if self.INTERRUPT_SIGNAL:
+            if INTERRUPT_SIGNAL:
                 break
 
     def parse_directory(self, current_dir) -> int:
@@ -90,10 +98,12 @@ class Process:
                 self.process_scene(scene=scene, reference_scene=scenes[0], aligned_scene=aligned_scene)
                 TOTAL_PROCESSED += 1
 
-                if self.INTERRUPT_SIGNAL:
+                print("Request to quit ", INTERRUPT_SIGNAL)
+
+                if INTERRUPT_SIGNAL:
                     break
 
-            if self.INTERRUPT_SIGNAL:
+            if INTERRUPT_SIGNAL:
                 break
 
             self.mh.wait_all_process_done()
@@ -101,7 +111,7 @@ class Process:
             # self.write_align_csv(path_row=path_row,
             # output=output_dir)
 
-        if self.INTERRUPT_SIGNAL:
+        if INTERRUPT_SIGNAL:
             return 2
 
         return 0
@@ -126,7 +136,7 @@ class Process:
 
         except KeyboardInterrupt:
             print(definitions.PRINT_CODES[1] + "Keyboard interrupt.")
-            self.INTERRUPT_SIGNAL = True
+            INTERRUPT_SIGNAL = True
             self.mh.kill_all_processes(signal.SIGTERM)
             self.mh.wait_all_process_done()
 
@@ -253,3 +263,19 @@ class Process:
         h = csv_writer.CSVWriter(output_dir=glacier_dir,
                                  arguments=arguments)
         h.start()
+
+if __name__ == "__main__":
+    """
+    Handle called from GUI.
+    """
+
+    big_glacier_dir = sys.argv[1]
+    glacier_dir = sys.argv[2]
+    output_dir = sys.argv[3]
+    max_processes=int(sys.argv[4])
+
+    process_align = Process(big_glacier_dir=big_glacier_dir,
+                                    glacier_dir=glacier_dir,
+                                    output_dir=output_dir,
+                                    max_processes=max_processes)
+    process_align.start()

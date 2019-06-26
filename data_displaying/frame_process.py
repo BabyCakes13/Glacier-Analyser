@@ -1,4 +1,7 @@
 import os
+import subprocess
+import signal
+
 from tkinter import *
 from tkinter import filedialog
 
@@ -20,6 +23,7 @@ class Process(fh.Page):
         self.create_labels()
 
         self.big_input_entry, self.input_entry, self.output_entry, self.max_process_entry = self.create_entries()
+        self.sp = None
 
     def create_buttons(self):
         """
@@ -36,8 +40,11 @@ class Process(fh.Page):
         browse = Button(self, text="BROWSE OUTPUT DIRECTORY", command=self.browse_output_directory)
         browse.grid(row=8, column=0)
 
-        process = Button(self, text="PROCESS", command=self.start_process)
+        process = Button(self, text="START PROCESS", command=self.start_process)
         process.grid(row=11, column=0)
+
+        process = Button(self, text="STOOP PROCESS", command=self.stop_process)
+        process.grid(row=12, column=0)
 
         # TODO show how many files have been processed till now and show loading button which finishes when it is done.
 
@@ -116,11 +123,15 @@ class Process(fh.Page):
         elif not max_process.isdigit():
             print("The number of processes must be a number.")
             return False
-        elif not (1 < int(max_process) < 30):
+        elif not (1 <= int(max_process) < 30):
             print("The number of processes must be between 1 and 30.")
             return False
         else:
             return True
+
+    def stop_process(self):
+        if self.sp:
+            self.sp.send_signal(signal.SIGINT)
 
     def start_process(self):
         big_glacier_dir, glacier_dir, output_dir, max_process = self.get_input()
@@ -129,12 +140,12 @@ class Process(fh.Page):
                                glacier_dir=glacier_dir,
                                output_dir=output_dir,
                                max_process=max_process):
-            max_process = int(max_process)
-            process_align = process.Process(big_glacier_dir=big_glacier_dir,
-                                            glacier_dir=glacier_dir,
-                                            output_dir=output_dir,
-                                            max_processes=max_process)
-            process_align.start()
+
+            task = ["python3", "./data_processing/process.py",
+                    big_glacier_dir, glacier_dir,
+                    output_dir, max_process]
+
+            self.sp = subprocess.Popen(task)
 
     @staticmethod
     def set_input(text, entry):
