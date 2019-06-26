@@ -42,6 +42,7 @@ class DifferenceMovement:
 
         image('different ' + scene1 + " vs " + scene2, self.image_diff)
         image('move ' + scene1 + " vs " + scene2, self.image_move)
+        waitImage()
 
         self.write(output_path)
 
@@ -143,7 +144,6 @@ class DifferenceMovement:
         cv2.imwrite(image1_path, self.image_diff)
         cv2.imwrite(image2_path, self.image_move)
 
-
 def image(window_name, image) -> None:
     """
     Display a numpy image.
@@ -153,8 +153,14 @@ def image(window_name, image) -> None:
     """
     cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
     cv2.resizeWindow(window_name, 1000, 1000)
+    cv2.moveWindow(window_name, 0, 0)
     cv2.imshow(window_name, image)
 
+def waitImage() -> None:
     while cv2.waitKey(0) & 0xff != 27:
         pass
     cv2.destroyAllWindows()
+
+
+if __name__ == "__main__":
+    diff = DifferenceMovement(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])

@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 import os
+import subprocess
+import signal
 
 # fixed the no background matplotlib bug
-# matplotlib.use('gtk3cairo')
+import matplotlib
+matplotlib.use('gtk3cairo')
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
 from pandas.plotting import register_matplotlib_converters
@@ -31,6 +34,8 @@ class Plot:
 
         self.input_data = None
         self.scenes = None
+
+        self.sp = []
 
     def start(self):
         """
@@ -75,10 +80,17 @@ class Plot:
 
         self.fig.canvas.mpl_connect('pick_event', self.onpick3)
         self.fig.canvas.mpl_connect('key_press_event', self.on_key)
+        self.fig.canvas.mpl_connect('close_event', self.handle_close)
 
         plot.legend(loc='upper left')
 
         plt.show()
+
+
+    def handle_close(self, evt):
+        for p in self.sp:
+            p.send_signal(signal.SIGTERM)
+        print('Closed Figure!')
 
     def onpick3(self, event):
         if isinstance(event.artist, Line2D):
@@ -89,7 +101,6 @@ class Plot:
 
             current_pick = (xdata[ind][0], ydata[ind][0])
             if current_pick == self.first_pick:
-                print("Picked the same image.", xdata[ind])
                 return
             self.remove_an()
 
@@ -106,10 +117,11 @@ class Plot:
             self.first_an = self.ax.annotate('first', xy=self.first_pick,
                                              xytext=(self.first_pick[0], self.first_pick[1] + 0.1),
                                              arrowprops=dict(facecolor='black', shrink=0.05))
-        plt.draw()
-
         if self.first_pick and self.second_pick:
             self.start_displaying_diff_move(self.first_pick[0], self.second_pick[0])
+
+        plt.draw()
+
 
     def start_displaying_diff_move(self, first_date, second_date):
         path, file = os.path.split(self.csv)
@@ -122,11 +134,15 @@ class Plot:
 
         print(first_path)
         print(second_path)
-        
+
         if os.path.isfile(first_path) and os.path.isfile(second_path):
-            diff = dm.DifferenceMovement(first_path, second_path, path, first_scene, second_scene)
-        else:
-            print("At least one of the files was not written due to bad alignment. Not creating difference and move.")
+            task = ["python3", "data_processing/difference_movement.py",
+                    first_path, second_path, path, first_scene, second_scene]
+            self.sp.append(subprocess.Popen(task))
+
+            plt.gcf().text(0.5, 0.9, "Processing " + first_scene + " vs " + second_scene + " ...",
+                           horizontalalignment='center', verticalalignment='center',
+                           fontsize=12, bbox=dict(facecolor='red'))
 
     def find_scene(self, date):
         for i, item in enumerate(self.input_data):
