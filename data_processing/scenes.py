@@ -4,9 +4,9 @@ Module which holds the two scene formats for a Landsat 8 scene.
 import os
 
 import cv2
+from osgeo import gdal
 
 import definitions
-from osgeo import gdal
 
 
 class PathScene:
@@ -55,32 +55,33 @@ class NumpyScene:
         self.swir1_numpy = swir1_numpy
 
     @staticmethod
-    def read(path_scene, open_with_GDAL = True):
+    def read(path_scene, open_with_GDAL=False, open_with_cv2=True):
         """
         Reads a simple path scene and opens the images found in the path as GDAL images.
+        :param open_with_cv2: If set to True, it reads the images with cv2.imread().
+        :param open_with_GDAL: If set to True, it reads the images with gdal.Open().
         :param path_scene: The input scene.
         :return: Returns the created NumpyScene image.
         """
+        green_numpy = None
+        swir1_numpy = None
+
         if open_with_GDAL:
-            # Read image
             dataset_green = gdal.Open(path_scene.green_path)
-            green_image = dataset_green.ReadAsArray(xoff=0, yoff=0,
+            green_numpy = dataset_green.ReadAsArray(xoff=0, yoff=0,
                                                     xsize=dataset_green.RasterXSize,
                                                     ysize=dataset_green.RasterYSize)
 
             dataset_swir1 = gdal.Open(path_scene.swir1_path)
-            swir1_image = dataset_swir1.ReadAsArray(xoff=0, yoff=0,
+            swir1_numpy = dataset_swir1.ReadAsArray(xoff=0, yoff=0,
                                                     xsize=dataset_swir1.RasterXSize,
                                                     ysize=dataset_swir1.RasterYSize)
 
-            print("open with gdal")
-        else:
-            green_image = cv2.imread(path_scene.green_path, cv2.IMREAD_LOAD_GDAL)
-            swir1_image = cv2.imread(path_scene.swir1_path, cv2.IMREAD_LOAD_GDAL)
+        elif open_with_cv2:
+            green_numpy = cv2.imread(path_scene.green_path, cv2.IMREAD_LOAD_GDAL)
+            swir1_numpy = cv2.imread(path_scene.swir1_path, cv2.IMREAD_LOAD_GDAL)
 
-            print("open with opencv")
-
-        img = NumpyScene(green_image, swir1_image)
+        img = NumpyScene(green_numpy, swir1_numpy)
         return img
 
     def write(self, file_path) -> None:
