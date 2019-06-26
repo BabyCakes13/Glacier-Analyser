@@ -1,14 +1,23 @@
 from tkinter import *
 from tkinter import filedialog
 
+import os
+
+import definitions
+
 sys.path.append(sys.path[0] + '/..')
 from data_displaying import page as fh
+from data_gathering import download
+from data_processing import process
 
 
 class Download(fh.Page):
     """
     Download page class.
     """
+    DOWNLOAD_CSV = None
+    DOWNLOAD_DIR = None
+    MAX_PROCESSES = None
 
     def __init__(self, *args, **kwargs):
         fh.Page.__init__(self, *args, **kwargs)
@@ -16,21 +25,21 @@ class Download(fh.Page):
         self.create_buttons()
         self.create_labels()
 
-        self.csv_entry, self.download_dir_entry = self.create_entries()
+        self.csv_entry, self.download_dir_entry, self.max_processes_entry = self.create_entries()
 
     def create_buttons(self):
         """
         Button creator.
         :return:
         """
-        submit = Button(self, text="SUBMIT", command=self.get_input)
-        submit.grid(row=7, column=0)
-
         browse = Button(self, text="BROWSE CSV", command=self.browse_csv)
         browse.grid(row=2, column=0)
 
         browse = Button(self, text="BROWSE OUTPUT DIRECTORY", command=self.browse_output_directory)
         browse.grid(row=5, column=0)
+
+        submit = Button(self, text="DOWNLOAD", command=self.start_download)
+        submit.grid(row=9, column=0)
 
     def create_labels(self):
         """
@@ -39,9 +48,11 @@ class Download(fh.Page):
         """
         csv = Label(self, text="Path to the CSV file containing the glacier information.")
         output_dir = Label(self, text="Path to the directory which will contain the downloaded data.")
+        max_processes = Label(self, text="The number of maximum processes which can run for calculation.")
 
         csv.grid(row=0, column=0)
         output_dir.grid(row=3, column=0)
+        max_processes.grid(row=6, column=0)
 
     def create_entries(self):
         """
@@ -50,18 +61,21 @@ class Download(fh.Page):
         """
         csv = Entry(self)
         output_dir = Entry(self)
+        max_processes = Entry(self)
 
         csv.grid(row=1, column=0)
         output_dir.grid(row=4, column=0)
+        max_processes.grid(row=7, column=0)
 
-        return csv, output_dir
+        return csv, output_dir, max_processes
 
     def browse_csv(self):
         """
         Search for the csv file which contains glacier download data.
         :return: The path to the csv glacier inventory.
         """
-        filename = filedialog.askopenfilename(initialdir="/", title="Select file", filetypes=(("CSV files", "*.csv"),))
+        filename = filedialog.askopenfilename(initialdir=definitions.FILES_DIR, title="Select file",
+                                              filetypes=(("CSV files", "*.csv"),))
         self.set_input(filename, self.csv_entry)
 
     def browse_output_directory(self):
@@ -69,17 +83,50 @@ class Download(fh.Page):
         Search for the csv file which contains glacier download data.
         :return: The path to the csv glacier inventory.
         """
-        filename = filedialog.askdirectory(initialdir="/", title="Select directory for download output.")
+        filename = filedialog.askdirectory(initialdir=definitions.ROOT_DIR,
+                                           title="Select directory for download output.")
         self.set_input(filename, self.download_dir_entry)
 
-    def get_input(self) -> None:
+    def get_input(self) -> tuple:
         """
         Gets the text which is set in the entries.
-        :return: None
+        :return: Tuple formed of the inputs.
         """
-        global DOWNLOAD_CSV, DOWNLOAD_DIR
-        DOWNLOAD_CSV = self.csv_entry.get()
-        DOWNLOAD_DIR = self.download_dir_entry.get()
+        csv = self.csv_entry.get()
+        download_dir = self.download_dir_entry.get()
+        max_processes = self.max_processes_entry.get()
+
+        return csv, download_dir, max_processes
+
+    @staticmethod
+    def validate_input(csv, download_dir, max_processes) -> bool:
+        """
+        Checks whether the input variables are correct or not, type wise.
+        :param csv: The csv should be the path to the input world glacier inventory csv.
+        :param download_dir: The download dir should be the path to the download directory for storing the items.
+        :param max_processes: Max processes should be the max number of processes the application will open to run, a
+        min of 1, and a max of 30.
+        :return: True if the input is valid, False otherwise.
+        """
+        if not os.path.isfile(csv):
+            return False
+        elif not os.path.isdir(download_dir):
+            return False
+        elif not max_processes.isdigit():
+            return False
+        elif not(1 < int(max_processes) < 30):
+            return False
+        else:
+            return True
+
+    def start_download(self):
+        print("Hey you!")
+        csv, download_dir, max_processes = self.get_input()
+
+        if self.validate_input(csv, download_dir, max_processes):
+            max_processes = int(max_processes)
+            downloader = download.Downloader(csv, download_dir, max_processes)
+            downloader.start()
 
     @staticmethod
     def set_input(text, entry):
@@ -91,3 +138,5 @@ class Download(fh.Page):
         """
         entry.delete(0, END)
         entry.insert(0, text)
+
+# TODO implement STOP button after key interrupt handling in order to stop the processing.
