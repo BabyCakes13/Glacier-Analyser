@@ -145,8 +145,8 @@ def set_process_function(args) -> None:
     """
     print("Setting up process...")
 
-    process_align = process.Process(args.input, args.bigdir, args.output, args.j)
-    process_align.start()
+    processor = process.Process(args.input, args.bigdir, args.output, args.j)
+    processor.start()
 
     print("Finished process.")
 
@@ -159,7 +159,7 @@ def set_display_function(args) -> None:
        """
     print("Setting up display...")
 
-    process_align = csv_reader.CSVReader(csv=args.csv)
-    process_align.start()
+    displayer = csv_reader.CSVReader(csv=args.csv)
+    displayer.start()
 
     print("Finished display.")

@@ -1,8 +1,12 @@
+import os
 from tkinter import *
 from tkinter import filedialog
 
+import definitions
+
 sys.path.append(sys.path[0] + '/..')
 from data_displaying import page as fh
+from data_displaying import csv_reader
 
 
 class Display(fh.Page):
@@ -23,11 +27,11 @@ class Display(fh.Page):
         Creates submit and browse buttons.
         :return:
         """
-        submit = Button(self, text="SUBMIT", command=self.get_input)
-        submit.grid(row=7, column=0)
-
         browse = Button(self, text="BROWSE NDSI CSV", command=self.browse_csv)
         browse.grid(row=2, column=0)
+
+        submit = Button(self, text="SUBMIT", command=self.start_displaying)
+        submit.grid(row=7, column=0)
 
         # TODO show how many files have been processed till now and show loading button which finishes when it is done.
 
@@ -46,6 +50,7 @@ class Display(fh.Page):
         """
         csv_entry = Entry(self)
         csv_entry.grid(row=1, column=0)
+
         return csv_entry
 
     def browse_csv(self):
@@ -53,16 +58,39 @@ class Display(fh.Page):
         Open a file search dialog window to search for the csv file containing the results of the NDSI processing.
         :return: None
         """
-        filename = filedialog.askopenfilename(initialdir="/", title="Select file", filetypes=(("CSV files", "*.csv"),))
+        filename = filedialog.askopenfilename(initialdir=definitions.FILES_DIR, title="Select file containing the NDSI"
+                                                                                      " results from the  processing.",
+                                              filetypes=(("CSV files", "*.csv"),))
         self.set_input(filename, self.csv_entry)
 
-    def get_input(self) -> None:
+    def get_input(self) -> str:
         """
         Gets the input from the csv entry and sets the global variable with it.
         :return: None
         """
-        global NDSI_CSV
-        NDSI_CSV = self.csv_entry.get()
+        csv = self.csv_entry.get()
+
+        return csv
+
+    @staticmethod
+    def validate_input(csv) -> bool:
+        filename, file_extension = os.path.splitext(csv)
+
+        if not os.path.isfile(csv):
+            print("The input is not a file.")
+            return False
+        elif file_extension != '.csv':
+            print("The input file is not a csv file.")
+            return False
+
+        return True
+
+    def start_displaying(self):
+        csv = self.get_input()
+
+        if self.validate_input(csv=csv):
+            displayer = csv_reader.CSVReader(csv=csv)
+            displayer.start()
 
     @staticmethod
     def set_input(text, entry) -> None:

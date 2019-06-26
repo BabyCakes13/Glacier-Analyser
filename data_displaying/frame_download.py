@@ -1,24 +1,18 @@
+import os
 from tkinter import *
 from tkinter import filedialog
-
-import os
 
 import definitions
 
 sys.path.append(sys.path[0] + '/..')
 from data_displaying import page as fh
 from data_gathering import download
-from data_processing import process
 
 
 class Download(fh.Page):
     """
     Download page class.
     """
-    DOWNLOAD_CSV = None
-    DOWNLOAD_DIR = None
-    MAX_PROCESSES = None
-
     def __init__(self, *args, **kwargs):
         fh.Page.__init__(self, *args, **kwargs)
 
@@ -114,10 +108,10 @@ class Download(fh.Page):
             return False
         elif not max_processes.isdigit():
             return False
-        elif not(1 < int(max_processes) < 30):
+        elif not 1 < int(max_processes) < 30:
             return False
-        else:
-            return True
+
+        return True
 
     def start_download(self):
         print("Hey you!")
