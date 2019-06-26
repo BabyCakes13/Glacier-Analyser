@@ -25,6 +25,7 @@ class OutputDirHandler:
         """
         self.input_dir = input_dir
         self.output_dir = output_dir
+        self.clearmeup = False
 
     def get_path_row_dir_map(self) -> map:
         """
@@ -108,8 +109,9 @@ class OutputDirHandler:
         glacier = self.get_glacier()
         glacier_dir = os.path.join(self.output_dir, glacier)
 
-        if os.path.exists(glacier_dir):
+        if os.path.exists(glacier_dir) and self.clearmeup is False:
             shutil.rmtree(glacier_dir)
+            self.clearmeup = True
         os.mkdir(glacier_dir)
 
         return glacier_dir
