@@ -24,8 +24,8 @@ class NDSI:
         :return: Returns the np array containing the result of the division.
         """
 
-        green_nan = numpy_scene.green.astype(math_dtype)
-        swir_nan = numpy_scene.swir.astype(math_dtype)
+        green_nan = numpy_scene.green_numpy.astype(math_dtype)
+        swir_nan = numpy_scene.swir1_numpy.astype(math_dtype)
 
         green_nan[green_nan == 0] = np.nan
         swir_nan[swir_nan == 0] = np.nan

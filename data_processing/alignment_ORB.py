@@ -154,8 +154,8 @@ class AlignORB:
         :param image_16bit:
         :return:
         """
-        image_8bit_green = (image_16bit.green >> 8).astype(np.uint8)
-        image_8bit_swir = (image_16bit.swir >> 8).astype(np.uint8)
+        image_8bit_green = (image_16bit.green_numpy >> 8).astype(np.uint8)
+        image_8bit_swir = (image_16bit.swir1_numpy >> 8).astype(np.uint8)
 
         return sc.NumpyScene(image_8bit_green, image_8bit_swir)
 
@@ -166,8 +166,8 @@ class AlignORB:
         :param bits:
         :return:
         """
-        normalized_image_8bit_green = cv2.normalize(image.green, None, 0, (1 << bits)-1, cv2.NORM_MINMAX)
-        normalized_image_8bit_swir = cv2.normalize(image.swir,  None, 0, (1 << bits)-1, cv2.NORM_MINMAX)
+        normalized_image_8bit_green = cv2.normalize(image.green_numpy, None, 0, (1 << bits)-1, cv2.NORM_MINMAX)
+        normalized_image_8bit_swir = cv2.normalize(image.swir1_numpy,  None, 0, (1 << bits)-1, cv2.NORM_MINMAX)
 
         return sc.NumpyScene(normalized_image_8bit_green, normalized_image_8bit_swir)
 
