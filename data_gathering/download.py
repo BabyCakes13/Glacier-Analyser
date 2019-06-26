@@ -2,6 +2,7 @@ import csv
 import os
 import shutil
 import subprocess
+import signal
 
 from colors import *
 
@@ -26,6 +27,7 @@ class Downloader:
         self.glacier_csv_path = input_csv_path
         self.download_dir = download_dir
         self.max_processes = max_processes
+        self.search_process = None
 
         self.mh = mh.Multiprocess(max_processes=self.max_processes,
                                   handler=self.process_handler)
@@ -118,21 +120,25 @@ class Downloader:
             except FileNotFoundError:
                 print("Cannot create download directory. The path has a directory which does not exist.")
 
+            def preexec_function():
+                signal.signal(signal.SIGINT, signal.SIG_IGN)
+
             try:
                 search_task = self.create_search_arglist(row, json_query_filename)
                 print(yellow(search_task))
                 # sync, will wait to finish
-                subprocess.call(search_task)
+                self.search_process = subprocess.Popen(search_task, preexec_fn=preexec_function)
+                self.search_process.wait()
 
                 # async, will not wait to finish
                 download_task = self.create_download_arglist(json_query_filename, directory_name)
                 print(blue(download_task))
 
-                self.mh.start_processing(task=download_task, task_name=json_query_filename)
+                self.mh.start_processing(task=download_task, task_name=json_query_filename, ignore_SIGINT=True)
 
             except KeyboardInterrupt:
-                print("Keyboard interrupt.")
                 self.INTERRUPT_SIGNAL = True
-                self.mh.kill_all_processes()
+                self.search_process.wait()
+                self.mh.kill_all_processes(signal.SIGKILL)
                 self.mh.wait_all_process_done()
                 break

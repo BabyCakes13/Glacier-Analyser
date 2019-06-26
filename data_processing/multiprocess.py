@@ -25,7 +25,7 @@ class Multiprocess:
         self.process_queue = []
         self.handler = handler
 
-    def start_processing(self, task, task_name) -> None:
+    def start_processing(self, task, task_name, ignore_SIGINT=False) -> None:
         """
         Waits for a spot to free in the queue of processes, and when one finished, the pending one is appended to the
         list and started.
@@ -36,7 +36,14 @@ class Multiprocess:
         self.poll_process_done()
         print(blue("Processes in queue before add: "), blue(len(self.process_queue)))
 
-        sp = subprocess.Popen(task)
+        def preexec_function():
+                signal.signal(signal.SIGINT, signal.SIG_IGN)
+
+        if ignore_SIGINT:
+            sp = subprocess.Popen(task, preexec_fn=preexec_function)
+        else:
+            sp = subprocess.Popen(task)
+
         self.process_queue.append((task_name, sp))
 
         print(blue("Processes in queue after add: "), blue(len(self.process_queue)))
@@ -79,10 +86,10 @@ class Multiprocess:
         while len(self.process_queue) > 0:
             self.check_process_done()
 
-    def kill_all_processes(self) -> None:
+    def kill_all_processes(self, signal=signal.SIGINT) -> None:
         """
         If interrupt key is pressed, it signals each process to terminate.
         :return: None
         """
         for task_name, sp in self.process_queue:
-            sp.send_signal(signal.SIGINT)
+            sp.send_signal(signal)
