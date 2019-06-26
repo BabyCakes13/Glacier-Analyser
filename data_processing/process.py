@@ -10,10 +10,7 @@ from util import strings
 
 def interrupt_handler(signum, frame):
     INTERRUPT_SIGNAL = True
-    print ("exiting now")
     sys.exit(5)
-
-signal.signal(signal.SIGINT, interrupt_handler)
 
 DEBUG = False
 VALID_ALIGNED = 0
@@ -273,6 +270,8 @@ if __name__ == "__main__":
     glacier_dir = sys.argv[2]
     output_dir = sys.argv[3]
     max_processes=int(sys.argv[4])
+
+    signal.signal(signal.SIGINT, interrupt_handler)
 
     process_align = Process(big_glacier_dir=big_glacier_dir,
                                     glacier_dir=glacier_dir,
