@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
 
-import numpy as np
 # fixed the no background matplotlib bug
 # matplotlib.use('gtk3cairo')
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
-from matplotlib.patches import Rectangle
-from matplotlib.text import Text
 from pandas.plotting import register_matplotlib_converters
 
 # fixing the future pandas warning
@@ -19,6 +16,12 @@ from data_preparing import dataset_handler as dh
 class Plot:
     def __init__(self):
         self.fig, self.ax = plt.subplots()
+
+        self.first_pick = None
+        self.second_pick = None
+
+        self.first_an = None
+        self.second_an = None
 
     def start(self, csv):
         """
@@ -55,37 +58,66 @@ class Plot:
         plot.set_xlabel('Years')
         plot.set_ylabel('Results')
 
-        plot.plot(*zip(*data), linestyle='-', marker='o', label=title, picker=20)
+        plot.plot(*zip(*data), linestyle='-', marker='o', label=title, picker=3.14)
 
     def plot_show(self):
         plot = self.ax
 
-        def onpick3(event):
-            if isinstance(event.artist, Line2D):
-                thisline = event.artist
-                xdata = thisline.get_xdata()
-                ydata = thisline.get_ydata()
-                ind = event.ind
-                print('onpick1 line:', np.column_stack([xdata[ind], ydata[ind]]))
-            elif isinstance(event.artist, Rectangle):
-                patch = event.artist
-                print('onpick1 patch:', patch.get_path())
-            elif isinstance(event.artist, Text):
-                text = event.artist
-                print('onpick1 text:', text.get_text())
-
-        def onpress(event):
-            print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
-                  ('double' if event.dblclick else 'single', event.button,
-                   event.x, event.y, event.xdata, event.ydata))
-
-        self.fig.canvas.mpl_connect('pick_event', onpick3)
-        self.fig.canvas.mpl_connect('button_press_event', onpress)
+        self.fig.canvas.mpl_connect('pick_event', self.onpick3)
+        self.fig.canvas.mpl_connect('key_press_event', self.on_key)
 
         plot.legend(loc='upper left')
 
         plt.show()
 
-    def handle_scene_pick(self):
-        pass
+    def onpick3(self, event):
+        if isinstance(event.artist, Line2D):
+            thisline = event.artist
+            xdata = thisline.get_xdata()
+            ydata = thisline.get_ydata()
+            ind = event.ind
 
+            current_pick = (xdata[ind], ydata[ind])
+
+            if current_pick == self.first_pick:
+                return
+
+            self.remove_an()
+
+            self.second_pick = self.first_pick
+            self.first_pick = (xdata[ind], ydata[ind])
+
+            print("First", self.first_pick)
+            print("Second", self.second_pick)
+
+            if self.second_pick:
+                self.second_an = self.ax.annotate('second', xy=self.second_pick,
+                                                  xytext=(self.second_pick[0], self.second_pick[1] + 0.1),
+                                                  arrowprops=dict(facecolor='black', shrink=0.05))
+            self.first_an = self.ax.annotate('first', xy=self.first_pick,
+                                             xytext=(self.first_pick[0], self.first_pick[1] + 0.1),
+                                             arrowprops=dict(facecolor='black', shrink=0.05))
+        plt.show()
+
+    def on_key(self, event):
+        if event.key == "delete":
+            print("in delet")
+            self.first_pick = None
+            self.second_pick = None
+            self.remove_an()
+        plt.show()
+
+    def remove_an(self):
+        if self.first_an:
+            self.first_an.remove()
+            self.first_an = None
+
+        if self.second_an:
+            self.second_an.remove()
+            self.second_an = None
+
+        # TODO delete annotations
+
+
+def handle_scene_pick(self):
+    pass
