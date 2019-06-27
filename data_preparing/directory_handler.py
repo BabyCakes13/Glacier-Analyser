@@ -2,10 +2,11 @@
 Module which creates the processing output directories hierarchy.
 """
 import os
-import re
 import shutil
 from collections import defaultdict
+
 from colors import *
+
 import definitions
 from data_gathering import scene_information
 from util import strings
@@ -42,7 +43,7 @@ class OutputDirHandler:
                     path_row = self.get_scene_path_row(file)
 
                     if (path_row not in pr_dir.keys()) and (path_row is not None):
-                        print("Made directory ", path_row)
+                        print(definitions.PRINT_CODES[0] + "Made directory ", path_row)
                         path_row_dir = self.make_path_row_directory(path_row)
                         pr_dir[path_row] = path_row_dir
 
@@ -110,7 +111,7 @@ class OutputDirHandler:
         glacier_dir = os.path.join(self.output_dir, glacier)
 
         if os.path.exists(glacier_dir) and self.clearmeup is False:
-            print(red("Cleanup"), glacier_dir);
+            print(definitions.PRINT_CODES[0] + magenta("Cleanup"), glacier_dir);
             shutil.rmtree(glacier_dir)
 
         self.clearmeup = True

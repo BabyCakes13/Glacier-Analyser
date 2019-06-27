@@ -34,10 +34,10 @@ class Multiprocess:
         :return: None
         """
         self.poll_process_done()
-        print(blue("Processes in queue before add: "), blue(len(self.process_queue)))
+        print(definitions.PRINT_CODES[0] + blue("Processes in queue before add: "), blue(len(self.process_queue)))
 
         def preexec_function():
-                signal.signal(signal.SIGINT, signal.SIG_IGN)
+            signal.signal(signal.SIGINT, signal.SIG_IGN)
 
         if ignore_SIGINT:
             sp = subprocess.Popen(task, preexec_fn=preexec_function)
@@ -46,7 +46,7 @@ class Multiprocess:
 
         self.process_queue.append((task_name, sp))
 
-        print(blue("Processes in queue after add: "), blue(len(self.process_queue)))
+        print(definitions.PRINT_CODES[0] + blue("Processes in queue after add: "), blue(len(self.process_queue)))
 
     def check_process_full(self) -> None:
         """
@@ -66,7 +66,7 @@ class Multiprocess:
         for task_name, sp in self.process_queue:
             if sp.poll() is not None:
                 self.process_queue.remove((task_name, sp))
-                print(blue("Query done: "), blue(task_name))
+                print(definitions.PRINT_CODES[0] + blue("Query done: "), blue(task_name))
                 if self.handler is not None:
                     self.handler(task_name, sp.returncode)
 

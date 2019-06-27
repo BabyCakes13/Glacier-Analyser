@@ -1,11 +1,16 @@
 from __future__ import print_function
+
+import cProfile
+import io
+import pstats
 import signal
 import sys
-import cProfile, pstats, io
 
 
 def interrupt_handler(signum, frame):
     sys.exit(2)
+
+
 signal.signal(signal.SIGTERM, interrupt_handler)
 
 try:
@@ -19,6 +24,7 @@ except ImportError:
 
 # This is a workaround to allow importing scene both if imported from main and if called directly
 import sys
+
 sys.path.append(sys.path[0] + '/..')
 from data_processing import scenes as sc
 from data_processing import ndsi as nc
@@ -43,7 +49,8 @@ NDSI_CSV = 'ndsi'
 
 class ProcessImage:
     """Class which handles ORB alignment of two images."""
-    def __init__(self, scene:sc.PathScene, reference_scene: sc.PathScene, aligned_scene: sc.PathScene):
+
+    def __init__(self, scene: sc.PathScene, reference_scene: sc.PathScene, aligned_scene: sc.PathScene):
         self.image_16bit = sc.NumpyScene.read(scene)
         self.reference_16bit = sc.NumpyScene.read(reference_scene)
         self.aligned_16bit = None
@@ -58,13 +65,11 @@ class ProcessImage:
         :return: sc.SatImage
         """
         if self.aligned_16bit is not None:
-            print("Here 1")
             self.aligned_16bit = sc.NumpySceneWithNDSI(self.aligned_16bit.green_numpy,
                                                        self.aligned_16bit.swir1_numpy,
                                                        nc.NDSI.calculate_NDSI(self.aligned_16bit))
             image_with_ndsi_16bit = self.aligned_16bit
         else:
-            print("Here 2")
             self.image_16bit = sc.NumpySceneWithNDSI(self.image_16bit.green_numpy,
                                                      self.image_16bit.swir1_numpy,
                                                      nc.NDSI.calculate_NDSI(self.image_16bit))
@@ -83,7 +88,7 @@ class ProcessImage:
 
     @staticmethod
     def write_ndsi_csv(path, scene, snow_ratio):
-        print("Writing NDSI.")
+        print(yellow("[ INFO  ]: ") + yellow("Writing NDSI item..."))
         path_row_dir = pathlib.Path(path).parents[0]
         glacier_dir, path_row = os.path.split(path_row_dir)
         glacier_dir = pathlib.Path(path).parents[1]
@@ -109,7 +114,6 @@ class ProcessImage:
             snow_ratio,
         ]
 
-        print(red(snow_ratio))
         h = csv_writer.CSVWriter(output_dir=path_row_dir,
                                  arguments=arguments,
                                  path=path,
@@ -143,6 +147,7 @@ class AlignORB:
     """
     Class which gets two images as input and alignes the image based on the reference.
     """
+
     def __init__(self, input_img: sc.NumpyScene, reference_img: sc.NumpyScene):
         # transform from scientific notation to decimal for easy check
         np.set_printoptions(suppress=True, precision=4)
@@ -183,8 +188,8 @@ class AlignORB:
         :param bits:
         :return:
         """
-        normalized_image_8bit_green = cv2.normalize(image.green_numpy, None, 0, (1 << bits)-1, cv2.NORM_MINMAX)
-        normalized_image_8bit_swir = cv2.normalize(image.swir1_numpy,  None, 0, (1 << bits)-1, cv2.NORM_MINMAX)
+        normalized_image_8bit_green = cv2.normalize(image.green_numpy, None, 0, (1 << bits) - 1, cv2.NORM_MINMAX)
+        normalized_image_8bit_swir = cv2.normalize(image.swir1_numpy, None, 0, (1 << bits) - 1, cv2.NORM_MINMAX)
 
         return sc.NumpyScene(normalized_image_8bit_green, normalized_image_8bit_swir)
 
@@ -207,9 +212,9 @@ class AlignORB:
         for x in range(0, columns):
             for y in range(0, rows):
                 x0 = x * image.shape[1] // columns
-                x1 = (x+1) * image.shape[1] // columns
+                x1 = (x + 1) * image.shape[1] // columns
                 y0 = y * image.shape[0] // rows
-                y1 = (y+1) * image.shape[0] // rows
+                y1 = (y + 1) * image.shape[0] // rows
 
                 image_box = image[y0:y1, x0:x1]
 
@@ -251,15 +256,15 @@ class AlignORB:
 
         # detect and compute the feature points by splitting the image in boxes for good feature spread
         keypoints_img_green, descriptors_img_green = self.boxedDetectAndCompute(self.align_input.green_numpy)
-        keypoints_img_swir,  descriptors_img_swir  = self.boxedDetectAndCompute(self.align_input.swir1_numpy)
+        keypoints_img_swir, descriptors_img_swir = self.boxedDetectAndCompute(self.align_input.swir1_numpy)
         keypoints_ref_green, descriptors_ref_green = self.boxedDetectAndCompute(self.align_reference.green_numpy)
-        keypoints_ref_swir,  descriptors_ref_swir  = self.boxedDetectAndCompute(self.align_reference.swir1_numpy)
+        keypoints_ref_swir, descriptors_ref_swir = self.boxedDetectAndCompute(self.align_reference.swir1_numpy)
 
-        keypoints_img_all   = keypoints_img_green + keypoints_img_swir
-        keypoints_ref_all   = keypoints_ref_green + keypoints_ref_swir
+        keypoints_img_all = keypoints_img_green + keypoints_img_swir
+        keypoints_ref_all = keypoints_ref_green + keypoints_ref_swir
 
         if len(keypoints_img_all) == 0 or len(keypoints_ref_all) == 0:
-            print("There are no keypoints found.")
+            print(red("There are no keypoints found."))
             return None
 
         try:
@@ -279,14 +284,11 @@ class AlignORB:
 
         sc.DISPLAY.image("MATCHES", pruned_matches_image)
 
-        print(len(reference_points))
-        print(len(image_points))
-
         # create the affine transformation matrix and inliers
         try:
             affine, inliers = cv2.estimateAffine2D(image_points, reference_points, None, cv2.RANSAC)
         except Exception as e:
-            print(e)
+            print(red("Image is corrupt. Not writing."))
             return None
 
         # check application mode
@@ -309,10 +311,10 @@ class AlignORB:
         # warp the affine matrix to the current image
         height, width = self.reference_img.green_numpy.shape
         aligned_result_green = cv2.warpAffine(self.input_img.green_numpy, affine, (width, height))
-        aligned_result_swir  = cv2.warpAffine(self.input_img.swir1_numpy, affine, (width, height))
+        aligned_result_swir = cv2.warpAffine(self.input_img.swir1_numpy, affine, (width, height))
 
         if isinstance(self.input_img, sc.NumpySceneWithNDSI):
-            aligned_result_ndsi  = cv2.warpAffine(self.input_img.ndsi, affine, (width, height))
+            aligned_result_ndsi = cv2.warpAffine(self.input_img.ndsi, affine, (width, height))
             aligned = sc.NumpySceneWithNDSI(aligned_result_green, aligned_result_swir, aligned_result_ndsi)
         else:
             aligned = sc.NumpyScene(aligned_result_green, aligned_result_swir)
@@ -455,13 +457,12 @@ if __name__ == "__main__":
     pr = cProfile.Profile()
     pr.enable()
 
-
     VALID = True
-    scene           = sc.PathScene(sys.argv[1], sys.argv[2])
+    scene = sc.PathScene(sys.argv[1], sys.argv[2])
     reference_scene = sc.PathScene(sys.argv[3], sys.argv[4])
-    aligned_scene   = sc.PathScene(sys.argv[5], sys.argv[6])
+    aligned_scene = sc.PathScene(sys.argv[5], sys.argv[6])
 
-    print("Scene: ", scene.get_scene_name())
+    print(yellow("[ INFO ] ") + magenta("Aligning scene: ") + magenta(scene.get_scene_name()))
     process = ProcessImage(scene=scene,
                            reference_scene=reference_scene,
                            aligned_scene=aligned_scene)
@@ -472,7 +473,6 @@ if __name__ == "__main__":
     if aligned_image is None:
         VALID = False
     else:
-        print("Processing NDSI")
         process.write()
 
     pr.disable()
@@ -480,7 +480,7 @@ if __name__ == "__main__":
     sortby = 'cumulative'
     ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
     ps.dump_stats(scene.get_scene_name() + ".prof")
-    print( s.getvalue())
+    print(s.getvalue())
     # TODO put profile data in another dir, output dir.
     sc.DISPLAY.wait()
 

@@ -1,17 +1,31 @@
+"""
+Module which handles the processing part of the application: ndsi, alignment, difference and movement, arima.
+"""
 import os
 import pathlib
 import signal
 import sys
+
 sys.path.append(sys.path[0] + '/..')
 import definitions
 from data_preparing import directory_handler as odh, csv_writer
-from data_processing import scenes as sc, multiprocess as mh, alignment_ORB as al
+from data_processing import scenes as sc, multiprocess as mh
 from util import strings
+
+from colors import *
 
 
 def interrupt_handler(signum, frame):
+    """
+    Method which handles the interrupt for application stop.
+    :param signum: The signal name.
+    :param frame: The frame in which to stop it.
+    :return: raises KeyboardInterrupt.
+    """
+    print(definitions.PRINT_CODES[0] + "Exiting.")
     INTERRUPT_SIGNAL = True
-    sys.exit(5)
+    sys.exit(2)
+
 
 DEBUG = False
 MULTIPROCESSED = True
@@ -19,6 +33,10 @@ INTERRUPT_SIGNAL = False
 
 
 class Process:
+    """
+    Class which handles processing of the input directories.
+    """
+
     def __init__(self, big_glacier_dir, glacier_dir, output_dir, max_processes=definitions.MAX_PROCESSES):
         """
         The constructor of the Process class.
@@ -76,13 +94,15 @@ class Process:
         pr_dirs_map, pr_bands_map = h.prepare_path_row_maps()
 
         for path_row, bands in pr_bands_map.items():
+            print_string = "Processing for" + " " + str(path_row[0]) + "-" + str(path_row[1])
+            print(definitions.PRINT_CODES[0] + yellow(print_string))
             green_band_list, swir1_band_list = self.separate_and_sort_bands_on_type(bands)
             scenes = self.make_scenes(green_band_list=green_band_list,
                                       swir1_band_list=swir1_band_list)
             output_dir = self.assign_path_row_directory(path_row=path_row, pr_dirs_map=pr_dirs_map)
 
             if len(scenes) == 0:
-                print(definitions.PRINT_CODES[1] + "There are 0 scenes.")
+                print(definitions.PRINT_CODES[1] + red("There are 0 scenes."))
                 break
 
             # processing
@@ -107,7 +127,7 @@ class Process:
         else:
             return 0
 
-    def process_scene(self, scene, reference_scene, aligned_scene):
+    def process_scene(self, scene, reference_scene, aligned_scene) -> None:
         """
         Starts processing each scene with its reference filename by calling the parallel processing of alignment module.
         :param aligned_scene: The scene to be aligned.
@@ -126,12 +146,18 @@ class Process:
             self.mh.start_processing(task=task, task_name=scene.get_scene_name(), ignore_SIGINT=True)
 
         except KeyboardInterrupt:
-            print(definitions.PRINT_CODES[1] + "Keyboard interrupt.")
+            print(definitions.PRINT_CODES[1] + yellow("Keyboard interrupt."))
             INTERRUPT_SIGNAL = True
             self.mh.kill_all_processes(signal.SIGTERM)
             self.mh.wait_all_process_done()
 
-    def process_handler(self, task_name, return_code):
+    def process_handler(self, task_name, return_code) -> None:
+        """
+        Method which handles output of subprocesses.
+        :param task_name: The name of the finished task.
+        :param return_code: The return code of the finished task.
+        :return: None
+        """
         if return_code == 0:
             self.VALID_ALIGNED += 1
 
@@ -141,9 +167,8 @@ class Process:
         except KeyError:
             return_str = "IDK"
 
-        print("Return code of ", task_name, " is ", return_code, " meaning ", return_str, " with params ", al.MAX_FEATURES)
-        print("Valid: ", self.VALID_ALIGNED, " from: ", self.TOTAL_PROCESSED )
-
+        print(definitions.PRINT_CODES[0] + "Return code of ", task_name, " is ", return_code, " meaning ", return_str)
+        print(definitions.PRINT_CODES[0] + "Valid: ", self.VALID_ALIGNED, " from: ", self.TOTAL_PROCESSED)
 
     @staticmethod
     def create_aligned_scene(scene, output_dir) -> sc.PathScene:
@@ -212,7 +237,7 @@ class Process:
         return scenes
 
     @staticmethod
-    def assign_path_row_directory(path_row=None, pr_dirs_map=None):
+    def assign_path_row_directory(path_row=None, pr_dirs_map=None) -> str:
         """
         Assigns the scene to the correct path and row output directory.
         :param path_row: The current path and row directory.
@@ -229,7 +254,13 @@ class Process:
 
         return output_directory
 
-    def write_align_csv(self, path_row, output):
+    def write_align_csv(self, path_row, output) -> None:
+        """
+        Method which writes an alignment object to the alignment CSV.
+        :param path_row: Path and row of file.
+        :param output: Output path.
+        :return: None
+        """
         glacier_dir = pathlib.Path(output).parents[0]
         parent_dir, glacier_id = os.path.split(glacier_dir)
         path = path_row[0]
@@ -252,10 +283,9 @@ class Process:
                                  arguments=arguments)
         h.start()
 
-        #reset for next run
+        # reset for next run
         self.VALID_ALIGNED = 0
         self.TOTAL_PROCESSED = 0
-
 
 
 if __name__ == "__main__":
@@ -266,12 +296,12 @@ if __name__ == "__main__":
     big_glacier_dir = sys.argv[1]
     glacier_dir = sys.argv[2]
     output_dir = sys.argv[3]
-    max_processes=int(sys.argv[4])
+    max_processes = int(sys.argv[4])
 
     signal.signal(signal.SIGINT, interrupt_handler)
 
     process_align = Process(big_glacier_dir=big_glacier_dir,
-                                    glacier_dir=glacier_dir,
-                                    output_dir=output_dir,
-                                    max_processes=max_processes)
+                            glacier_dir=glacier_dir,
+                            output_dir=output_dir,
+                            max_processes=max_processes)
     process_align.start()

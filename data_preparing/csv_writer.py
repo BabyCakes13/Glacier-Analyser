@@ -4,6 +4,8 @@ import os
 
 from filelock import FileLock
 
+from colors import *
+
 import definitions
 
 ALIGN_CSV = 'align'
@@ -38,7 +40,6 @@ class CSVWriter:
         :return: None
         """
 
-        print ("Is directory ", self.output_dir, " is ", os.path.isdir(self.output_dir))
         self.lock = FileLock(self.csv_path + ".lock")
 
         self.create()
@@ -49,10 +50,9 @@ class CSVWriter:
         Create it if it doesn't exist, append if it does."""
         with self.lock:
             if os.path.isfile(self.csv_path):
-                print("Is file.")
                 return
             else:
-                print(definitions.PRINT_CODES[0] + "Creating csv...")
+                print(definitions.PRINT_CODES[0] + yellow("Creating csv..."))
                 with open(self.csv_path, "w") as file:
                     writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
