@@ -65,7 +65,7 @@ class Plot:
         # self.plot_results("Input Data Sorted No Zeros", input_data_inliers)
 
         arima = ari.Arima(self.input_data)
-        predictions, mean_error = arima.start(count=10)
+        predictions, mean_error = arima.start(count=5)
 
         if len(predictions) > 0:
             self.plot_results("predicted", predictions )
