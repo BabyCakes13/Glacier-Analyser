@@ -18,6 +18,10 @@ class Download(fh.Page):
     def __init__(self, *args, **kwargs):
         fh.Page.__init__(self, *args, **kwargs)
 
+
+        self.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
+
         self.create_buttons()
         self.create_labels()
         self.sp = None
@@ -30,25 +34,25 @@ class Download(fh.Page):
         :return:
         """
         browse = Button(self, text="BROWSE CSV", command=self.browse_csv)
-        browse.grid(row=0, column=2, sticky=W)
+        browse.grid(row=0, column=2, sticky=W+E)
 
         browse = Button(self, text="BROWSE OUTPUT DIRECTORY", command=self.browse_output_directory)
-        browse.grid(row=1, column=2, sticky=W)
+        browse.grid(row=1, column=2, sticky=W+E)
 
         submit = Button(self, text="START DOWNLOAD", command=self.start_download)
-        submit.grid(row=3, column=1)
+        submit.grid(row=3, column=1, sticky=W+E)
 
         submit = Button(self, text="STOP DOWNLOAD", command=self.stop_download)
-        submit.grid(row=4, column=1)
+        submit.grid(row=4, column=1, sticky=W+E)
 
     def create_labels(self):
         """
         Label creator.
         :return:
         """
-        csv = Label(self, text="Path to the CSV file containing the glacier information.")
-        output_dir = Label(self, text="Path to the directory which will contain the downloaded data.")
-        max_processes = Label(self, text="The number of max processes which can run for search and download..")
+        csv = Label(self, text="Glacier CSV:")
+        output_dir = Label(self, text="Download directory:")
+        max_processes = Label(self, text="Used processes:")
 
         csv.grid(row=0, column=0, sticky=W)
         output_dir.grid(row=1, column=0, sticky=W)

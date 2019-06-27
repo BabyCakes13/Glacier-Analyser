@@ -17,6 +17,8 @@ class Display(fh.Page):
     def __init__(self, *args, **kwargs):
         fh.Page.__init__(self, *args, **kwargs)
 
+        self.columnconfigure(0, weight=1)
+
         self.create_labels()
         self.create_buttons()
 
@@ -28,10 +30,10 @@ class Display(fh.Page):
         :return:
         """
         browse = Button(self, text="BROWSE NDSI CSV", command=self.browse_csv)
-        browse.grid(row=0, column=2, sticky=W)
+        browse.grid(row=0, column=2, sticky=W+E)
 
         submit = Button(self, text="SUBMIT", command=self.start_displaying)
-        submit.grid(row=1, column=1)
+        submit.grid(row=1, column=1, sticky=W+E)
 
         # TODO show how many files have been processed till now and show loading button which finishes when it is done.
 
@@ -40,7 +42,7 @@ class Display(fh.Page):
         Creates the necessary labels for the entry input specifying the directions.
         :return: None
         """
-        csv = Label(self, text="Path to the NDSI CSV results from the processing.")
+        csv = Label(self, text="NDSI CSV for ARIMA prediction:")
         csv.grid(row=0, column=0, sticky=W)
 
     def create_entries(self) -> Entry:
@@ -49,7 +51,7 @@ class Display(fh.Page):
         :return: None
         """
         csv_entry = Entry(self)
-        csv_entry.grid(row=0, column=1, sticky=W)
+        csv_entry.grid(row=0, column=1, sticky=W+E)
 
         return csv_entry
 

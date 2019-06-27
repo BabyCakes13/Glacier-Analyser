@@ -19,6 +19,9 @@ class Process(fh.Page):
     def __init__(self, *args, **kwargs):
         fh.Page.__init__(self, *args, **kwargs)
 
+        self.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
+
         self.create_buttons()
         self.create_labels()
 
@@ -32,19 +35,19 @@ class Process(fh.Page):
         """
 
         browse = Button(self, text="BROWSE BIG INPUT DIRECTORY", command=self.browse_big_glacier_directory)
-        browse.grid(row=0, column=2, sticky=W)
+        browse.grid(row=0, column=2, sticky=W+E)
 
         browse = Button(self, text="BROWSE INPUT DIRECTORY", command=self.browse_glacier_directory)
-        browse.grid(row=1, column=2, sticky=W)
+        browse.grid(row=1, column=2, sticky=W+E)
 
         browse = Button(self, text="BROWSE OUTPUT DIRECTORY", command=self.browse_output_directory)
-        browse.grid(row=2, column=2, sticky=W)
+        browse.grid(row=2, column=2, sticky=W+E)
 
         process = Button(self, text="START PROCESS", command=self.start_process)
-        process.grid(row=4, column=1)
+        process.grid(row=4, column=1, sticky=W+E)
 
         process = Button(self, text="STOOP PROCESS", command=self.stop_process)
-        process.grid(row=5, column=1)
+        process.grid(row=5, column=1, sticky=W+E)
 
         # TODO show how many files have been processed till now and show loading button which finishes when it is done.
 
@@ -53,11 +56,10 @@ class Process(fh.Page):
         Label creator.
         :return:
         """
-        big_dir = Label(self, text="Path to the directory which contains directories of glaciers."
-                                   "Leave blank if not the case")
-        glacier_dir = Label(self, text="Path to the glacier directory which contains the images.")
-        output_dir = Label(self, text="Path to the directory which will contain the result images after processing.")
-        max_process_dir = Label(self, text="The number of max processes which can run for processing..")
+        big_dir = Label(self, text="Big directory (blank if none):")
+        glacier_dir = Label(self, text="Glacier directory:")
+        output_dir = Label(self, text="Processing save directory:")
+        max_process_dir = Label(self, text="Used processes:")
 
         big_dir.grid(row=0, column=0, sticky=W)
         glacier_dir.grid(row=1, column=0, sticky=W)

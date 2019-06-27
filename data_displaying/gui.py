@@ -28,14 +28,14 @@ class MainView(Frame):
         button_frame = Frame(self)
         button_frame.place(relx=.5, rely=.5, anchor="c")
         button_frame.pack(side="top", fill="x", expand=False)
-
+        button_frame.configure(background='#b0b0b0')
         b1 = Button(button_frame, text="DOWNLOAD", command=self.download.lift, padx=15, pady=15)
         b2 = Button(button_frame, text="PROCESS", command=self.process.lift, padx=15, pady=15)
         b3 = Button(button_frame, text="DISPLAY", command=self.display.lift, padx=15, pady=15)
 
-        b1.pack(side="left", padx=10, pady=10)
-        b2.pack(side="left", padx=10, pady=10)
-        b3.pack(side="left", padx=10, pady=10)
+        b1.pack(side="left", padx=5, pady=5, expand=True)
+        b2.pack(side="left", padx=5, pady=5, expand=True)
+        b3.pack(side="left", padx=5, pady=5, expand=True)
 
     def create_container(self) -> None:
         """
@@ -43,7 +43,7 @@ class MainView(Frame):
         :return: None
         """
         container_frame = Frame(self)
-
+        container_frame.configure(background='#e0e0e0')
         container_frame.place(relx=.5, rely=.5, anchor="c")
         container_frame.pack(side="top", fill="both", expand=True)
 
@@ -53,8 +53,8 @@ class MainView(Frame):
 
 
 def position_master(master):
-    w = 1000  # width for the Tk root
-    h = 1000  # height for the Tk root
+    w = 560  # width for the Tk root
+    h = 250  # height for the Tk root
 
     ws = master.winfo_screenwidth()  # width of the screen
     hs = master.winfo_screenheight()  # height of the screen
@@ -67,7 +67,9 @@ def position_master(master):
 
 def start():
     master = Tk()
-
+    master.title('Satellite Glacier Images Analyzer')
+    master.resizable(False, False)
+    master.configure(background='black')
     main = MainView(master)
     position_master(master)
     main.pack(side="top", fill="both", expand=True)
