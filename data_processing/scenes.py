@@ -2,6 +2,7 @@
 Module which holds the two scene formats for a Landsat 8 scene.
 """
 import os
+import sys
 
 import cv2
 from osgeo import gdal
@@ -67,19 +68,28 @@ class NumpyScene:
         swir1_numpy = None
 
         if open_with_GDAL:
-            dataset_green = gdal.Open(path_scene.green_path)
-            green_numpy = dataset_green.ReadAsArray(xoff=0, yoff=0,
-                                                    xsize=dataset_green.RasterXSize,
-                                                    ysize=dataset_green.RasterYSize)
+            try:
+                dataset_green = gdal.Open(path_scene.green_path)
+                green_numpy = dataset_green.ReadAsArray(xoff=0, yoff=0,
+                                                        xsize=dataset_green.RasterXSize,
+                                                        ysize=dataset_green.RasterYSize)
 
-            dataset_swir1 = gdal.Open(path_scene.swir1_path)
-            swir1_numpy = dataset_swir1.ReadAsArray(xoff=0, yoff=0,
-                                                    xsize=dataset_swir1.RasterXSize,
-                                                    ysize=dataset_swir1.RasterYSize)
+                dataset_swir1 = gdal.Open(path_scene.swir1_path)
+                swir1_numpy = dataset_swir1.ReadAsArray(xoff=0, yoff=0,
+                                                        xsize=dataset_swir1.RasterXSize,
+                                                        ysize=dataset_swir1.RasterYSize)
+            except Exception:
+                sys.exit(6)
 
         elif open_with_cv2:
-            green_numpy = cv2.imread(path_scene.green_path, cv2.IMREAD_LOAD_GDAL)
-            swir1_numpy = cv2.imread(path_scene.swir1_path, cv2.IMREAD_LOAD_GDAL)
+            try:
+                green_numpy = cv2.imread(path_scene.green_path, cv2.IMREAD_LOAD_GDAL)
+                swir1_numpy = cv2.imread(path_scene.swir1_path, cv2.IMREAD_LOAD_GDAL)
+            except Exception:
+                sys.exit(6)
+
+        if green_numpy is None or swir1_numpy is None:
+            sys.exit(6)
 
         img = NumpyScene(green_numpy, swir1_numpy)
         return img

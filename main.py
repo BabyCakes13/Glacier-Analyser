@@ -12,5 +12,6 @@ pr.disable()
 s = io.StringIO()
 sortby = 'cumulative'
 ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-ps.dump_stats("main.prof")
+ps.dump_stats("main.prof") # TODO change profile paths
 print( s.getvalue())
+

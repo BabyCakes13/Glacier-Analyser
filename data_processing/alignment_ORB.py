@@ -481,7 +481,7 @@ if __name__ == "__main__":
     ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
     ps.dump_stats(scene.get_scene_name() + ".prof")
     print( s.getvalue())
-
+    # TODO put profile data in another dir, output dir.
     sc.DISPLAY.wait()
 
     if VALID:
