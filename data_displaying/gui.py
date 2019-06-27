@@ -43,6 +43,7 @@ class MainView(Frame):
         :return: None
         """
         container_frame = Frame(self)
+
         container_frame.place(relx=.5, rely=.5, anchor="c")
         container_frame.pack(side="top", fill="both", expand=True)
 
@@ -66,6 +67,7 @@ def position_master(master):
 
 def start():
     master = Tk()
+
     main = MainView(master)
     position_master(master)
     main.pack(side="top", fill="both", expand=True)

@@ -32,19 +32,19 @@ class Process(fh.Page):
         """
 
         browse = Button(self, text="BROWSE BIG INPUT DIRECTORY", command=self.browse_big_glacier_directory)
-        browse.grid(row=2, column=0)
+        browse.grid(row=0, column=2, sticky=W)
 
         browse = Button(self, text="BROWSE INPUT DIRECTORY", command=self.browse_glacier_directory)
-        browse.grid(row=5, column=0)
+        browse.grid(row=1, column=2, sticky=W)
 
         browse = Button(self, text="BROWSE OUTPUT DIRECTORY", command=self.browse_output_directory)
-        browse.grid(row=8, column=0)
+        browse.grid(row=2, column=2, sticky=W)
 
         process = Button(self, text="START PROCESS", command=self.start_process)
-        process.grid(row=11, column=0)
+        process.grid(row=4, column=1)
 
         process = Button(self, text="STOOP PROCESS", command=self.stop_process)
-        process.grid(row=12, column=0)
+        process.grid(row=5, column=1)
 
         # TODO show how many files have been processed till now and show loading button which finishes when it is done.
 
@@ -59,10 +59,10 @@ class Process(fh.Page):
         output_dir = Label(self, text="Path to the directory which will contain the result images after processing.")
         max_process_dir = Label(self, text="The number of max processes which can run for processing..")
 
-        big_dir.grid(row=0, column=0)
-        glacier_dir.grid(row=3, column=0)
-        output_dir.grid(row=6, column=0)
-        max_process_dir.grid(row=9, column=0)
+        big_dir.grid(row=0, column=0, sticky=W)
+        glacier_dir.grid(row=1, column=0, sticky=W)
+        output_dir.grid(row=2, column=0, sticky=W)
+        max_process_dir.grid(row=3, column=0, sticky=W)
 
     def create_entries(self):
         """
@@ -74,10 +74,10 @@ class Process(fh.Page):
         output_entry = Entry(self)
         max_process_entry = Entry(self)
 
-        big_entry.grid(row=1, column=0)
-        input_entry.grid(row=4, column=0)
-        output_entry.grid(row=7, column=0)
-        max_process_entry.grid(row=10, column=0)
+        big_entry.grid(row=0, column=1, sticky=W)
+        input_entry.grid(row=1, column=1, sticky=W)
+        output_entry.grid(row=2, column=1, sticky=W)
+        max_process_entry.grid(row=3, column=1, sticky=W)
 
         return big_entry, input_entry, output_entry, max_process_entry
 

@@ -1,7 +1,6 @@
 import os
-import subprocess
 import signal
-
+import subprocess
 from tkinter import *
 from tkinter import filedialog
 
@@ -9,7 +8,6 @@ import definitions
 
 sys.path.append(sys.path[0] + '/..')
 from data_displaying import page as fh
-from data_gathering import download
 
 
 class Download(fh.Page):
@@ -32,16 +30,16 @@ class Download(fh.Page):
         :return:
         """
         browse = Button(self, text="BROWSE CSV", command=self.browse_csv)
-        browse.grid(row=2, column=0)
+        browse.grid(row=0, column=2, sticky=W)
 
         browse = Button(self, text="BROWSE OUTPUT DIRECTORY", command=self.browse_output_directory)
-        browse.grid(row=5, column=0)
+        browse.grid(row=1, column=2, sticky=W)
 
         submit = Button(self, text="START DOWNLOAD", command=self.start_download)
-        submit.grid(row=9, column=0)
+        submit.grid(row=3, column=1)
 
         submit = Button(self, text="STOP DOWNLOAD", command=self.stop_download)
-        submit.grid(row=10, column=0)
+        submit.grid(row=4, column=1)
 
     def create_labels(self):
         """
@@ -52,9 +50,9 @@ class Download(fh.Page):
         output_dir = Label(self, text="Path to the directory which will contain the downloaded data.")
         max_processes = Label(self, text="The number of max processes which can run for search and download..")
 
-        csv.grid(row=0, column=0)
-        output_dir.grid(row=3, column=0)
-        max_processes.grid(row=6, column=0)
+        csv.grid(row=0, column=0, sticky=W)
+        output_dir.grid(row=1, column=0, sticky=W)
+        max_processes.grid(row=2, column=0, sticky=W)
 
     def create_entries(self):
         """
@@ -65,9 +63,9 @@ class Download(fh.Page):
         output_dir = Entry(self)
         max_processes = Entry(self)
 
-        csv.grid(row=1, column=0)
-        output_dir.grid(row=4, column=0)
-        max_processes.grid(row=7, column=0)
+        csv.grid(row=0, column=1, sticky=W)
+        output_dir.grid(row=1, column=1, sticky=W)
+        max_processes.grid(row=2, column=1, sticky=W)
 
         return csv, output_dir, max_processes
 

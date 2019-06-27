@@ -28,10 +28,10 @@ class Display(fh.Page):
         :return:
         """
         browse = Button(self, text="BROWSE NDSI CSV", command=self.browse_csv)
-        browse.grid(row=2, column=0)
+        browse.grid(row=0, column=2, sticky=W)
 
         submit = Button(self, text="SUBMIT", command=self.start_displaying)
-        submit.grid(row=7, column=0)
+        submit.grid(row=1, column=1)
 
         # TODO show how many files have been processed till now and show loading button which finishes when it is done.
 
@@ -41,7 +41,7 @@ class Display(fh.Page):
         :return: None
         """
         csv = Label(self, text="Path to the NDSI CSV results from the processing.")
-        csv.grid(row=0, column=0)
+        csv.grid(row=0, column=0, sticky=W)
 
     def create_entries(self) -> Entry:
         """
@@ -49,7 +49,7 @@ class Display(fh.Page):
         :return: None
         """
         csv_entry = Entry(self)
-        csv_entry.grid(row=1, column=0)
+        csv_entry.grid(row=0, column=1, sticky=W)
 
         return csv_entry
 
