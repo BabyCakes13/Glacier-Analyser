@@ -95,8 +95,6 @@ class Process:
                 self.process_scene(scene=scene, reference_scene=scenes[0], aligned_scene=aligned_scene)
                 TOTAL_PROCESSED += 1
 
-                print("Request to quit ", INTERRUPT_SIGNAL)
-
                 if INTERRUPT_SIGNAL:
                     break
 
