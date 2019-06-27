@@ -40,7 +40,7 @@ class FrameDisplay(fh.Page):
         browse = Button(self, text="BROWSE NDSI CSV", command=self.browse_csv)
         browse.grid(row=0, column=2, sticky=W + E)
 
-        submit = Button(self, text="SUBMIT", command=self.start_displaying)
+        submit = Button(self, text="DISPLAY", command=self.start_displaying)
         submit.grid(row=1, column=1, sticky=W + E)
 
         # TODO show how many files have been processed till now and show loading button which finishes when it is done.
