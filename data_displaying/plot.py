@@ -1,10 +1,17 @@
-#!/usr/bin/env python3
+"""
+Module which handles plotting of data generated from prediction, and difference movement images.
+"""
+# !/usr/bin/env python3
+
+# fixed the no background matplotlib bug
+# !/usr/bin/env python3
 import os
-import subprocess
 import signal
+import subprocess
 
 # fixed the no background matplotlib bug
 import matplotlib
+
 matplotlib.use('gtk3cairo')
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
@@ -15,13 +22,18 @@ register_matplotlib_converters()
 
 from data_processing import arima as ari
 from data_preparing import dataset_handler as dh
-from data_processing import difference_movement as dm
-
-from colors import *
 
 
 class Plot:
+    """
+    Class which handles plotting of data.
+    """
+
     def __init__(self, csv):
+        """
+        Initializes the needed NDSI csv containing the snow pixel data in order to create data sets and plot.
+        :param csv: The path to the csv file.
+        """
         self.csv = csv
 
         self.fig, self.ax = plt.subplots()
@@ -37,7 +49,7 @@ class Plot:
 
         self.sp = []
 
-    def start(self):
+    def start(self) -> None:
         """
         Method which is called on command line display argument.
         :return: None
@@ -60,12 +72,12 @@ class Plot:
 
         self.plot_show()
 
-    def plot_results(self, title, data):
+    def plot_results(self, title, data) -> None:
         """
         Plots the result in a matplotlib window.
-        :param title:
-        :param data:
-        :return:
+        :param title: The title of the plot
+        :param data: The data set of the plot.
+        :return: None
         """
         plot = self.ax
 
@@ -75,7 +87,11 @@ class Plot:
         data, snow = zip(*data)
         plot.plot(data, snow, linestyle='-', marker='o', label=title, picker=3.14)
 
-    def plot_show(self):
+    def plot_show(self) -> None:
+        """
+        Show the plot.
+        :return: None
+        """
         plot = self.ax
 
         self.fig.canvas.mpl_connect('pick_event', self.onpick3)
@@ -86,20 +102,29 @@ class Plot:
 
         plt.show()
 
-
-    def handle_close(self, evt):
+    def handle_close(self, evt) -> None:
+        """
+        Method which handles close button, and stops all processes in the backend.
+        :param evt: Event.
+        :return: None
+        """
         for p in self.sp:
             p.send_signal(signal.SIGTERM)
         print('Closed Figure!')
 
-    def onpick3(self, event):
+    def onpick3(self, event) -> None:
+        """
+        Event handler for picking in interactive mode graphic.
+        :param event: Event.
+        :return: None
+        """
         if isinstance(event.artist, Line2D):
-            thisline = event.artist
-            xdata = thisline.get_xdata()
-            ydata = thisline.get_ydata()
+            this_line = event.artist
+            x_data = this_line.get_xdata()
+            y_data = this_line.get_ydata()
             ind = event.ind
 
-            current_pick = (xdata[ind][0], ydata[ind][0])
+            current_pick = (x_data[ind][0], y_data[ind][0])
             if current_pick == self.first_pick:
                 return
             self.remove_an()
@@ -107,8 +132,8 @@ class Plot:
             self.second_pick = self.first_pick
             self.first_pick = current_pick
 
-            print("First", self.first_pick)
-            print("Second", self.second_pick)
+            # print("First", self.first_pick)
+            # print("Second", self.second_pick)
 
             if self.second_pick:
                 self.second_an = self.ax.annotate('second', xy=self.second_pick,
@@ -122,8 +147,13 @@ class Plot:
 
         plt.draw()
 
-
-    def start_displaying_diff_move(self, first_date, second_date):
+    def start_displaying_diff_move(self, first_date, second_date) -> None:
+        """
+        Method which calls difference and movement image creation on pick of two images.
+        :param first_date: The first image to compare.
+        :param second_date: The second image to compare.
+        :return: None
+        """
         path, file = os.path.split(self.csv)
 
         first_scene = self.find_scene(first_date)
@@ -131,9 +161,6 @@ class Plot:
 
         first_path = os.path.join(path, first_scene + "_NDSI.TIF")
         second_path = os.path.join(path, second_scene + "_NDSI.TIF")
-
-        print(first_path)
-        print(second_path)
 
         if os.path.isfile(first_path) and os.path.isfile(second_path):
             task = ["python3", "data_processing/difference_movement.py",
@@ -144,21 +171,34 @@ class Plot:
                            horizontalalignment='center', verticalalignment='center',
                            fontsize=12, bbox=dict(facecolor='red'))
 
-    def find_scene(self, date):
+    def find_scene(self, date) -> str:
+        """
+        Find the scene of processing based on the picked date.
+        :param date: The parameter returned on pick from graphic.
+        :return: None
+        """
         for i, item in enumerate(self.input_data):
             if date == item[0]:
                 print("Date ", date, " scene ", self.scenes[i])
                 return self.scenes[i]
 
-    def on_key(self, event):
+    def on_key(self, event) -> None:
+        """
+        Handle delete of pickings in interactive mode graphic.
+        :param event: Key pressing event, delete.
+        :return: None
+        """
         if event.key == "delete":
-            print("in delet")
             self.first_pick = None
             self.second_pick = None
             self.remove_an()
         plt.show()
 
     def remove_an(self):
+        """
+        Remove arrows.
+        :return: None
+        """
         if self.first_an:
             self.first_an.remove()
             self.first_an = None
@@ -166,9 +206,3 @@ class Plot:
         if self.second_an:
             self.second_an.remove()
             self.second_an = None
-
-        # TODO delete annotations
-
-
-def handle_scene_pick(self):
-    pass
