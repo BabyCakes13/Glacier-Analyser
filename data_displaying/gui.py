@@ -1,3 +1,6 @@
+"""
+Class which handles the main view of the GUI.
+"""
 from tkinter import *
 
 sys.path.append(sys.path[0] + '/..')
@@ -5,6 +8,9 @@ from data_displaying import frame_process as fp, frame_download as fdw, frame_di
 
 
 class MainView(Frame):
+    """
+    Main frame class.
+    """
     def __init__(self, *args, **kwargs):
         """
         Set the button frame and the container frame for the Main frame.
@@ -52,7 +58,12 @@ class MainView(Frame):
         self.display.place(in_=container_frame, x=0, y=0, relwidth=1, relheight=1)
 
 
-def position_master(master):
+def center_frame(master) -> None:
+    """
+    Position to the center of the screen.
+    :param master: The tkinter root.
+    :return: None
+    """
     w = 560  # width for the Tk root
     h = 250  # height for the Tk root
 
@@ -66,11 +77,15 @@ def position_master(master):
 
 
 def start():
+    """
+    Starting point of the GUI.
+    :return: None
+    """
     master = Tk()
     master.title('Satellite Glacier Images Analyzer')
     master.resizable(False, False)
     master.configure(background='black')
     main = MainView(master)
-    position_master(master)
+    center_frame(master)
     main.pack(side="top", fill="both", expand=True)
     master.mainloop()

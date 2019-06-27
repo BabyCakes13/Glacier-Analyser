@@ -1,3 +1,6 @@
+"""
+Module which handles download GUI.
+"""
 import os
 from tkinter import *
 from tkinter import filedialog
@@ -15,6 +18,11 @@ class FrameDisplay(fh.Page):
     """
 
     def __init__(self, *args, **kwargs):
+        """
+        Constructor which initialises the frame object, and sets up the GUI parameters.
+        :param args: Arguments from Frame.
+        :param kwargs: Arguments from Frame.
+        """
         fh.Page.__init__(self, *args, **kwargs)
 
         self.columnconfigure(0, weight=1)
@@ -24,16 +32,16 @@ class FrameDisplay(fh.Page):
 
         self.csv_entry = self.create_entries()
 
-    def create_buttons(self):
+    def create_buttons(self) -> None:
         """
         Creates submit and browse buttons.
-        :return:
+        :return: None
         """
         browse = Button(self, text="BROWSE NDSI CSV", command=self.browse_csv)
-        browse.grid(row=0, column=2, sticky=W+E)
+        browse.grid(row=0, column=2, sticky=W + E)
 
         submit = Button(self, text="SUBMIT", command=self.start_displaying)
-        submit.grid(row=1, column=1, sticky=W+E)
+        submit.grid(row=1, column=1, sticky=W + E)
 
         # TODO show how many files have been processed till now and show loading button which finishes when it is done.
 
@@ -51,11 +59,11 @@ class FrameDisplay(fh.Page):
         :return: None
         """
         csv_entry = Entry(self)
-        csv_entry.grid(row=0, column=1, sticky=W+E)
+        csv_entry.grid(row=0, column=1, sticky=W + E)
 
         return csv_entry
 
-    def browse_csv(self):
+    def browse_csv(self) -> None:
         """
         Open a file search dialog window to search for the csv file containing the results of the NDSI processing.
         :return: None
@@ -76,6 +84,11 @@ class FrameDisplay(fh.Page):
 
     @staticmethod
     def validate_input(csv) -> bool:
+        """
+        Checks whether the input variables are correct or not, type wise.
+        :param csv: The csv should be the path to the input world glacier inventory csv.
+        :return: None
+        """
         filename, file_extension = os.path.splitext(csv)
 
         if not os.path.isfile(csv):
@@ -87,7 +100,11 @@ class FrameDisplay(fh.Page):
 
         return True
 
-    def start_displaying(self):
+    def start_displaying(self) -> None:
+        """
+        Start the download process.
+        :return: None
+        """
         csv = self.get_input()
 
         if self.validate_input(csv=csv):
