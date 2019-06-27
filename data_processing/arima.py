@@ -36,7 +36,7 @@ class Arima:
                 if index < len(test):
                     observed = test[index][1]
                     history.append((test[index][0], observed))
-                    continue
+                continue
 
             predicted = output[0][0]
             error = output[1][0]
