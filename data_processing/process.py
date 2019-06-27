@@ -5,16 +5,15 @@ import sys
 sys.path.append(sys.path[0] + '/..')
 import definitions
 from data_preparing import directory_handler as odh, csv_writer
-from data_processing import scenes as sc, multiprocess as mh
+from data_processing import scenes as sc, multiprocess as mh, alignment_ORB as al
 from util import strings
+
 
 def interrupt_handler(signum, frame):
     INTERRUPT_SIGNAL = True
     sys.exit(5)
 
 DEBUG = False
-VALID_ALIGNED = 0
-TOTAL_PROCESSED = 0
 MULTIPROCESSED = True
 INTERRUPT_SIGNAL = False
 
@@ -36,6 +35,8 @@ class Process:
 
         self.mh = mh.Multiprocess(max_processes=self.max_processes,
                                   handler=self.process_handler)
+        self.VALID_ALIGNED = 0
+        self.TOTAL_PROCESSED = 0
 
     def start(self) -> None:
         """
@@ -71,10 +72,6 @@ class Process:
         :param current_dir: The current glacier directory.
         :return: Return code of the function.
         """
-        global VALID_ALIGNED, TOTAL_PROCESSED
-        VALID_ALIGNED = 0
-        TOTAL_PROCESSED = 0
-
         h = odh.OutputDirHandler(input_dir=current_dir, output_dir=self.output_dir)
         pr_dirs_map, pr_bands_map = h.prepare_path_row_maps()
 
@@ -93,7 +90,7 @@ class Process:
                 aligned_scene = self.create_aligned_scene(scene=scene, output_dir=output_dir)
 
                 self.process_scene(scene=scene, reference_scene=scenes[0], aligned_scene=aligned_scene)
-                TOTAL_PROCESSED += 1
+                self.TOTAL_PROCESSED += 1
 
                 if INTERRUPT_SIGNAL:
                     break
@@ -103,13 +100,12 @@ class Process:
 
             self.mh.wait_all_process_done()
             # don't write alignment csv until the ndsi work is tested.
-            # self.write_align_csv(path_row=path_row,
-            # output=output_dir)
+            self.write_align_csv(path_row=path_row, output=output_dir)
 
         if INTERRUPT_SIGNAL:
             return 2
-
-        return 0
+        else:
+            return 0
 
     def process_scene(self, scene, reference_scene, aligned_scene):
         """
@@ -135,11 +131,9 @@ class Process:
             self.mh.kill_all_processes(signal.SIGTERM)
             self.mh.wait_all_process_done()
 
-    @staticmethod
-    def process_handler(task_name, return_code):
-        global VALID_ALIGNED
+    def process_handler(self, task_name, return_code):
         if return_code == 0:
-            VALID_ALIGNED += 1
+            self.VALID_ALIGNED += 1
 
         return_codes = definitions.RETURN_CODES
         try:
@@ -147,7 +141,9 @@ class Process:
         except KeyError:
             return_str = "IDK"
 
-        print("Return code of ", task_name, " is ", return_code, " meaning ", return_str)
+        print("Return code of ", task_name, " is ", return_code, " meaning ", return_str, " with params ", al.MAX_FEATURES)
+        print("Valid: ", self.VALID_ALIGNED, " from: ", self.TOTAL_PROCESSED )
+
 
     @staticmethod
     def create_aligned_scene(scene, output_dir) -> sc.PathScene:
@@ -233,31 +229,34 @@ class Process:
 
         return output_directory
 
-    @staticmethod
-    def write_align_csv(path_row, output):
-        global TOTAL_PROCESSED, VALID_ALIGNED
-
+    def write_align_csv(self, path_row, output):
         glacier_dir = pathlib.Path(output).parents[0]
         parent_dir, glacier_id = os.path.split(glacier_dir)
         path = path_row[0]
         row = path_row[1]
 
-        if TOTAL_PROCESSED == 0:
+        if self.TOTAL_PROCESSED == 0:
             ratio = 0
         else:
-            ratio = VALID_ALIGNED / TOTAL_PROCESSED
+            ratio = self.VALID_ALIGNED / self.TOTAL_PROCESSED
         arguments = [
             glacier_id,
             path,
             row,
-            TOTAL_PROCESSED,
-            VALID_ALIGNED,
+            self.TOTAL_PROCESSED,
+            self.VALID_ALIGNED,
             ratio
         ]
 
         h = csv_writer.CSVWriter(output_dir=glacier_dir,
                                  arguments=arguments)
         h.start()
+
+        #reset for next run
+        self.VALID_ALIGNED = 0
+        self.TOTAL_PROCESSED = 0
+
+
 
 if __name__ == "__main__":
     """
