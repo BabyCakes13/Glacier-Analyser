@@ -28,38 +28,45 @@ class CSVWriter:
             self.csv_name = ALIGN_CSV
 
         self.csv_path = os.path.join(output_dir, self.csv_name)
+        self.output_dir = output_dir
         self.arguments = arguments
+        self.lock = None
 
     def start(self) -> None:
         """
         Starts creating and writing to the csv.
         :return: None
         """
+
+        print ("Is directory ", self.output_dir, " is ", os.path.isdir(self.output_dir))
+        self.lock = FileLock(self.csv_path + ".lock")
+
         self.create()
         self.add_item()
 
     def create(self) -> None:
         """Verifies if the file already exists. If it doesn't, that means the csv file is not created yet.
         Create it if it doesn't exist, append if it does."""
-        if os.path.isfile(self.csv_path):
-            print("Is file.")
-            return
-        else:
-            print(definitions.PRINT_CODES[0] + "Creating csv...")
-            with open(self.csv_path, "w") as file:
-                writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        with self.lock:
+            if os.path.isfile(self.csv_path):
+                print("Is file.")
+                return
+            else:
+                print(definitions.PRINT_CODES[0] + "Creating csv...")
+                with open(self.csv_path, "w") as file:
+                    writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
-                # align
-                if ALIGN_CSV in self.csv_name:
-                    writer.writerow(self.get_default_align_csv())
-                # ndsi
-                elif NDSI_CSV in self.csv_name:
-                    writer.writerow(self.get_default_ndsi_csv())
-                else:
-                    print(definitions.PRINT_CODES[1] + "There option is not valid. Not writing.")
-                    return
+                    # align
+                    if ALIGN_CSV in self.csv_name:
+                        writer.writerow(self.get_default_align_csv())
+                        # ndsi
+                    elif NDSI_CSV in self.csv_name:
+                        writer.writerow(self.get_default_ndsi_csv())
+                    else:
+                        print(definitions.PRINT_CODES[1] + "There option is not valid. Not writing.")
+                        return
 
-                file.flush()
+                    file.flush()
 
     def add_item(self) -> None:
         """
@@ -69,8 +76,7 @@ class CSVWriter:
         """
         result = self.arguments
 
-        lock = FileLock(self.csv_path + ".lock")
-        with lock:
+        with self.lock:
             with open(self.csv_path, "a") as file:
                 writer = csv.writer(file)
                 writer.writerow(result)
