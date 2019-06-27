@@ -48,14 +48,15 @@ BBOX_SIZE = 0.000001
 # processing
 MAX_PROCESSES = 4
 RETURN_CODES = {
-    0: (green("SUCCESS")),
-    1: (red("FAILURE")),
-    2: (yellow("INTERRUPTED"))
+    0: (green("SUCCESS. ")),
+    1: (red("FAILURE. ")),
+    2: (yellow("INTERRUPTED. ")),
+    4: (red("OTHER ERROR. "))
 }
 
 # print codes
 PRINT_CODES = [
-    magenta("[INFO] "),
+    yellow("[INFO] "),
     red("[ERROR] "),
     blue("[DONE] ")
 ]

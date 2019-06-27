@@ -1,20 +1,30 @@
+"""
+Class which handles the downloading and searching of Landsat 8 files. Multiprocessed.
+"""
 import csv
 import os
 import shutil
-import subprocess
 import signal
+import subprocess
 
 from colors import *
 
-import sys
+# done in order to access top level files
 sys.path.append(sys.path[0] + '/..')
-
 import definitions
 from data_processing import multiprocess as mh
 
+
 def interrupt_handler(signum, frame):
-    print ("exiting now")
+    """
+    Method which handles the interrupt for application stop.
+    :param signum: The signal name.
+    :param frame: The frame in which to stop it.
+    :return: raises KeyboardInterrupt.
+    """
+    print(definitions.PRINT_CODES[0] + "Exiting.")
     raise KeyboardInterrupt
+
 
 class Downloader:
     """
@@ -98,9 +108,9 @@ class Downloader:
         try:
             return_str = return_codes[return_code]
         except KeyError:
-            return_str = "IDK"
+            return_str = "OTHER ERROR."
 
-        print("Return code of ", task_name, " is ", return_code, " meaning ", return_str)
+        print(definitions.PRINT_CODES[0] + "Return code of ", task_name, " is ", return_code, " meaning ", return_str)
 
     def parse_rows(self, csv_reader) -> None:
         """
@@ -122,33 +132,40 @@ class Downloader:
                     shutil.rmtree(directory_name)
                 os.mkdir(directory_name)
             except FileNotFoundError:
-                print("Cannot create download directory. The path has a directory which does not exist.")
+                print(definitions.PRINT_CODES[1] +
+                      "Cannot create download directory. The path has a directory which does not exist.")
 
             def preexec_function():
+                """
+                Method which signals the processes to end.
+                :return:
+                """
+                # signal ignore the signal
                 signal.signal(signal.SIGINT, signal.SIG_IGN)
 
             try:
                 search_task = self.create_search_arglist(row, json_query_filename)
-                print(yellow(search_task))
+                print(definitions.PRINT_CODES[0] + magenta(search_task))
                 # sync, will wait to finish
                 self.search_process = subprocess.Popen(search_task, preexec_fn=preexec_function)
                 self.search_process.wait()
 
                 # async, will not wait to finish
                 download_task = self.create_download_arglist(json_query_filename, directory_name)
-                print(blue(download_task))
+                print(definitions.PRINT_CODES[0] + blue(download_task))
 
                 self.mh.start_processing(task=download_task, task_name=json_query_filename, ignore_SIGINT=True)
 
             except KeyboardInterrupt:
-                print("exiting ... 4")
+                print(definitions.PRINT_CODES[0] + definitions.RETURN_CODES[2] + "Exiting... 4")
                 self.search_process.wait()
-                print("exiting ... 3")
+                print(definitions.PRINT_CODES[0] + definitions.RETURN_CODES[2] + "Exiting... 3")
                 self.mh.kill_all_processes(signal.SIGTERM)
-                print("exiting ... 2")
+                print(definitions.PRINT_CODES[0] + definitions.RETURN_CODES[2] + "Exiting... 2")
                 self.mh.wait_all_process_done()
-                print("exiting ... 1")
+                print(definitions.PRINT_CODES[0] + definitions.RETURN_CODES[2] + "Exiting... 1")
                 break
+
 
 if __name__ == "__main__":
     """
@@ -157,11 +174,9 @@ if __name__ == "__main__":
 
     csv_path = sys.argv[1]
     download_dir = sys.argv[2]
-    max_processes=int(sys.argv[3])
+    max_processes = int(sys.argv[3])
 
     signal.signal(signal.SIGINT, interrupt_handler)
 
     downloader = Downloader(csv_path, download_dir, max_processes)
     downloader.start()
-
-    print("exited")
