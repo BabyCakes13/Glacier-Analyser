@@ -10,12 +10,10 @@ sys.path.append(sys.path[0] + '/..')
 from data_displaying import page as fh
 
 
-class Process(fh.Page):
+class FrameProcess(fh.Page):
     """
     Class which handles process calling in the GUI.
     """
-    INPUT_DIR = None
-    OUTPUT_DIR = None
 
     def __init__(self, *args, **kwargs):
         """
@@ -160,10 +158,10 @@ class Process(fh.Page):
             self.sp.send_signal(signal.SIGINT)
             self.sp = None
 
-    def start_process(self):
+    def start_process(self) -> None:
         """
         Starts the processing when start process is pressed.
-        :return:
+        :return: None
         """
         big_glacier_dir, glacier_dir, output_dir, max_process = self.get_input()
 

@@ -9,7 +9,7 @@ from data_displaying import page as fh
 from data_displaying import plot
 
 
-class Display(fh.Page):
+class FrameDisplay(fh.Page):
     """
     Class which holds the items for the display window.
     """

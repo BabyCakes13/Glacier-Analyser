@@ -1,3 +1,6 @@
+"""
+Module which handles download GUI.
+"""
 import os
 import signal
 import subprocess
@@ -10,14 +13,18 @@ sys.path.append(sys.path[0] + '/..')
 from data_displaying import page as fh
 
 
-class Download(fh.Page):
+class FrameDownload(fh.Page):
     """
-    Download page class.
+    Class which holds the items for the download window.
     """
 
     def __init__(self, *args, **kwargs):
+        """
+        Constructor which initialises the frame object, and sets up the GUI parameters.
+        :param args: Arguments from Frame.
+        :param kwargs: Arguments from Frame.
+        """
         fh.Page.__init__(self, *args, **kwargs)
-
 
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
@@ -28,10 +35,10 @@ class Download(fh.Page):
 
         self.csv_entry, self.download_dir_entry, self.max_processes_entry = self.create_entries()
 
-    def create_buttons(self):
+    def create_buttons(self) -> None:
         """
         Button creator.
-        :return:
+        :return: None
         """
         browse = Button(self, text="BROWSE CSV", command=self.browse_csv)
         browse.grid(row=0, column=2, sticky=W+E)
@@ -45,10 +52,10 @@ class Download(fh.Page):
         submit = Button(self, text="STOP DOWNLOAD", command=self.stop_download)
         submit.grid(row=4, column=1, sticky=W+E)
 
-    def create_labels(self):
+    def create_labels(self) -> None:
         """
         Label creator.
-        :return:
+        :return: None
         """
         csv = Label(self, text="Glacier CSV:")
         output_dir = Label(self, text="Download directory:")
@@ -58,10 +65,10 @@ class Download(fh.Page):
         output_dir.grid(row=1, column=0, sticky=W)
         max_processes.grid(row=2, column=0, sticky=W)
 
-    def create_entries(self):
+    def create_entries(self) -> tuple:
         """
         Creates entries as input fields.
-        :return:
+        :return: tuple
         """
         csv = Entry(self)
         output_dir = Entry(self)
@@ -73,7 +80,7 @@ class Download(fh.Page):
 
         return csv, output_dir, max_processes
 
-    def browse_csv(self):
+    def browse_csv(self) -> None:
         """
         Search for the csv file which contains glacier download data.
         :return: The path to the csv glacier inventory.
@@ -82,7 +89,7 @@ class Download(fh.Page):
                                               filetypes=(("CSV files", "*.csv"),))
         self.set_input(filename, self.csv_entry)
 
-    def browse_output_directory(self):
+    def browse_output_directory(self) -> None:
         """
         Search for the csv file which contains glacier download data.
         :return: The path to the csv glacier inventory.
@@ -123,13 +130,20 @@ class Download(fh.Page):
 
         return True
 
-    def stop_download(self):
+    def stop_download(self) -> None:
+        """
+        Handle the stop process signal from stop process button event.
+        :return: None
+        """
         if self.sp:
             self.sp.send_signal(signal.SIGINT)
             self.sp = None
 
-    def start_download(self):
-        print("Hey you!")
+    def start_download(self) -> None:
+        """
+        Start the download process.
+        :return: None
+        """
         csv, download_dir, max_processes = self.get_input()
 
         if self.validate_input(csv, download_dir, max_processes):
@@ -139,14 +153,12 @@ class Download(fh.Page):
             self.sp = subprocess.Popen(task)
 
     @staticmethod
-    def set_input(text, entry):
+    def set_input(text, entry) -> None:
         """
         Sets text in an entry.
-        :param text:
-        :param entry:
-        :return:
+        :param text: The text from the entry.
+        :param entry: The entry.
+        :return: None
         """
         entry.delete(0, END)
         entry.insert(0, text)
-
-# TODO implement STOP button after key interrupt handling in order to stop the processing.

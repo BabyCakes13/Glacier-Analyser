@@ -12,9 +12,9 @@ class MainView(Frame):
         :param kwargs: Aby arguments
         """
         Frame.__init__(self, *args, **kwargs)
-        self.download = fdw.Download(self)
-        self.process = fp.Process(self)
-        self.display = fds.Display(self)
+        self.download = fdw.FrameDownload(self)
+        self.process = fp.FrameProcess(self)
+        self.display = fds.FrameDisplay(self)
 
         # call first so it it placed at top
         self.create_buttons()
