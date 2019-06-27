@@ -24,6 +24,8 @@ class Arima:
         fake_dates = pd.date_range(history[0][0], periods=100, freq='M')
         future_dates = pd.date_range(self.dataset[len(self.dataset) - 1][0], periods=count + 1, freq='M')
 
+        errors = []
+
         for index in range(len(test) + count):
             print("estimating on: ", history)
             real_dates, ndsi = zip(*history)
@@ -50,7 +52,10 @@ class Arima:
                 # prepare next iteration of model estimating
                 history.append((test[index][0], observed))
                 predictions.append((test[index][0], predicted))
-                print('predicted=%f, expected=%f' % (predicted, observed))
+                actual_error = predicted - observed
+                error_fraction = actual_error / observed
+                errors.append(error_fraction)
+                print('predicted=%f, expected=%f actual_error %f percent %f' % (predicted, observed, actual_error, error_fraction))
             else:
                 for predicted in output[0]:
                     # prepare next iteration of model estimating
@@ -59,7 +64,9 @@ class Arima:
                     index += 1
                 break
 
-        return predictions
+        mean_error = sum(errors) / len(errors)
+
+        return predictions, mean_error
 
     @staticmethod
     def make_test_train(dataset):

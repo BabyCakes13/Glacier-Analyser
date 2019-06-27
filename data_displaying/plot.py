@@ -65,10 +65,13 @@ class Plot:
         # self.plot_results("Input Data Sorted No Zeros", input_data_inliers)
 
         arima = ari.Arima(self.input_data)
-        predictions = arima.start(count=10)
+        predictions, mean_error = arima.start(count=10)
 
         if len(predictions) > 0:
-            self.plot_results("predicted", predictions)
+            self.plot_results("predicted", predictions )
+            plt.gcf().text(0.0, 0.94, "Prediction Error is: " + str(mean_error))
+
+        plt.gcf().text(0.0, 0.97, "File Processed:" + self.csv)
 
         self.plot_show()
 
