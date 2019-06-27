@@ -5,7 +5,7 @@ import os
 import re
 import shutil
 from collections import defaultdict
-
+from colors import *
 import definitions
 from data_gathering import scene_information
 from util import strings
@@ -110,8 +110,11 @@ class OutputDirHandler:
         glacier_dir = os.path.join(self.output_dir, glacier)
 
         if os.path.exists(glacier_dir) and self.clearmeup is False:
+            print(red("Cleanup"), glacier_dir);
             shutil.rmtree(glacier_dir)
-            self.clearmeup = True
+
+        self.clearmeup = True
+
         try:
             os.mkdir(glacier_dir)
         except OSError:
