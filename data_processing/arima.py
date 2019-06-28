@@ -24,7 +24,8 @@ class Arima:
         fake_dates = pd.date_range(history[0][0], periods=100, freq='M')
         future_dates = pd.date_range(self.dataset[len(self.dataset) - 1][0], periods=count + 1, freq='M')
 
-        errors = []
+        accuracies = []
+        max_val = 0
 
         for index in range(len(test) + count):
             print("estimating on: ", history)
@@ -52,10 +53,19 @@ class Arima:
                 # prepare next iteration of model estimating
                 history.append((test[index][0], observed))
                 predictions.append((test[index][0], predicted))
-                actual_error = predicted - observed
-                error_fraction = actual_error / observed
-                errors.append(error_fraction)
-                print('predicted=%f, expected=%f actual_error %f percent %f' % (predicted, observed, actual_error, error_fraction))
+                accuracy = 999999999 #initialize with a huge value for the beginning
+                for t in self.dataset:
+                    acc = abs(predicted - t[1])
+                    print ("FInd ", acc, " in ", t[1])
+                    if acc < accuracy:
+                        accuracy = acc
+                        print('smallest ', accuracy, " from val ", t[1])
+                    if abs(t[1]) > max_val:
+                        max_val = abs(t[1])
+                        print('max is: ', max_val)
+
+                accuracies.append(acc)
+                print('predicted=%f, expected=%f accuracy %f' % (predicted, observed, acc))
             else:
                 for predicted in output[0]:
                     # prepare next iteration of model estimating
@@ -64,9 +74,12 @@ class Arima:
                     index += 1
                 break
 
-        mean_error = sum(errors) / len(errors)
+        if(len(accuracies) > 0):
+            mean_error_percent = sum(accuracies) / max_val / len(accuracies) * 100
+        else:
+            mean_error_percent = 999
 
-        return predictions, mean_error
+        return predictions, mean_error_percent
 
     @staticmethod
     def make_test_train(dataset):

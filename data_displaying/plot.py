@@ -23,6 +23,7 @@ register_matplotlib_converters()
 from data_processing import arima as ari
 from data_preparing import dataset_handler as dh
 
+INTERACTIVE = True
 
 class Plot:
     """
@@ -68,8 +69,8 @@ class Plot:
         predictions, mean_error = arima.start(count=5)
 
         if len(predictions) > 0:
-            self.plot_results("predicted", predictions)
-            plt.gcf().text(0.0, 0.94, "Prediction Error is: " + str(mean_error))
+            self.plot_results("predicted", predictions )
+            plt.gcf().text(0.0, 0.94, 'Prediction Error is: %02.2f %%' % mean_error)
 
         plt.gcf().text(0.0, 0.97, "File Processed:" + self.csv)
 
@@ -103,7 +104,10 @@ class Plot:
 
         plot.legend(loc='upper left')
 
-        plt.show()
+        if INTERACTIVE:
+            plt.show()
+        else:
+            plt.savefig(self.csv + '.plot.png')
 
     def handle_close(self, evt) -> None:
         """
@@ -140,10 +144,10 @@ class Plot:
 
             if self.second_pick:
                 self.second_an = self.ax.annotate('second', xy=self.second_pick,
-                                                  xytext=(self.second_pick[0], self.second_pick[1] + self.second_pick[1]/2*6),
+                                                  xytext=(self.second_pick[0], self.second_pick[1] + 0.1),
                                                   arrowprops=dict(facecolor='black', shrink=0.05))
             self.first_an = self.ax.annotate('first', xy=self.first_pick,
-                                             xytext=(self.first_pick[0], self.first_pick[1] + self.first_pick[1]/2*6),
+                                             xytext=(self.first_pick[0], self.first_pick[1] + 0.1),
                                              arrowprops=dict(facecolor='black', shrink=0.05))
         if self.first_pick and self.second_pick:
             self.start_displaying_diff_move(self.first_pick[0], self.second_pick[0])
