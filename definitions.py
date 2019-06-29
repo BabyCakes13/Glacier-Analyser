@@ -1,7 +1,8 @@
 """Module which holds definitions."""
-from colors import *
-import os
 import datetime
+import os
+
+from colors import *
 
 # directories
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -29,7 +30,6 @@ THRESHOLD = 12000
 OUT_TIFF_UINT8 = str(THRESHOLD) + "_NDSI_INT8.tif"
 OUT_TIFF_UINT16 = str(THRESHOLD) + "_NDSI_INT16.tif"
 OUT_TIFF_FLOAT32 = str(THRESHOLD) + "_NDSI_FLOAT32.tif"
-
 
 # align
 MAX_FEATURES = 1500

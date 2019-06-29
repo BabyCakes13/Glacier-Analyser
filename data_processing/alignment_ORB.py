@@ -8,6 +8,12 @@ import sys
 
 
 def interrupt_handler(signum, frame):
+    """
+    Signal handler for GUI.
+    :param signum: Signal.
+    :param frame: Frame for signal.
+    :return:
+    """
     sys.exit(2)
 
 
@@ -194,7 +200,7 @@ class AlignORB:
         return sc.NumpyScene(normalized_image_8bit_green, normalized_image_8bit_swir)
 
     @staticmethod
-    def boxedDetectAndCompute(image, rows=ROWS_NUMBER, columns=COLUMNS_NUMBER):
+    def box_detect_and_compute(image, rows=ROWS_NUMBER, columns=COLUMNS_NUMBER) -> tuple:
         """
         Splits the image in n boxes and applies feature finding in each, so that the points are evenly distributed,
         avoiding image distortion in the case there are feature points only in one part of the image.
@@ -233,6 +239,11 @@ class AlignORB:
 
     @staticmethod
     def prune_low_score_matches(matches):
+        """
+        Prune low score matches in order to get feature which were as close to straight lines as possible.
+        :param matches:
+        :return:
+        """
         # best matches first
         matches.sort(key=lambda x: x.distance, reverse=False)
 
@@ -255,10 +266,10 @@ class AlignORB:
         """
 
         # detect and compute the feature points by splitting the image in boxes for good feature spread
-        keypoints_img_green, descriptors_img_green = self.boxedDetectAndCompute(self.align_input.green_numpy)
-        keypoints_img_swir, descriptors_img_swir = self.boxedDetectAndCompute(self.align_input.swir1_numpy)
-        keypoints_ref_green, descriptors_ref_green = self.boxedDetectAndCompute(self.align_reference.green_numpy)
-        keypoints_ref_swir, descriptors_ref_swir = self.boxedDetectAndCompute(self.align_reference.swir1_numpy)
+        keypoints_img_green, descriptors_img_green = self.box_detect_and_compute(self.align_input.green_numpy)
+        keypoints_img_swir, descriptors_img_swir = self.box_detect_and_compute(self.align_input.swir1_numpy)
+        keypoints_ref_green, descriptors_ref_green = self.box_detect_and_compute(self.align_reference.green_numpy)
+        keypoints_ref_swir, descriptors_ref_swir = self.box_detect_and_compute(self.align_reference.swir1_numpy)
 
         keypoints_img_all = keypoints_img_green + keypoints_img_swir
         keypoints_ref_all = keypoints_ref_green + keypoints_ref_swir
@@ -280,7 +291,7 @@ class AlignORB:
         matches = self.prune_low_score_matches(matches)
 
         reference_points, image_points, pruned_matches_image = \
-            self.pruneMatchesByDistance(matches, keypoints_ref_all, keypoints_img_all)
+            self.prune_matches_by_distance(matches, keypoints_ref_all, keypoints_img_all)
 
         sc.DISPLAY.image("MATCHES", pruned_matches_image)
 
@@ -341,7 +352,7 @@ class AlignORB:
                   "  x  ", reference_point[0] - image_point[0],
                   "  y  ", reference_point[1] - image_point[1])
 
-    def pruneMatchesByDistance(self, matches, reference_keypoints, image_keypoints):
+    def prune_matches_by_distance(self, matches, reference_keypoints, image_keypoints):
         """
         Method which prunes the feature points pairs which are not valid (too far away from each other in the euclidean
         distance. This ensures that the remaining feature points are valid matches and the match line as straight as
@@ -454,10 +465,12 @@ if __name__ == "__main__":
     Handle multi process.
     """
 
+    # profiler for execution data gathering
     pr = cProfile.Profile()
     pr.enable()
 
     VALID = True
+
     scene = sc.PathScene(sys.argv[1], sys.argv[2])
     reference_scene = sc.PathScene(sys.argv[3], sys.argv[4])
     aligned_scene = sc.PathScene(sys.argv[5], sys.argv[6])
@@ -475,13 +488,14 @@ if __name__ == "__main__":
     else:
         process.write()
 
+    #  stop profiler
     pr.disable()
     s = io.StringIO()
     sortby = 'cumulative'
     ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-    ps.dump_stats(scene.get_scene_name() + ".prof")
+    output_dir, file_name = os.path.split(scene.green_path)
+    ps.dump_stats(os.path.join(output_dir, scene.get_scene_name() + ".prof"))
     print(s.getvalue())
-    # TODO put profile data in another dir, output dir.
     sc.DISPLAY.wait()
 
     if VALID:

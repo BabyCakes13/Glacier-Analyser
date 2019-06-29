@@ -140,10 +140,10 @@ class Plot:
 
             if self.second_pick:
                 self.second_an = self.ax.annotate('second', xy=self.second_pick,
-                                                  xytext=(self.second_pick[0], self.second_pick[1] + 0.1),
+                                                  xytext=(self.second_pick[0], self.second_pick[1] + self.second_pick[1]/2*6),
                                                   arrowprops=dict(facecolor='black', shrink=0.05))
             self.first_an = self.ax.annotate('first', xy=self.first_pick,
-                                             xytext=(self.first_pick[0], self.first_pick[1] + 0.1),
+                                             xytext=(self.first_pick[0], self.first_pick[1] + self.first_pick[1]/2*6),
                                              arrowprops=dict(facecolor='black', shrink=0.05))
         if self.first_pick and self.second_pick:
             self.start_displaying_diff_move(self.first_pick[0], self.second_pick[0])

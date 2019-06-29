@@ -15,7 +15,7 @@ register_matplotlib_converters()
 class DatasetHandler:
     def __init__(self, csv):
         self.csv = csv
-        h = None
+        self.h = None
 
     def read_csv(self):
         """
@@ -88,33 +88,3 @@ class DatasetHandler:
                 inliers.append(entry)
 
         return inliers
-
-    @staticmethod
-    def interpolate(input_data):
-        """
-        Interpolation for later. # TODO
-        :param input_data:
-        :return:
-        """
-        interpolated_dates = pd.date_range(input_data[0][0], input_data[len(input_data) - 1][0], freq='1Y')
-
-        dense_ndsi = []
-        for date in interpolated_dates:
-            for real_date, ndsi in input_data:
-
-                real_date = datetime.datetime(real_date.year, real_date.month, real_date.day)
-                delta = real_date - date
-
-                if 175 > delta.days > -175:
-                    dense_ndsi.append(ndsi)
-                else:
-                    dense_ndsi.append(np.nan)
-
-                print(" REAL: ", real_date, " FAKE: ", date, " delta: ", delta)
-
-        s = pd.Series(dense_ndsi)
-        s.interpolate(method='linear', limit=100)
-
-        output = list(zip(interpolated_dates, s))
-
-        return output
