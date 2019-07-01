@@ -8,8 +8,8 @@ from tkinter import filedialog
 import definitions
 
 sys.path.append(sys.path[0] + '/..')
-from data_displaying import page as fh
-from data_displaying import plot
+from data_displaying import page as fh  # noqa
+from data_displaying import plot  # noqa
 
 
 class FrameDisplay(fh.Page):
@@ -19,7 +19,8 @@ class FrameDisplay(fh.Page):
 
     def __init__(self, *args, **kwargs):
         """
-        Constructor which initialises the frame object, and sets up the GUI parameters.
+        Constructor which initialises the frame object,
+         and sets up the GUI parameters.
         :param args: Arguments from Frame.
         :param kwargs: Arguments from Frame.
         """
@@ -40,14 +41,14 @@ class FrameDisplay(fh.Page):
         browse = Button(self, text="BROWSE NDSI CSV", command=self.browse_csv)
         browse.grid(row=0, column=2, sticky=W + E)
 
-        submit = Button(self, text="DISPLAY", command=self.start_displaying)
+        submit = Button(self, text="DISPLAY",
+                        command=self.start_displaying)
         submit.grid(row=1, column=1, sticky=W + E)
-
-        # TODO show how many files have been processed till now and show loading button which finishes when it is done.
 
     def create_labels(self) -> None:
         """
-        Creates the necessary labels for the entry input specifying the directions.
+        Creates the necessary labels for the entry
+        input specifying the directions.
         :return: None
         """
         csv = Label(self, text="NDSI CSV for ARIMA prediction:")
@@ -55,7 +56,8 @@ class FrameDisplay(fh.Page):
 
     def create_entries(self) -> Entry:
         """
-        Creates entries as input fields which will be filled with a path to the NDSI csv file.
+        Creates entries as input fields which will be
+        filled with a path to the NDSI csv file.
         :return: None
         """
         csv_entry = Entry(self)
@@ -65,12 +67,15 @@ class FrameDisplay(fh.Page):
 
     def browse_csv(self) -> None:
         """
-        Open a file search dialog window to search for the csv file containing the results of the NDSI processing.
+        Open a file search dialog window to search for the csv file
+        containing the results of the NDSI processing.
         :return: None
         """
-        filename = filedialog.askopenfilename(initialdir=definitions.FILES_DIR, title="Select file containing the NDSI"
-                                                                                      " results from the  processing.",
-                                              filetypes=(("CSV files", "*.csv"),))
+        filename = \
+            filedialog.askopenfilename(initialdir=definitions.FILES_DIR,
+                                       title="Select file containing the NDSI"
+                                             " results from the  processing.",
+                                       filetypes=(("CSV files", "*.csv"),))
         self.set_input(filename, self.csv_entry)
 
     def get_input(self) -> str:
@@ -86,8 +91,9 @@ class FrameDisplay(fh.Page):
     def validate_input(csv) -> bool:
         """
         Checks whether the input variables are correct or not, type wise.
-        :param csv: The csv should be the path to the input world glacier inventory csv.
-        :return: None
+        :param csv: The csv should be the path to the input
+        world glacier inventory csv.
+        :return: Boolean
         """
         filename, file_extension = os.path.splitext(csv)
 

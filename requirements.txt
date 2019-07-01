@@ -1,3 +1,4 @@
+colors
 ansicolors==1.1.8
 asn1crypto==0.24.0
 astroid==2.2.5

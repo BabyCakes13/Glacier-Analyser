@@ -1,3 +1,5 @@
+# flake8: noqa 405
+
 import os
 import signal
 import subprocess
@@ -7,7 +9,7 @@ from tkinter import filedialog
 import definitions
 
 sys.path.append(sys.path[0] + '/..')
-from data_displaying import page as fh
+from data_displaying import page as fh  # noqapep8 
 
 
 class FrameProcess(fh.Page):

@@ -1,3 +1,4 @@
+# flake8: noqa 405
 """
 Module which handles download GUI.
 """
@@ -10,7 +11,7 @@ from tkinter import filedialog
 import definitions
 
 sys.path.append(sys.path[0] + '/..')
-from data_displaying import page as fh
+from data_displaying import page as fh  # noqa
 
 
 class FrameDownload(fh.Page):
@@ -20,7 +21,8 @@ class FrameDownload(fh.Page):
 
     def __init__(self, *args, **kwargs):
         """
-        Constructor which initialises the frame object, and sets up the GUI parameters.
+        Constructor which initialises the frame object,
+         and sets up the GUI parameters.
         :param args: Arguments from Frame.
         :param kwargs: Arguments from Frame.
         """
@@ -33,7 +35,8 @@ class FrameDownload(fh.Page):
         self.create_labels()
         self.sp = None
 
-        self.csv_entry, self.download_dir_entry, self.max_processes_entry = self.create_entries()
+        self.csv_entry, self.download_dir_entry, \
+        self.max_processes_entry = self.create_entries()
 
     def create_buttons(self) -> None:
         """
@@ -41,16 +44,18 @@ class FrameDownload(fh.Page):
         :return: None
         """
         browse = Button(self, text="BROWSE CSV", command=self.browse_csv)
-        browse.grid(row=0, column=2, sticky=W+E)
+        browse.grid(row=0, column=2, sticky=W + E)
 
-        browse = Button(self, text="BROWSE OUTPUT DIRECTORY", command=self.browse_output_directory)
-        browse.grid(row=1, column=2, sticky=W+E)
+        browse = Button(self, text="BROWSE OUTPUT DIRECTORY",
+                        command=self.browse_output_directory)
+        browse.grid(row=1, column=2, sticky=W + E)
 
-        submit = Button(self, text="START DOWNLOAD", command=self.start_download)
-        submit.grid(row=3, column=1, sticky=W+E)
+        submit = Button(self, text="START DOWNLOAD",
+                        command=self.start_download)
+        submit.grid(row=3, column=1, sticky=W + E)
 
         submit = Button(self, text="STOP DOWNLOAD", command=self.stop_download)
-        submit.grid(row=4, column=1, sticky=W+E)
+        submit.grid(row=4, column=1, sticky=W + E)
 
     def create_labels(self) -> None:
         """
@@ -85,8 +90,10 @@ class FrameDownload(fh.Page):
         Search for the csv file which contains glacier download data.
         :return: The path to the csv glacier inventory.
         """
-        filename = filedialog.askopenfilename(initialdir=definitions.FILES_DIR, title="Select file",
-                                              filetypes=(("CSV files", "*.csv"),))
+        filename = \
+            filedialog.askopenfilename(initialdir=definitions.FILES_DIR,
+                                       title="Select file",
+                                       filetypes=(("CSV files", "*.csv"),))
         self.set_input(filename, self.csv_entry)
 
     def browse_output_directory(self) -> None:
@@ -94,8 +101,9 @@ class FrameDownload(fh.Page):
         Search for the csv file which contains glacier download data.
         :return: The path to the csv glacier inventory.
         """
-        filename = filedialog.askdirectory(initialdir=definitions.ROOT_DIR,
-                                           title="Select directory for download output.")
+        filename = \
+            filedialog.askdirectory(initialdir=definitions.ROOT_DIR,
+                                    title="Select directory for download output.")
         self.set_input(filename, self.download_dir_entry)
 
     def get_input(self) -> tuple:
@@ -113,9 +121,12 @@ class FrameDownload(fh.Page):
     def validate_input(csv, download_dir, max_processes) -> bool:
         """
         Checks whether the input variables are correct or not, type wise.
-        :param csv: The csv should be the path to the input world glacier inventory csv.
-        :param download_dir: The download dir should be the path to the download directory for storing the items.
-        :param max_processes: Max processes should be the max number of processes the application will open to run, a
+        :param csv: The csv should be the path to the input
+        world glacier inventory csv.
+        :param download_dir: The download dir should be the path to the
+        download directory for storing the items.
+        :param max_processes: Max processes should be the max number of
+        processes the application will open to run, a
         min of 1, and a max of 30.
         :return: True if the input is valid, False otherwise.
         """

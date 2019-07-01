@@ -2,8 +2,7 @@
 import datetime
 import os
 
-from colors import *
-
+import colors
 # directories
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 UTIL_DIR = os.path.join(ROOT_DIR, 'util')
@@ -14,7 +13,8 @@ DEFAULT_DOWNLOAD_DIR = os.path.join(FILES_DIR, 'download')
 
 # files
 GLACIER_DATASET_FILENAME = 'wgi_feb2012'
-GLACIER_DATASET_PATH = os.path.join(FILES_DIR, GLACIER_DATASET_FILENAME + '.csv')
+GLACIER_DATASET_PATH = os.path.join(FILES_DIR,
+                                    GLACIER_DATASET_FILENAME + '.csv')
 JSON_QUERY = 'query.json'
 DEFAULT_SCENE_NAME = None
 DEFAULT_BIG_DIR = None
@@ -48,15 +48,15 @@ BBOX_SIZE = 0.000001
 # processing
 MAX_PROCESSES = 4
 RETURN_CODES = {
-    0: (green("SUCCESS. ")),
-    1: (red("FAILURE. ")),
-    2: (yellow("INTERRUPTED. ")),
-    4: (red("OTHER ERROR. "))
+    0: (colors.green("SUCCESS. ")),
+    1: (colors.red("FAILURE. ")),
+    2: (colors.yellow("INTERRUPTED. ")),
+    4: (colors.red("OTHER ERROR. "))
 }
 
 # print codes
 PRINT_CODES = [
-    yellow("[INFO] "),
-    red("[ERROR] "),
-    blue("[DONE] ")
+    colors.yellow("[INFO] "),
+    colors.red("[ERROR] "),
+    colors.blue("[DONE] ")
 ]
