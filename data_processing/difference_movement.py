@@ -144,6 +144,7 @@ class DifferenceMovement:
         cv2.imwrite(image1_path, self.image_diff)
         cv2.imwrite(image2_path, self.image_move)
 
+
 def image(window_name, image) -> None:
     """
     Display a numpy image.
@@ -155,6 +156,7 @@ def image(window_name, image) -> None:
     cv2.resizeWindow(window_name, 1000, 1000)
     cv2.moveWindow(window_name, 0, 0)
     cv2.imshow(window_name, image)
+
 
 def waitImage() -> None:
     while cv2.waitKey(0) & 0xff != 27:

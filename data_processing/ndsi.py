@@ -2,7 +2,7 @@
 import numpy as np
 
 from data_processing import scenes as sc
-
+import cv2
 
 class NDSI:
     """Class which handles the creation of the Normalised Difference Snow Index (NDSI) file."""
@@ -87,3 +87,38 @@ class NDSI:
         ratio = snow_pixels / all_pixels
 
         return ratio
+
+
+def image(window_name, image, normalize=True) -> None:
+    """
+    Displays an image in a cv2 window.
+    :param normalize: Check if wanting it in 8bit.
+    :param window_name: Name of the cv2 window.
+    :param image: cv2 image.
+    :return: Nothing.
+    """
+    if normalize:
+        image = cv2.normalize(image, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1)
+
+    cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+    cv2.resizeWindow(window_name, 1000, 1000)
+    cv2.imshow(window_name, image)
+
+
+if __name__ == "__main__":
+    scene = sc.PathScene("/storage/maria/D/Programming/Facultate/test_27_06/232_083/LC82320832013319LGN01_B3.TIF",
+                         "/storage/maria/D/Programming/Facultate/test_27_06/232_083/LC82320832013319LGN01_B6.TIF")
+    image_16bit = sc.NumpyScene.read(scene)
+    nd = NDSI()
+    ndsi = nd.calculate_NDSI(image_16bit)
+    snow = nd.get_snow_image(ndsi)
+
+    print(nd.get_snow_pixels_ratio(snow))
+
+    image('contrast', snow)
+    while cv2.waitKey() != 27:
+        pass
+
+    image('ndsi', ndsi)
+    while cv2.waitKey() != 27:
+        pass

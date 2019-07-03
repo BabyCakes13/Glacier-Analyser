@@ -68,7 +68,7 @@ class Plot:
         predictions, mean_error = arima.start(count=5)
 
         if len(predictions) > 0:
-            self.plot_results("predicted", predictions )
+            self.plot_results("predicted", predictions)
             plt.gcf().text(0.0, 0.94, "Prediction Error is: " + str(mean_error))
 
         plt.gcf().text(0.0, 0.97, "File Processed:" + self.csv)
