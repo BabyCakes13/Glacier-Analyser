@@ -70,13 +70,22 @@ class Downloader:
         :return: list
         """
         """Creates the sat-search argument list."""
-        search_arglist = ["sat-search", "search", "--bbox",
-                          str(float(row['lon']) - definitions.BBOX_SIZE),
-                          str(float(row['lat']) - definitions.BBOX_SIZE),
-                          str(float(row['lon']) + definitions.BBOX_SIZE),
-                          str(float(row['lat']) + definitions.BBOX_SIZE),
-                          "-p", "eo:cloud_cover<" + definitions.DEFAULT_CLOUD_COVERAGE,
-                          "--save", json_query_filename]
+        try:
+            search_arglist = ["sat-search", "search", "--bbox",
+                              str(float(row['lon']) - definitions.BBOX_SIZE),
+                              str(float(row['lat']) - definitions.BBOX_SIZE),
+                              str(float(row['lon']) + definitions.BBOX_SIZE),
+                              str(float(row['lat']) + definitions.BBOX_SIZE),
+                              "-p", "eo:cloud_cover<" + definitions.DEFAULT_CLOUD_COVERAGE,
+                              "--save", json_query_filename]
+        except KeyError:
+            search_arglist = ["sat-search", "search", "--bbox",
+                              str(float(row[' lon']) - definitions.BBOX_SIZE),
+                              str(float(row[' lat']) - definitions.BBOX_SIZE),
+                              str(float(row[' lon']) + definitions.BBOX_SIZE),
+                              str(float(row[' lat']) + definitions.BBOX_SIZE),
+                              "-p", "eo:cloud_cover<" + definitions.DEFAULT_CLOUD_COVERAGE,
+                              "--save", json_query_filename]
 
         return search_arglist
 
@@ -122,8 +131,11 @@ class Downloader:
         """
         """Parses and processes each row in the CSV file."""
         for row in csv_reader:
+            try:
+                directory_id = row['wgi_glacier_id'] + "_" + row['lon'] + "_" + row['lat']
+            except KeyError:
+                directory_id = row['wgi_glacier_id'] + "_" + row[' lon'] + "_" + row[' lat']
 
-            directory_id = row['wgi_glacier_id'] + "_" + row['lon'] + "_" + row['lat']
             directory_name = os.path.join(self.download_dir, directory_id)
             json_query_filename = os.path.join(directory_name, definitions.JSON_QUERY)
 
