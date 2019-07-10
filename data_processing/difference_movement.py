@@ -23,8 +23,8 @@ class DifferenceMovement:
         """
         np.seterr(divide='ignore', invalid='ignore')
 
-        image1 = cv2.imread(image1_path, cv2.IMREAD_GRAYSCALE)
-        image2 = cv2.imread(image2_path, cv2.IMREAD_GRAYSCALE)
+        image1 = cv2.imread(image2_path, cv2.IMREAD_GRAYSCALE)
+        image2 = cv2.imread(image1_path, cv2.IMREAD_GRAYSCALE)
 
         mask1, mask2 = self.create_mask(image1=image1,
                                         image2=image2)
