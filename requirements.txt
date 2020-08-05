@@ -91,7 +91,7 @@ pytz==2018.5
 pyudev==0.21.0
 pyxdg==0.26
 PyYAML==5.1
-requests==2.7.0
+requests==2.20.0
 requests-file==1.4.3
 requests-ftp==0.3.1
 requests-futures==0.9.9
