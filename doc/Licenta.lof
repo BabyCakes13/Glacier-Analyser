@@ -1,0 +1,50 @@
+\babel@toc {english}{}
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {1.1}{\ignorespaces Profile data on application run, detailed.}}{4}% 
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Landsat 8 satellite \cite {landsat_8_image}.}}{6}% 
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Worldwide Reference System land coverage \cite {wrs2}.}}{6}% 
+\contentsline {figure}{\numberline {2.3}{\ignorespaces OLI wavelength comparison between Landsat 7 and 8 \cite {wavelength}.}}{7}% 
+\contentsline {figure}{\numberline {2.4}{\ignorespaces Landsat 8 spectral resolution \cite {landsat_resolution}.}}{8}% 
+\contentsline {figure}{\numberline {2.5}{\ignorespaces Landsat 8 Band 3 (Glacier (ID) AT4J143FA006 at (10.803, 47.007) coordinates. \cite {green_band}}}{10}% 
+\contentsline {figure}{\numberline {2.6}{\ignorespaces Landsat 8 Band 6 (Glacier (ID) AT4J143FA006 at (10.803, 47.007) coordinates. \cite {swir1_band}}}{11}% 
+\contentsline {figure}{\numberline {2.7}{\ignorespaces NDSI and contrast between green and SWIR1 bands.}}{12}% 
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Earth Explorer \cite {earth_explorer_1}.}}{17}% 
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Search Inventory interface (NSIDC) \cite {nsidc_1}.}}{18}% 
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Extract Selected Regions interface (NSIDC) \cite {nsidc_2}.}}{19}% 
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Download folder hierarchy.}}{20}% 
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Metadata file.}}{21}% 
+\contentsline {figure}{\numberline {3.6}{\ignorespaces Output folder hierarchy.}}{22}% 
+\contentsline {figure}{\numberline {3.7}{\ignorespaces NDSI and contrast between green and SWIR1 bands.}}{23}% 
+\contentsline {figure}{\numberline {3.8}{\ignorespaces Two unaligned Landsat 8 scenes, overlapped.}}{24}% 
+\contentsline {figure}{\numberline {3.9}{\ignorespaces Zoomed in two unaligned Landsat 8 scenes, overlapped.}}{24}% 
+\contentsline {figure}{\numberline {3.10}{\ignorespaces Two aligned Landsat 8 scenes, overlapped.}}{24}% 
+\contentsline {figure}{\numberline {3.11}{\ignorespaces Zoomed in two aligned Landsat 8 scenes, overlapped.}}{25}% 
+\contentsline {figure}{\numberline {3.12}{\ignorespaces Difference for object state.}}{26}% 
+\contentsline {figure}{\numberline {3.13}{\ignorespaces Difference for object movement.}}{26}% 
+\contentsline {figure}{\numberline {3.14}{\ignorespaces Download CLI and GUI diagram.}}{29}% 
+\contentsline {figure}{\numberline {3.15}{\ignorespaces Process CLI and GUI diagram.}}{30}% 
+\contentsline {figure}{\numberline {3.16}{\ignorespaces Display CLI and GUI interactive prediction plot.}}{31}% 
+\contentsline {figure}{\numberline {3.17}{\ignorespaces Prediction interactive plot CLI and GUI.}}{32}% 
+\contentsline {figure}{\numberline {3.18}{\ignorespaces Main use case of the application. The user can choose between downloading, processing or displaying and predicting data. Prediction can only be made if display is chosen, and the interactive plot will pop-up.}}{33}% 
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Download process class diagram.}}{35}% 
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Matches between the reference image (left, green) and image to be aligned (rigH, SWIR1).}}{38}% 
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Image after warping the affine matrix on the SWIR1 band.}}{38}% 
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Matches between the reference image (left, green) and image to be aligned (right, SWIR1), after box feature find.}}{39}% 
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Matches between the reference image (left, green) and image to be aligned (right, SWIR1), before prune matches improvement.}}{40}% 
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Matches between the reference image (left, green) and image to be aligned (right, SWIR1), after prune matches improvement.}}{40}% 
+\contentsline {figure}{\numberline {4.7}{\ignorespaces The aligned image after applying all four features.}}{41}% 
+\contentsline {figure}{\numberline {4.8}{\ignorespaces The NDSI class diagram..}}{42}% 
+\contentsline {figure}{\numberline {4.9}{\ignorespaces The alignment and NDSI processing for a path and row directory class diagram.}}{43}% 
+\contentsline {figure}{\numberline {4.10}{\ignorespaces Plot of glacier AR1I0111B128, with coordinates(-70.341, -36.785), on path and row 232, 086.}}{44}% 
+\contentsline {figure}{\numberline {4.11}{\ignorespaces Picking two NDSI images to create their difference and movement images.}}{46}% 
+\contentsline {figure}{\numberline {4.12}{\ignorespaces The difference and movement images for the selected points on the plot.}}{47}% 
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {5.1}{\ignorespaces Las Heras Department, Provincia Mendoza, Argentina (AR1J11132208, 233, 82).}}{48}% 
+\contentsline {figure}{\numberline {5.2}{\ignorespaces Las Heras Department, Provincia Mendoza, Argentina (AR1J11132208, 232, 83).}}{49}% 
+\contentsline {figure}{\numberline {5.3}{\ignorespaces Panjshir, Afganistan (AF5Q112C0242, 152, 32).}}{49}% 
+\contentsline {figure}{\numberline {5.4}{\ignorespaces Las Heras Department, Provincia Mendoza, Argentina (AR1J11132208, 232, 82).}}{50}% 
+\addvspace {10\p@ }
+\addvspace {10\p@ }

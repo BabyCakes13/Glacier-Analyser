@@ -1,0 +1,81 @@
+\babel@toc {english}{}
+\contentsline {chapter}{List Of Figures}{iii}% 
+\contentsline {chapter}{List Of Tables}{v}% 
+\contentsline {chapter}{\numberline {1}Introduction}{1}% 
+\contentsline {section}{\numberline {1.1}Motivation and goals}{2}% 
+\contentsline {section}{\numberline {1.2}The context of this thesis}{2}% 
+\contentsline {section}{\numberline {1.3}Our Contribution}{3}% 
+\contentsline {chapter}{\numberline {2}Data set Structure}{5}% 
+\contentsline {section}{\numberline {2.1}Satellite Imagery}{5}% 
+\contentsline {section}{\numberline {2.2}Landsat 8}{5}% 
+\contentsline {subsection}{\numberline {2.2.1}Worldwide Reference System}{6}% 
+\contentsline {subsection}{\numberline {2.2.2}Operational Land Imager (OLI)}{7}% 
+\contentsline {subsection}{\numberline {2.2.3}Thermal Infrared Sensor (TIRS)}{7}% 
+\contentsline {section}{\numberline {2.3}Resolutions}{7}% 
+\contentsline {paragraph}{Radiometric resolution}{8}% 
+\contentsline {paragraph}{Temporal resolution}{8}% 
+\contentsline {paragraph}{Spectral resolution}{8}% 
+\contentsline {paragraph}{Spacial resolution}{8}% 
+\contentsline {section}{\numberline {2.4}Data set Collection}{9}% 
+\contentsline {subsection}{\numberline {2.4.1}Collection process}{9}% 
+\contentsline {subsection}{\numberline {2.4.2}Landsat Image Collection}{9}% 
+\contentsline {paragraph}{Collection 1 Tier 1}{9}% 
+\contentsline {section}{\numberline {2.5}Data set Images}{9}% 
+\contentsline {subsection}{\numberline {2.5.1}Landsat 8 Bands}{9}% 
+\contentsline {subsection}{\numberline {2.5.2}Green Band}{10}% 
+\contentsline {subsection}{\numberline {2.5.3}SWIR1 (Infrared) Band}{11}% 
+\contentsline {subsection}{\numberline {2.5.4}The Normalized-Difference Snow Index}{11}% 
+\contentsline {subsection}{\numberline {2.5.5}Landsat scene name convention}{13}% 
+\contentsline {section}{\numberline {2.6}Programming Environment: PyCharm}{13}% 
+\contentsline {section}{\numberline {2.7}Python Programming Language}{13}% 
+\contentsline {section}{\numberline {2.8}Git}{14}% 
+\contentsline {section}{\numberline {2.9}Libraries}{14}% 
+\contentsline {subsection}{\numberline {2.9.1}Geospatial Data Abstraction Library (GDAL)}{14}% 
+\contentsline {subsection}{\numberline {2.9.2}NumPy}{14}% 
+\contentsline {subsection}{\numberline {2.9.3}OpenCV}{15}% 
+\contentsline {subsection}{\numberline {2.9.4}sat-search}{15}% 
+\contentsline {chapter}{\numberline {3}The application}{16}% 
+\contentsline {section}{\numberline {3.1}Functional description}{16}% 
+\contentsline {subsection}{\numberline {3.1.1}Satellite Data Set Building}{16}% 
+\contentsline {subsubsection}{Earth Explorer}{16}% 
+\contentsline {subsubsection}{Where is the data collected from?}{17}% 
+\contentsline {subsubsection}{How are the glacier scenes found?}{18}% 
+\contentsline {paragraph}{Search Inventory interface}{18}% 
+\contentsline {paragraph}{Extract Selected Regions interface}{19}% 
+\contentsline {subsubsection}{Where are they downloaded to?}{19}% 
+\contentsline {subsection}{\numberline {3.1.2}Data Set Information Extraction}{20}% 
+\contentsline {subsubsection}{Scene Metadata (MTL)}{20}% 
+\contentsline {section}{\numberline {3.2}Pre-processing}{21}% 
+\contentsline {section}{\numberline {3.3}Processing}{22}% 
+\contentsline {subsection}{\numberline {3.3.1}The Normalized-Difference Snow Index}{22}% 
+\contentsline {subsection}{\numberline {3.3.2}Image Alignment}{23}% 
+\contentsline {subsection}{\numberline {3.3.3}Diference}{25}% 
+\contentsline {subsection}{\numberline {3.3.4}Movement}{26}% 
+\contentsline {section}{\numberline {3.4}The user interface and guide}{27}% 
+\contentsline {subsection}{\numberline {3.4.1}Download GUI}{27}% 
+\contentsline {subsection}{\numberline {3.4.2}Process GUI}{28}% 
+\contentsline {subsection}{\numberline {3.4.3}Display GUI}{28}% 
+\contentsline {section}{\numberline {3.5}Difference and Movement GUI}{28}% 
+\contentsline {section}{\numberline {3.6}Main use cases}{33}% 
+\contentsline {chapter}{\numberline {4}Design and implementation}{34}% 
+\contentsline {section}{\numberline {4.1}Download}{34}% 
+\contentsline {section}{\numberline {4.2}Alignment and NDSI}{36}% 
+\contentsline {subsection}{\numberline {4.2.1}Alignment}{36}% 
+\contentsline {paragraph}{1. Two feature sets}{38}% 
+\contentsline {paragraph}{2. Box split}{38}% 
+\contentsline {paragraph}{3. Prune matches}{39}% 
+\contentsline {paragraph}{4. Three feature sets}{41}% 
+\contentsline {subsection}{\numberline {4.2.2}NDSI}{41}% 
+\contentsline {section}{\numberline {4.3}Display and ARIMA prediction}{44}% 
+\contentsline {subsection}{\numberline {4.3.1}Data set normalization}{44}% 
+\contentsline {subsection}{\numberline {4.3.2}Data set plotting}{44}% 
+\contentsline {subsection}{\numberline {4.3.3}Data set predicting}{45}% 
+\contentsline {subsection}{\numberline {4.3.4}Difference and Movement images}{45}% 
+\contentsline {paragraph}{Difference}{46}% 
+\contentsline {paragraph}{Movement}{46}% 
+\contentsline {chapter}{\numberline {5}Performance Evaluation}{48}% 
+\contentsline {chapter}{\numberline {6}Conclusions}{51}% 
+\contentsline {section}{\numberline {6.1}Future Development}{52}% 
+\contentsline {chapter}{Bibliography}{52}% 
+\contentsline {chapter}{\numberline {A}Glossary}{58}% 
+\contentsline {section}{\numberline {A.1}Acronyms}{58}% 

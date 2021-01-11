@@ -1,0 +1,1087 @@
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2019.12.3)  11 JAN 2021 18:56
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**Licenta.tex
+(./Licenta.tex
+LaTeX2e <2018-12-01>
+(/app/texmf-dist/tex/latex/base/report.cls
+Document Class: report 2018/09/03 v1.4i Standard LaTeX document class
+(/app/texmf-dist/tex/latex/base/size12.clo
+File: size12.clo 2018/09/03 v1.4i Standard LaTeX file (size option)
+)
+\c@part=\count80
+\c@chapter=\count81
+\c@section=\count82
+\c@subsection=\count83
+\c@subsubsection=\count84
+\c@paragraph=\count85
+\c@subparagraph=\count86
+\c@figure=\count87
+\c@table=\count88
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+)
+(/app/texmf-dist/tex/generic/babel/babel.sty
+Package: babel 2019/04/03 3.29 The Babel package
+
+(/app/texmf-dist/tex/generic/babel/switch.def
+File: switch.def 2019/04/03 3.29 Babel switching mechanism
+)
+(/app/texmf-dist/tex/generic/babel-english/english.ldf
+Language: english 2017/06/06 v3.3r English support from the babel system
+
+(/app/texmf-dist/tex/generic/babel/babel.def
+File: babel.def 2019/04/03 3.29 Babel common definitions
+\babel@savecnt=\count89
+\U@D=\dimen103
+
+(/app/texmf-dist/tex/generic/babel/txtbabel.def)
+\bbl@dirlevel=\count90
+)
+\l@canadian = a dialect from \language\l@american 
+\l@australian = a dialect from \language\l@british 
+\l@newzealand = a dialect from \language\l@british 
+))
+(/app/texmf-dist/tex/latex/base/inputenc.sty
+Package: inputenc 2018/08/11 v1.3c Input encoding file
+\inpenc@prehook=\toks14
+\inpenc@posthook=\toks15
+
+(/app/texmf-dist/tex/latex/ucs/utf8x.def
+File: utf8x.def 2004/10/17 UCS: Input encoding UTF-8
+))
+(/app/texmf-dist/tex/latex/ucs/ucs.sty
+Package: ucs 2013/05/11 v2.2 UCS: Unicode input support
+
+(/app/texmf-dist/tex/latex/ucs/data/uni-global.def
+File: uni-global.def 2013/05/13 UCS: Unicode global data
+)
+\uc@secondtry=\count91
+\uc@combtoks=\toks16
+\uc@combtoksb=\toks17
+\uc@temptokena=\toks18
+)
+(/app/texmf-dist/tex/latex/geometry/geometry.sty
+Package: geometry 2018/04/16 v5.8 Page Geometry
+
+(/app/texmf-dist/tex/latex/graphics/keyval.sty
+Package: keyval 2014/10/28 v1.15 key=value parser (DPC)
+\KV@toks@=\toks19
+)
+(/app/texmf-dist/tex/generic/oberdiek/ifpdf.sty
+Package: ifpdf 2018/09/07 v3.3 Provides the ifpdf switch
+)
+(/app/texmf-dist/tex/generic/oberdiek/ifvtex.sty
+Package: ifvtex 2016/05/16 v1.6 Detect VTeX and its facilities (HO)
+Package ifvtex Info: VTeX not detected.
+)
+(/app/texmf-dist/tex/generic/ifxetex/ifxetex.sty
+Package: ifxetex 2010/09/12 v0.6 Provides ifxetex conditional
+)
+\Gm@cnth=\count92
+\Gm@cntv=\count93
+\c@Gm@tempcnt=\count94
+\Gm@bindingoffset=\dimen104
+\Gm@wd@mp=\dimen105
+\Gm@odd@mp=\dimen106
+\Gm@even@mp=\dimen107
+\Gm@layoutwidth=\dimen108
+\Gm@layoutheight=\dimen109
+\Gm@layouthoffset=\dimen110
+\Gm@layoutvoffset=\dimen111
+\Gm@dimlist=\toks20
+)
+(/app/texmf-dist/tex/latex/appendix/appendix.sty
+Package: appendix 2009/09/02 v1.2b extra appendix facilities
+\c@@pps=\count95
+\c@@ppsavesec=\count96
+\c@@ppsaveapp=\count97
+)
+(/app/texmf-dist/tex/latex/amsmath/amsmath.sty
+Package: amsmath 2018/12/01 v2.17b AMS math features
+\@mathmargin=\skip43
+
+For additional information on amsmath, use the `?' option.
+(/app/texmf-dist/tex/latex/amsmath/amstext.sty
+Package: amstext 2000/06/29 v2.01 AMS text
+
+(/app/texmf-dist/tex/latex/amsmath/amsgen.sty
+File: amsgen.sty 1999/11/30 v2.0 generic functions
+\@emptytoks=\toks21
+\ex@=\dimen112
+))
+(/app/texmf-dist/tex/latex/amsmath/amsbsy.sty
+Package: amsbsy 1999/11/29 v1.2d Bold Symbols
+\pmbraise@=\dimen113
+)
+(/app/texmf-dist/tex/latex/amsmath/amsopn.sty
+Package: amsopn 2016/03/08 v2.02 operator names
+)
+\inf@bad=\count98
+LaTeX Info: Redefining \frac on input line 223.
+\uproot@=\count99
+\leftroot@=\count100
+LaTeX Info: Redefining \overline on input line 385.
+\classnum@=\count101
+\DOTSCASE@=\count102
+LaTeX Info: Redefining \ldots on input line 482.
+LaTeX Info: Redefining \dots on input line 485.
+LaTeX Info: Redefining \cdots on input line 606.
+\Mathstrutbox@=\box27
+\strutbox@=\box28
+\big@size=\dimen114
+LaTeX Font Info:    Redeclaring font encoding OML on input line 729.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 730.
+\macc@depth=\count103
+\c@MaxMatrixCols=\count104
+\dotsspace@=\muskip10
+\c@parentequation=\count105
+\dspbrk@lvl=\count106
+\tag@help=\toks22
+\row@=\count107
+\column@=\count108
+\maxfields@=\count109
+\andhelp@=\toks23
+\eqnshift@=\dimen115
+\alignsep@=\dimen116
+\tagshift@=\dimen117
+\tagwidth@=\dimen118
+\totwidth@=\dimen119
+\lineht@=\dimen120
+\@envbody=\toks24
+\multlinegap=\skip44
+\multlinetaggap=\skip45
+\mathdisplay@stack=\toks25
+LaTeX Info: Redefining \[ on input line 2844.
+LaTeX Info: Redefining \] on input line 2845.
+)
+(/app/texmf-dist/tex/latex/graphics/graphicx.sty
+Package: graphicx 2017/06/01 v1.1a Enhanced LaTeX Graphics (DPC,SPQR)
+
+(/app/texmf-dist/tex/latex/graphics/graphics.sty
+Package: graphics 2017/06/25 v1.2c Standard LaTeX Graphics (DPC,SPQR)
+
+(/app/texmf-dist/tex/latex/graphics/trig.sty
+Package: trig 2016/01/03 v1.10 sin cos tan (DPC)
+)
+(/app/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
+File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
+)
+Package graphics Info: Driver file: pdftex.def on input line 99.
+
+(/app/texmf-dist/tex/latex/graphics-def/pdftex.def
+File: pdftex.def 2018/01/08 v1.0l Graphics/color driver for pdftex
+))
+\Gin@req@height=\dimen121
+\Gin@req@width=\dimen122
+)
+(/app/texmf-dist/tex/latex/float/float.sty
+Package: float 2001/11/08 v1.3d Float enhancements (AL)
+\c@float@type=\count110
+\float@exts=\toks26
+\float@box=\box29
+\@float@everytoks=\toks27
+\@floatcapt=\box30
+)
+(/app/texmf-dist/tex/latex/preprint/fullpage.sty
+Package: fullpage 1999/02/23 1.1 (PWD)
+\FP@margin=\skip46
+)
+(/app/texmf-dist/tex/latex/url/url.sty
+\Urlmuskip=\muskip11
+Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
+)
+(/app/texmf-dist/tex/latex/listings/listings.sty
+\lst@mode=\count111
+\lst@gtempboxa=\box31
+\lst@token=\toks28
+\lst@length=\count112
+\lst@currlwidth=\dimen123
+\lst@column=\count113
+\lst@pos=\count114
+\lst@lostspace=\dimen124
+\lst@width=\dimen125
+\lst@newlines=\count115
+\lst@lineno=\count116
+\lst@maxwidth=\dimen126
+
+(/app/texmf-dist/tex/latex/listings/lstmisc.sty
+File: lstmisc.sty 2019/02/27 1.8b (Carsten Heinz)
+\c@lstnumber=\count117
+\lst@skipnumbers=\count118
+\lst@framebox=\box32
+)
+(/app/texmf-dist/tex/latex/listings/listings.cfg
+File: listings.cfg 2019/02/27 1.8b listings configuration
+))
+Package: listings 2019/02/27 1.8b (Carsten Heinz)
+
+(/app/texmf-dist/tex/latex/tools/verbatim.sty
+Package: verbatim 2014/10/28 v1.5q LaTeX2e package for verbatim enhancements
+\every@verbatim=\toks29
+\verbatim@line=\toks30
+\verbatim@in@stream=\read1
+)
+(/app/texmf-dist/tex/latex/graphics/color.sty
+Package: color 2016/07/10 v1.1e Standard LaTeX Color (DPC)
+
+(/app/texmf-dist/tex/latex/graphics-cfg/color.cfg
+File: color.cfg 2016/01/02 v1.6 sample color configuration
+)
+Package color Info: Driver file: pdftex.def on input line 147.
+)
+(/app/texmf-dist/tex/latex/listings/lstlang1.sty
+File: lstlang1.sty 2019/02/27 1.8b listings language file
+)
+(/app/texmf-dist/tex/latex/multirow/multirow.sty
+Package: multirow 2019/01/01 v2.4 Span multiple rows of a table
+\multirow@colwidth=\skip47
+\multirow@cntb=\count119
+\multirow@dima=\skip48
+\bigstrutjot=\dimen127
+)
+(/app/texmf-dist/tex/latex/tools/array.sty
+Package: array 2018/12/30 v2.4k Tabular extension package (FMi)
+\col@sep=\dimen128
+\ar@mcellbox=\box33
+\extrarowheight=\dimen129
+\NC@list=\toks31
+\extratabsurround=\skip49
+\backup@length=\skip50
+\ar@cellbox=\box34
+) (./Licenta.aux
+
+LaTeX Warning: Label `fig:ndsi' multiply defined.
+
+
+LaTeX Warning: Label `fig:bad_reference_1' multiply defined.
+
+
+LaTeX Warning: Label `fig:bad_matches_3' multiply defined.
+
+
+LaTeX Warning: Label `table:ndsi_table' multiply defined.
+
+
+LaTeX Warning: Label `fig:three' multiply defined.
+
+
+LaTeX Warning: Label `fig:three' multiply defined.
+
+)
+\openout1 = `Licenta.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 51.
+LaTeX Font Info:    ... okay on input line 51.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 51.
+LaTeX Font Info:    ... okay on input line 51.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 51.
+LaTeX Font Info:    ... okay on input line 51.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 51.
+LaTeX Font Info:    ... okay on input line 51.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 51.
+LaTeX Font Info:    ... okay on input line 51.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 51.
+LaTeX Font Info:    ... okay on input line 51.
+ (/app/texmf-dist/tex/latex/ucs/ucsencs.def
+File: ucsencs.def 2011/01/21 Fixes to fontencodings LGR, T3
+)
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+*geometry* verbose mode - [ preamble ] result:
+* driver: pdftex
+* paper: a4paper
+* layout: <same size as paper>
+* layoutoffset:(h,v)=(0.0pt,0.0pt)
+* modes: 
+* h-part:(L,W,R)=(71.13188pt, 455.24411pt, 71.13188pt)
+* v-part:(T,H,B)=(71.13188pt, 672.50832pt, 101.40665pt)
+* \paperwidth=597.50787pt
+* \paperheight=845.04684pt
+* \textwidth=452.9679pt
+* \textheight=670.50687pt
+* \oddsidemargin=0.0pt
+* \evensidemargin=0.0pt
+* \topmargin=0.0pt
+* \headheight=0.0pt
+* \headsep=0.0pt
+* \topskip=12.0pt
+* \footskip=30.0pt
+* \marginparwidth=35.0pt
+* \marginparsep=10.0pt
+* \columnsep=10.0pt
+* \skip\footins=10.8pt plus 4.0pt minus 2.0pt
+* \hoffset=0.0pt
+* \voffset=0.0pt
+* \mag=1000
+* \@twocolumnfalse
+* \@twosidefalse
+* \@mparswitchfalse
+* \@reversemarginfalse
+* (1in=72.27pt=25.4mm, 1cm=28.453pt)
+
+(/app/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count120
+\scratchdimen=\dimen130
+\scratchbox=\box35
+\nofMPsegments=\count121
+\nofMParguments=\count122
+\everyMPshowfont=\toks32
+\MPscratchCnt=\count123
+\MPscratchDim=\dimen131
+\MPnumerator=\count124
+\makeMPintoPDFobject=\count125
+\everyMPtoPDFconversion=\toks33
+) (/app/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
+Package: epstopdf-base 2016/05/15 v2.6 Base part for package epstopdf
+
+(/app/texmf-dist/tex/generic/oberdiek/infwarerr.sty
+Package: infwarerr 2016/05/16 v1.4 Providing info/warning/error messages (HO)
+)
+(/app/texmf-dist/tex/latex/oberdiek/grfext.sty
+Package: grfext 2016/05/16 v1.2 Manage graphics extensions (HO)
+
+(/app/texmf-dist/tex/generic/oberdiek/kvdefinekeys.sty
+Package: kvdefinekeys 2016/05/16 v1.4 Define keys (HO)
+
+(/app/texmf-dist/tex/generic/oberdiek/ltxcmds.sty
+Package: ltxcmds 2016/05/16 v1.23 LaTeX kernel commands for general use (HO)
+)))
+(/app/texmf-dist/tex/latex/oberdiek/kvoptions.sty
+Package: kvoptions 2016/05/16 v3.12 Key value format for package options (HO)
+
+(/app/texmf-dist/tex/generic/oberdiek/kvsetkeys.sty
+Package: kvsetkeys 2016/05/16 v1.17 Key value parser (HO)
+
+(/app/texmf-dist/tex/generic/oberdiek/etexcmds.sty
+Package: etexcmds 2016/05/16 v1.6 Avoid name clashes with e-TeX commands (HO)
+
+(/app/texmf-dist/tex/generic/oberdiek/ifluatex.sty
+Package: ifluatex 2016/05/16 v1.4 Provides the ifluatex switch (HO)
+Package ifluatex Info: LuaTeX not detected.
+))))
+(/app/texmf-dist/tex/generic/oberdiek/pdftexcmds.sty
+Package: pdftexcmds 2018/09/10 v0.29 Utility functions of pdfTeX for LuaTeX (HO
+)
+Package pdftexcmds Info: LuaTeX not detected.
+Package pdftexcmds Info: \pdf@primitive is available.
+Package pdftexcmds Info: \pdf@ifprimitive is available.
+Package pdftexcmds Info: \pdfdraftmode found.
+)
+Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
+38.
+Package grfext Info: Graphics extension search list:
+(grfext)             [.pdf,.png,.jpg,.mps,.jpeg,.jbig2,.jb2,.PDF,.PNG,.JPG,.JPE
+G,.JBIG2,.JB2,.eps]
+(grfext)             \AppendGraphicsExtensions on input line 456.
+
+(/app/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
+File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
+e
+))
+\c@lstlisting=\count126
+<FMI-03.png, id=1, 597.432pt x 597.432pt>
+File: FMI-03.png Graphic file (type png)
+<use FMI-03.png>
+Package pdftex.def Info: FMI-03.png  used on input line 66.
+(pdftex.def)             Requested size: 100.0pt x 99.99413pt.
+
+(/app/texmf-dist/tex/latex/ucs/data/uni-0.def
+File: uni-0.def 2013/05/13 UCS: Unicode data U+0000..U+00FF
+) [1
+
+
+Non-PDF special ignored!
+<special> papersize=210mm, 297mm
+{/app/texmf-var/fonts/map/pdftex/updmap/pdftex.map} <./FMI-03.png>] [1]
+[1] (./Licenta.toc [1
+
+] [2])
+\tf@toc=\write3
+\openout3 = `Licenta.toc'.
+
+ [3] (./Licenta.lof
+
+LaTeX Warning: Citation `nsidc_2' on page iv undefined on input line 15.
+
+[4
+
+])
+\tf@lof=\write4
+\openout4 = `Licenta.lof'.
+
+ [5] (./Licenta.lot)
+\tf@lot=\write5
+\openout5 = `Licenta.lot'.
+
+ [6
+
+]
+Chapter 1.
+[1
+
+]
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 224.
+
+ (/app/texmf-dist/tex/latex/base/omscmr.fd
+File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
+)
+LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <12> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 224.
+ [2] [3]
+(/app/texmf-dist/tex/latex/ucs/data/uni-32.def
+File: uni-32.def 2013/05/13 UCS: Unicode data U+2000..U+20FF
+)
+<profilebottom.png, id=48, 330.2739pt x 167.6664pt>
+File: profilebottom.png Graphic file (type png)
+<use profilebottom.png>
+Package pdftex.def Info: profilebottom.png  used on input line 263.
+(pdftex.def)             Requested size: 330.27307pt x 167.66597pt.
+ [4 <./profilebottom.png>]
+Chapter 2.
+<landsat_8.png, id=54, 451.6875pt x 283.81032pt>
+File: landsat_8.png Graphic file (type png)
+<use landsat_8.png>
+Package pdftex.def Info: landsat_8.png  used on input line 279.
+(pdftex.def)             Requested size: 180.67178pt x 113.52211pt.
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+<worldwide_reference.png, id=55, 274.1442pt x 200.1879pt>
+File: worldwide_reference.png Graphic file (type png)
+<use worldwide_reference.png>
+Package pdftex.def Info: worldwide_reference.png  used on input line 288.
+(pdftex.def)             Requested size: 274.14351pt x 200.1874pt.
+[5
+
+]
+<oli_wavelight_7_vs_8.jpg, id=59, 192.72pt x 96.36pt>
+File: oli_wavelight_7_vs_8.jpg Graphic file (type jpg)
+<use oli_wavelight_7_vs_8.jpg>
+Package pdftex.def Info: oli_wavelight_7_vs_8.jpg  used on input line 300.
+(pdftex.def)             Requested size: 385.43903pt x 192.71948pt.
+ [6 <./landsat_8.png> <./worldwide_reference.png>] [7 <./oli_wavelight_7_vs_8.j
+pg>]
+<landsat_8_bands.jpg, id=69, 284.262pt x 145.9854pt>
+File: landsat_8_bands.jpg Graphic file (type jpg)
+<use landsat_8_bands.jpg>
+Package pdftex.def Info: landsat_8_bands.jpg  used on input line 322.
+(pdftex.def)             Requested size: 284.26129pt x 145.98503pt.
+ [8 <./landsat_8_bands.jpg>] [9]
+<LC81930272018108LGN00_B3.png, id=76, 240.9pt x 244.2726pt>
+File: LC81930272018108LGN00_B3.png Graphic file (type png)
+<use LC81930272018108LGN00_B3.png>
+Package pdftex.def Info: LC81930272018108LGN00_B3.png  used on input line 373.
+(pdftex.def)             Requested size: 240.8994pt x 244.272pt.
+ [10 <./LC81930272018108LGN00_B3.png>]
+<LC81930272018108LGN00_B6.png, id=81, 240.9pt x 244.2726pt>
+File: LC81930272018108LGN00_B6.png Graphic file (type png)
+<use LC81930272018108LGN00_B6.png>
+Package pdftex.def Info: LC81930272018108LGN00_B6.png  used on input line 402.
+(pdftex.def)             Requested size: 240.8994pt x 244.272pt.
+
+[11 <./LC81930272018108LGN00_B6.png>]
+<result(2).png, id=85, 240.9pt x 244.2726pt>
+File: result(2).png Graphic file (type png)
+<use result(2).png>
+Package pdftex.def Info: result(2).png  used on input line 432.
+(pdftex.def)             Requested size: 240.8994pt x 244.272pt.
+ [12 <./result(2).png>] [13] [14] [15]
+Chapter 3.
+<earth_explorerpng.png, id=99, 455.301pt x 199.4652pt>
+File: earth_explorerpng.png Graphic file (type png)
+<use earth_explorerpng.png>
+Package pdftex.def Info: earth_explorerpng.png  used on input line 495.
+(pdftex.def)             Requested size: 387.00768pt x 169.5462pt.
+[16
+
+] [17 <./earth_explorerpng.png>]
+<nsidc_search.png, id=107, 265.9536pt x 221.1462pt>
+File: nsidc_search.png Graphic file (type png)
+<use nsidc_search.png>
+Package pdftex.def Info: nsidc_search.png  used on input line 526.
+(pdftex.def)             Requested size: 265.95294pt x 221.14565pt.
+<ndsic_2.png, id=108, 235.6002pt x 206.4513pt>
+File: ndsic_2.png Graphic file (type png)
+<use ndsic_2.png>
+Package pdftex.def Info: ndsic_2.png  used on input line 536.
+(pdftex.def)             Requested size: 400.51862pt x 350.96568pt.
+
+
+LaTeX Warning: Citation `nsidc_2' on page 18 undefined on input line 537.
+
+[18 <./nsidc_search.png>]
+<download_folderhierarchy.png, id=112, 289.8027pt x 132.495pt>
+File: download_folderhierarchy.png Graphic file (type png)
+<use download_folderhierarchy.png>
+Package pdftex.def Info: download_folderhierarchy.png  used on input line 546.
+(pdftex.def)             Requested size: 405.72101pt x 185.49171pt.
+ [19 <./ndsic_2.png>]
+<metadata_example.png, id=116, 131.2905pt x 143.8173pt>
+File: metadata_example.png Graphic file (type png)
+<use metadata_example.png>
+Package pdftex.def Info: metadata_example.png  used on input line 558.
+(pdftex.def)             Requested size: 262.58032pt x 287.63388pt.
+ [20 <./download_folderhierarchy.png>]
+<process_folder_diagram.png, id=120, 301.8477pt x 141.6492pt>
+File: process_folder_diagram.png Graphic file (type png)
+<use process_folder_diagram.png>
+Package pdftex.def Info: process_folder_diagram.png  used on input line 568.
+(pdftex.def)             Requested size: 452.77043pt x 212.47325pt.
+ [21 <./metadata_example.png>]
+LaTeX Font Info:    Font shape `OMS/cmr/bx/n' in size <12> not available
+(Font)              Font shape `OMS/cmsy/b/n' tried instead on input line 583.
+ [22 <./process_folder_diagram.png>]
+File: result(2).png Graphic file (type png)
+<use result(2).png>
+Package pdftex.def Info: result(2).png  used on input line 594.
+(pdftex.def)             Requested size: 240.8994pt x 244.272pt.
+<red_big_unaligned.png, id=129, 481.8pt x 491.436pt>
+File: red_big_unaligned.png Graphic file (type png)
+<use red_big_unaligned.png>
+Package pdftex.def Info: red_big_unaligned.png  used on input line 607.
+(pdftex.def)             Requested size: 144.95303pt x 147.85185pt.
+<blue_big_unaligned.png, id=130, 481.8pt x 492.1587pt>
+File: blue_big_unaligned.png Graphic file (type png)
+<use blue_big_unaligned.png>
+Package pdftex.def Info: blue_big_unaligned.png  used on input line 610.
+(pdftex.def)             Requested size: 144.95303pt x 148.06929pt.
+<purple_big_unaligned.png, id=131, 481.8pt x 492.1587pt>
+File: purple_big_unaligned.png Graphic file (type png)
+<use purple_big_unaligned.png>
+Package pdftex.def Info: purple_big_unaligned.png  used on input line 613.
+(pdftex.def)             Requested size: 144.95303pt x 148.06929pt.
+
+[23]
+<red_tiny_unaligned.png, id=135, 361.35pt x 263.7855pt>
+File: red_tiny_unaligned.png Graphic file (type png)
+<use red_tiny_unaligned.png>
+Package pdftex.def Info: red_tiny_unaligned.png  used on input line 620.
+(pdftex.def)             Requested size: 144.95303pt x 105.8142pt.
+<blue_tiny_unaligned.png, id=136, 361.35pt x 263.7855pt>
+File: blue_tiny_unaligned.png Graphic file (type png)
+<use blue_tiny_unaligned.png>
+Package pdftex.def Info: blue_tiny_unaligned.png  used on input line 623.
+(pdftex.def)             Requested size: 144.95303pt x 105.8142pt.
+<purple_tiny_unaligned.png, id=137, 361.35pt x 263.7855pt>
+File: purple_tiny_unaligned.png Graphic file (type png)
+<use purple_tiny_unaligned.png>
+Package pdftex.def Info: purple_tiny_unaligned.png  used on input line 626.
+(pdftex.def)             Requested size: 144.95303pt x 105.8142pt.
+<red_big_aligned.png, id=138, 711.1368pt x 735.7086pt>
+File: red_big_aligned.png Graphic file (type png)
+<use red_big_aligned.png>
+Package pdftex.def Info: red_big_aligned.png  used on input line 636.
+(pdftex.def)             Requested size: 144.95303pt x 149.95683pt.
+<blue_big_aligned.png, id=139, 481.8pt x 491.436pt>
+File: blue_big_aligned.png Graphic file (type png)
+<use blue_big_aligned.png>
+Package pdftex.def Info: blue_big_aligned.png  used on input line 639.
+(pdftex.def)             Requested size: 144.95303pt x 147.85185pt.
+<purple_big_aligned.png, id=140, 714.38895pt x 736.06995pt>
+File: purple_big_aligned.png Graphic file (type png)
+<use purple_big_aligned.png>
+Package pdftex.def Info: purple_big_aligned.png  used on input line 642.
+(pdftex.def)             Requested size: 144.95303pt x 149.34537pt.
+<red_tiny_aligned.png, id=141, 361.35pt x 263.42415pt>
+File: red_tiny_aligned.png Graphic file (type png)
+<use red_tiny_aligned.png>
+Package pdftex.def Info: red_tiny_aligned.png  used on input line 649.
+(pdftex.def)             Requested size: 144.95303pt x 105.66925pt.
+<blue_tiny_aligned.png, id=142, 361.35pt x 263.42415pt>
+File: blue_tiny_aligned.png Graphic file (type png)
+<use blue_tiny_aligned.png>
+Package pdftex.def Info: blue_tiny_aligned.png  used on input line 652.
+(pdftex.def)             Requested size: 144.95303pt x 105.66925pt.
+<purple_tiny_aligned.png, id=143, 361.35pt x 263.42415pt>
+File: purple_tiny_aligned.png Graphic file (type png)
+<use purple_tiny_aligned.png>
+Package pdftex.def Info: purple_tiny_aligned.png  used on input line 655.
+(pdftex.def)             Requested size: 144.95303pt x 105.66925pt.
+ [24 <./red_big_unaligned.png> <./blue_big_unaligned.png> <./purple_big_unalign
+ed.png
+
+pdfTeX warning: /app/bin/x86_64-linux/pdflatex (file ./purple_big_unaligned.png
+): large interlaced PNG might cause out of memory (use non-interlaced PNG to fi
+x this)
+> <./red_tiny_unaligned.png> <./blue_tiny_unaligned.png> <./purple_tiny_unalign
+ed.png> <./red_big_aligned.png
+
+pdfTeX warning: /app/bin/x86_64-linux/pdflatex (file ./red_big_aligned.png): la
+rge interlaced PNG might cause out of memory (use non-interlaced PNG to fix thi
+s)
+> <./blue_big_aligned.png> <./purple_big_aligned.png
+
+pdfTeX warning: /app/bin/x86_64-linux/pdflatex (file ./purple_big_aligned.png):
+ large interlaced PNG might cause out of memory (use non-interlaced PNG to fix 
+this)
+>]
+<difference.png, id=151, 228.3732pt x 232.4685pt>
+File: difference.png Graphic file (type png)
+<use difference.png>
+Package pdftex.def Info: difference.png  used on input line 674.
+(pdftex.def)             Requested size: 217.42265pt x 221.33333pt.
+<diff_tiny.png, id=152, 397.485pt x 226.9278pt>
+File: diff_tiny.png Graphic file (type png)
+<use diff_tiny.png>
+Package pdftex.def Info: diff_tiny.png  used on input line 677.
+(pdftex.def)             Requested size: 217.42265pt x 124.13199pt.
+ [25 <./red_tiny_aligned.png> <./blue_tiny_aligned.png> <./purple_tiny_aligned.
+png>]
+<move_big.png, id=156, 481.8pt x 491.436pt>
+File: move_big.png Graphic file (type png)
+<use move_big.png>
+Package pdftex.def Info: move_big.png  used on input line 686.
+(pdftex.def)             Requested size: 217.42265pt x 221.76654pt.
+<move_tiny.png, id=157, 397.485pt x 224.037pt>
+File: move_tiny.png Graphic file (type png)
+<use move_tiny.png>
+Package pdftex.def Info: move_tiny.png  used on input line 689.
+(pdftex.def)             Requested size: 217.42265pt x 122.55069pt.
+ [26 <./difference.png> <./diff_tiny.png> <./move_big.png> <./move_tiny.png>] (
+/app/texmf-dist/tex/latex/listings/lstlang1.sty
+File: lstlang1.sty 2019/02/27 1.8b listings language file
+)
+(/app/texmf-dist/tex/latex/listings/lstlang1.sty
+File: lstlang1.sty 2019/02/27 1.8b listings language file
+) [27]
+<download_gui_cmd.png, id=167, 311.7246pt x 424.2249pt>
+File: download_gui_cmd.png Graphic file (type png)
+<use download_gui_cmd.png>
+Package pdftex.def Info: download_gui_cmd.png  used on input line 749.
+(pdftex.def)             Requested size: 467.58574pt x 636.33577pt.
+
+Overfull \hbox (14.61784pt too wide) in paragraph at lines 749--750
+ [][] 
+ []
+
+[28]
+<process_cmd_gui.png, id=172, 311.7246pt x 424.2249pt>
+File: process_cmd_gui.png Graphic file (type png)
+<use process_cmd_gui.png>
+Package pdftex.def Info: process_cmd_gui.png  used on input line 756.
+(pdftex.def)             Requested size: 467.58574pt x 636.33577pt.
+
+Overfull \hbox (14.61784pt too wide) in paragraph at lines 756--757
+ [][] 
+ []
+
+[29 <./download_gui_cmd.png>]
+<DISPLAY_cmd_gui.png, id=176, 311.7246pt x 358.941pt>
+File: DISPLAY_cmd_gui.png Graphic file (type png)
+<use DISPLAY_cmd_gui.png>
+Package pdftex.def Info: DISPLAY_cmd_gui.png  used on input line 763.
+(pdftex.def)             Requested size: 467.58574pt x 538.41016pt.
+
+Overfull \hbox (14.61784pt too wide) in paragraph at lines 763--764
+ [][] 
+ []
+
+[30 <./process_cmd_gui.png>]
+<DISPLAY_plot.png, id=180, 311.7246pt x 424.2249pt>
+File: DISPLAY_plot.png Graphic file (type png)
+<use DISPLAY_plot.png>
+Package pdftex.def Info: DISPLAY_plot.png  used on input line 770.
+(pdftex.def)             Requested size: 467.58574pt x 636.33577pt.
+
+Overfull \hbox (14.61784pt too wide) in paragraph at lines 770--771
+ [][] 
+ []
+
+[31 <./DISPLAY_cmd_gui.png>] [32 <./DISPLAY_plot.png>]
+<main_use_case.png, id=189, 185.0112pt x 130.086pt>
+File: main_use_case.png Graphic file (type png)
+<use main_use_case.png>
+Package pdftex.def Info: main_use_case.png  used on input line 781.
+(pdftex.def)             Requested size: 370.02148pt x 260.17133pt.
+ [33 <./main_use_case.png>]
+Chapter 4.
+[34
+
+]
+<download_process_class.png, id=197, 264.5082pt x 173.9298pt>
+File: download_process_class.png Graphic file (type png)
+<use download_process_class.png>
+Package pdftex.def Info: download_process_class.png  used on input line 798.
+(pdftex.def)             Requested size: 423.21367pt x 278.28804pt.
+ [35 <./download_process_class.png>] [36] [37]
+<bad_matches_1.png, id=207, 1927.2pt x 981.6675pt>
+File: bad_matches_1.png Graphic file (type png)
+<use bad_matches_1.png>
+Package pdftex.def Info: bad_matches_1.png  used on input line 833.
+(pdftex.def)             Requested size: 481.79883pt x 245.41628pt.
+
+Overfull \hbox (28.83093pt too wide) in paragraph at lines 833--834
+ [][] 
+ []
+
+<bad_result_1.png, id=208, 742.27313pt x 757.32938pt>
+File: bad_result_1.png Graphic file (type png)
+<use bad_result_1.png>
+Package pdftex.def Info: bad_result_1.png  used on input line 840.
+(pdftex.def)             Requested size: 74.23166pt x 75.73737pt.
+[38 <./bad_matches_1.png> <./bad_result_1.png>]
+<matches_2.png, id=212, 1927.2pt x 981.6675pt>
+File: matches_2.png Graphic file (type png)
+<use matches_2.png>
+Package pdftex.def Info: matches_2.png  used on input line 849.
+(pdftex.def)             Requested size: 481.79883pt x 245.41628pt.
+
+Overfull \hbox (28.83093pt too wide) in paragraph at lines 849--850
+ [][] 
+ []
+
+<matches_before_prune.png, id=213, 1927.2pt x 981.6675pt>
+File: matches_before_prune.png Graphic file (type png)
+<use matches_before_prune.png>
+Package pdftex.def Info: matches_before_prune.png  used on input line 858.
+(pdftex.def)             Requested size: 481.79883pt x 245.41628pt.
+
+Overfull \hbox (28.83093pt too wide) in paragraph at lines 858--859
+ [][] 
+ []
+
+[39 <./matches_2.png>]
+<matches_after_prune.png, id=217, 1927.2pt x 981.6675pt>
+File: matches_after_prune.png Graphic file (type png)
+<use matches_after_prune.png>
+Package pdftex.def Info: matches_after_prune.png  used on input line 865.
+(pdftex.def)             Requested size: 481.79883pt x 245.41628pt.
+
+Overfull \hbox (28.83093pt too wide) in paragraph at lines 865--866
+ [][] 
+ []
+
+[40 <./matches_before_prune.png> <./matches_after_prune.png>]
+<matches_3.png, id=222, 691.08188pt x 703.87968pt>
+File: matches_3.png Graphic file (type png)
+<use matches_3.png>
+Package pdftex.def Info: matches_3.png  used on input line 874.
+(pdftex.def)             Requested size: 207.32616pt x 211.16553pt.
+<ndsi_class.png, id=223, 168.63pt x 128.6406pt>
+File: ndsi_class.png Graphic file (type png)
+<use ndsi_class.png>
+Package pdftex.def Info: ndsi_class.png  used on input line 888.
+(pdftex.def)             Requested size: 286.66975pt x 218.68806pt.
+ [41 <./matches_3.png>]
+<process_image_class.png, id=228, 236.5638pt x 178.0251pt>
+File: process_image_class.png Graphic file (type png)
+<use process_image_class.png>
+Package pdftex.def Info: process_image_class.png  used on input line 899.
+(pdftex.def)             Requested size: 496.78416pt x 373.85283pt.
+
+Overfull \hbox (43.81627pt too wide) in paragraph at lines 899--900
+ [][] 
+ []
+
+[42 <./ndsi_class.png>] [43 <./process_image_class.png>]
+Overfull \hbox (35.27739pt too wide) in paragraph at lines 910--911
+\OT1/cmr/bx/n/12 dif-fer-ence and move-ment im-ages\OT1/cmr/m/n/12 . When call-
+ing the dis-play pro-cess, the \OT1/cmr/bx/n/12 ndsi[]path[]row.csv
+ []
+
+<plot_1.png, id=235, 263.3037pt x 177.7842pt>
+File: plot_1.png Graphic file (type png)
+<use plot_1.png>
+Package pdftex.def Info: plot_1.png  used on input line 923.
+(pdftex.def)             Requested size: 394.95456pt x 266.6756pt.
+[44 <./plot_1.png>]
+<plot_first_second.png, id=239, 263.3037pt x 175.1343pt>
+File: plot_first_second.png Graphic file (type png)
+<use plot_first_second.png>
+Package pdftex.def Info: plot_first_second.png  used on input line 959.
+(pdftex.def)             Requested size: 447.61435pt x 297.72704pt.
+ [45] [46 <./plot_first_second.png>]
+<difference_plot.png, id=249, 184.0476pt x 186.4566pt>
+File: difference_plot.png Graphic file (type png)
+<use difference_plot.png>
+Package pdftex.def Info: difference_plot.png  used on input line 980.
+(pdftex.def)             Requested size: 217.42265pt x 220.26724pt.
+<movement_plot.png, id=250, 203.5605pt x 185.493pt>
+File: movement_plot.png Graphic file (type png)
+<use movement_plot.png>
+Package pdftex.def Info: movement_plot.png  used on input line 983.
+(pdftex.def)             Requested size: 217.42265pt x 198.1359pt.
+ [47 <./difference_plot.png> <./movement_plot.png>]
+Chapter 5.
+<21.png, id=254, 642.4pt x 481.8pt>
+File: 21.png Graphic file (type png)
+<use 21.png>
+Package pdftex.def Info: 21.png  used on input line 996.
+(pdftex.def)             Requested size: 321.19922pt x 240.8994pt.
+[48
+
+ <./21.png>]
+<10.png, id=258, 642.4pt x 481.8pt>
+File: 10.png Graphic file (type png)
+<use 10.png>
+Package pdftex.def Info: 10.png  used on input line 1005.
+(pdftex.def)             Requested size: 256.95544pt x 192.71658pt.
+
+Overfull \hbox (17.4064pt too wide) in paragraph at lines 1010--1011
+[]\OT1/cmr/m/n/12 The third picked area is lo-cated in Pan-jshir, Af-gan-istan,
+ on glacier with id AF5Q112C0242
+ []
+
+<31.png, id=259, 642.4pt x 481.8pt>
+File: 31.png Graphic file (type png)
+<use 31.png>
+Package pdftex.def Info: 31.png  used on input line 1014.
+(pdftex.def)             Requested size: 256.95544pt x 192.71658pt.
+[49 <./10.png> <./31.png>]
+<4.png, id=263, 642.4pt x 481.8pt>
+File: 4.png Graphic file (type png)
+<use 4.png>
+Package pdftex.def Info: 4.png  used on input line 1023.
+(pdftex.def)             Requested size: 256.95544pt x 192.71658pt.
+ [50 <./4.png>]
+Chapter 6.
+[51
+
+] [52]
+Overfull \hbox (362.41002pt too wide) in paragraph at lines 1071--1072
+[]$\OT1/cmtt/m/n/12 https : / / www . iflscience . com / environment / new-[]re
+port-[]warns-[]high-[]likelihood-[]of-[]human-[]civilization-[]coming-[]to-[]an
+-[]end-[]within-[]30-[]years/$
+ []
+
+[53
+
+]
+Underfull \hbox (badness 10000) in paragraph at lines 1075--1076
+[]$\OT1/cmtt/m/n/12 https : / / nsidc . org / cryosphere / glaciers / gallery /
+ retreating .
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1084--1085
+[]$\OT1/cmtt/m/n/12 http : / / www . fis . uni-[]bonn . de / en / recherchetool
+s / infobox / professionals /
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1089--1092
+[]\OT1/cmr/m/n/12 Spectral res-o-lu-tion deailed $\OT1/cmtt/m/n/12 https : / / 
+www . geoimage . com . au / SWIR % 20Series /
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1094--1096
+[]$\OT1/cmtt/m/n/12 https : / / www . esri . com / arcgis-[]blog / products / p
+roduct / imagery /
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1098--1100
+[]$\OT1/cmtt/m/n/12 https : / / landsat . gsfc . nasa . gov / landsat-[]data-[]
+continuity-[]mission/$
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1102--1104
+[]$\OT1/cmtt/m/n/12 https : / / landsat . gsfc . nasa . gov / operational-[]lan
+d-[]imager-[]oli/$
+ []
+
+
+Overfull \hbox (311.51pt too wide) in paragraph at lines 1106--1108
+[]$\OT1/cmtt/m/n/12 https : / / www . usgs . gov / centers / eros / science / u
+sgs-[]eros-[]archive-[]landsat-[]archives-[]landsat-[]8-[]oli-[]operational-[]l
+and-[]imager-[]and ?
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1109--1112
+[]\OT1/cmr/m/n/12 Thermal In-frared Sen-sor $\OT1/cmtt/m/n/12 https : / / lands
+at . gsfc . nasa . gov /
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1114--1116
+[]$\OT1/cmtt/m/n/12 https : / / www . gim-[]international . com / content / art
+icle /
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1118--1120
+[]$\OT1/cmtt/m/n/12 https : / / landsat . gsfc . nasa . gov / the-[]worldwide-[
+]reference-[]system/$
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1122--1124
+[]$\OT1/cmtt/m/n/12 https : / / www . usgs . gov / land-[]resources / nli / lan
+dsat / landsat-[]collection-[]1 ?
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1122--1124
+\OT1/cmtt/m/n/12 qt-[]science _ support _ page _ related _ con = 1 # qt-[]scien
+ce _ support _ page _
+ []
+
+[54]
+Underfull \hbox (badness 10000) in paragraph at lines 1126--1128
+[]$\OT1/cmtt/m/n/12 https : / / www . usgs . gov / media / images / landsat-[]8
+-[]band-[]designations$
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1155--1158
+[]\OT1/cmr/m/n/12 PyCharm cross-platform. $\OT1/cmtt/m/n/12 https : / / en . wi
+kipedia . org / wiki / PyCharm$
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1159--1162
+[]\OT1/cmr/m/n/12 Python def-i-ni-tion. $\OT1/cmtt/m/n/12 https : / / en . wiki
+pedia . org / wiki / Python _ (programming _
+ []
+
+Missing character: There is no â in font cmtt12!
+Missing character: There is no € in font cmtt12!
+Missing character: There is no “ in font cmtt12!
+
+Underfull \hbox (badness 10000) in paragraph at lines 1163--1166
+[]\OT1/cmr/m/n/12 The Zen of Python $\OT1/cmtt/m/n/12 Peters ,[] Tim(19August20
+04 ) ."PEP20TheZenofPython" .
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1163--1166
+\OT1/cmtt/m/n/12 PythonEnhancementProposals . PythonSoftwareFoundation .
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1167--1170
+[]\OT1/cmr/m/n/12 Definition of Git $\OT1/cmtt/m/n/12 Scopatz ,[] Anthony ; Huf
+f ,[] KathrynD . (2015 )
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1167--1170
+\OT1/cmtt/m/n/12 .EffectiveComputationinPhysics . O '[] ReillyMedia ,[] Inc . p
+ . 351 .
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1167--1170
+\OT1/cmtt/m/n/12 ISBN9781491901595 . Archivedfromtheoriginalon7May2016 .
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1171--1174
+[]\OT1/cmr/m/n/12 Linus Tor-valds on Git. $\OT1/cmtt/m/n/12 Torvalds ,[] Linus(
+10June2007 ) ."Re : fatal :
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1175--1178
+[]\OT1/cmr/m/n/12 Linus Tor-valds about Git goals. $\OT1/cmtt/m/n/12 LinusTorva
+lds(3May2007 )
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1175--1178
+\OT1/cmtt/m/n/12 .Googletechtalk : LinusTorvaldsongit . Eventoccursat02 : 30 .
+ []
+
+[55]
+Underfull \hbox (badness 10000) in paragraph at lines 1179--1182
+[]\OT1/cmr/m/n/12 General in-for-ma-tion about Git $\OT1/cmtt/m/n/12 https : / 
+/ en . wikipedia . org / wiki / Git$
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1183--1186
+[]\OT1/cmr/m/n/12 Fast and scal-able Git $\OT1/cmtt/m/n/12 Torvalds ,[] Linus(1
+9October2006 ) ."Re :
+ []
+
+
+Overfull \hbox (37.30986pt too wide) in paragraph at lines 1220--1222
+[]$\OT1/cmtt/m/n/12 https : / / gisgeography . com / usgs-[]earth-[]explorer-[]
+download-[]free-[]landsat-[]imagery/$
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1236--1238
+[]$\OT1/cmtt/m/n/12 https : / / docs . opencv . org / 3 . 0-[]beta / doc / py _
+ tutorials / py _ feature2d / py _
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1240--1242
+[]$\OT1/cmtt/m/n/12 https : / / opencv-[]python-[]tutroals . readthedocs . io /
+ en / latest / py _ tutorials /
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1244--1246
+[]$\OT1/cmtt/m/n/12 https : / / docs . opencv . org / 3 . 0-[]beta / doc / py _
+ tutorials / py _ feature2d / py _
+ []
+
+[56]
+Underfull \hbox (badness 10000) in paragraph at lines 1248--1250
+[]$\OT1/cmtt/m/n/12 https : / / docs . opencv . org / 3 . 4 . 3 / dc / d0d / tu
+torial _ py _ features _ harris . html$
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1260--1262
+[]$\OT1/cmtt/m/n/12 https : / / docs . opencv . org / 3 . 3 . 1 / d7 / d8b / tu
+torial _ py _ lucas _ kanade . html$
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1271--1273
+[]$\OT1/cmtt/m/n/12 https : / / www . cv-[]foundation . org / openaccess / cont
+ent _ iccv _ 2015 / papers /
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1274--1276
+[]$\OT1/cmtt/m/n/12 http : / / www . mastertheboss . com / jboss-[]server / jbo
+ss-[]script /
+ []
+
+[57]
+Appendix A.
+[58
+
+] (./Licenta.aux)
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: There were multiply-defined labels.
+
+ ) 
+Here is how much of TeX's memory you used:
+ 6668 strings out of 492623
+ 89952 string characters out of 6130947
+ 370980 words of memory out of 5000000
+ 10399 multiletter control sequences out of 15000+600000
+ 11918 words of font info for 43 fonts, out of 8000000 for 9000
+ 1141 hyphenation exceptions out of 8191
+ 41i,11n,47p,1695b,1233s stack positions out of 5000i,500n,10000p,200000b,80000s
+</app/texmf-dist/fonts/type1/public/amsfonts/cm/cmbsy10.pfb></app/texmf-dist/
+fonts/type1/public/amsfonts/cm/cmbx12.pfb></app/texmf-dist/fonts/type1/public/a
+msfonts/cm/cmcsc10.pfb></app/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.p
+fb></app/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></app/texmf-dist/f
+onts/type1/public/amsfonts/cm/cmr12.pfb></app/texmf-dist/fonts/type1/public/ams
+fonts/cm/cmr8.pfb></app/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></
+app/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></app/texmf-dist/fonts/
+type1/public/amsfonts/cm/cmti12.pfb></app/texmf-dist/fonts/type1/public/amsfont
+s/cm/cmtt10.pfb></app/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
+Output written on Licenta.pdf (67 pages, 43709696 bytes).
+PDF statistics:
+ 335 PDF objects out of 1000 (max. 8388607)
+ 187 compressed objects within 2 object streams
+ 0 named destinations out of 1000 (max. 500000)
+ 266 words of extra memory for PDF output out of 10000 (max. 10000000)
+
