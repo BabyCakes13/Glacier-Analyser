@@ -43,7 +43,7 @@ DEFAULT_END_DATE = datetime.datetime.now().strftime('%Y-%m-%d')
 
 # download parameters
 DEFAULT_CLOUD_COVERAGE = "5"
-BBOX_SIZE = 0.000001
+BBOX_SIZE = 0.00001
 
 # processing
 MAX_PROCESSES = 4

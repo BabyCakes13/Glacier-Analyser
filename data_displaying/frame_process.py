@@ -7,15 +7,18 @@ from tkinter import *
 from tkinter import filedialog
 
 import definitions
+import sys
 
 sys.path.append(sys.path[0] + '/..')
-from data_displaying import page as fh  # noqapep8 
+from data_displaying import page as fh  # noqapep8
 
 
 class FrameProcess(fh.Page):
     """
     Class which handles process calling in the GUI.
     """
+
+    ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
     def __init__(self, *args, **kwargs):
         """
@@ -92,7 +95,7 @@ class FrameProcess(fh.Page):
         Implement file hierarchy browsing to find the big glacier directory.
         :return: None
         """
-        filename = filedialog.askdirectory(initialdir=definitions.ROOT_DIR, title="Select directory which has glacier "
+        filename = filedialog.askdirectory(initialdir=self.ROOT_DIR, title="Select directory which has glacier "
                                                                                   "directories for processing.")
         self.set_input(filename, self.big_input_entry)
 
@@ -101,7 +104,7 @@ class FrameProcess(fh.Page):
         Implement file hierarchy browsing to find the glacier directory.
         :return: None
         """
-        filename = filedialog.askdirectory(initialdir=definitions.ROOT_DIR, title="Select directory which has the TIF"
+        filename = filedialog.askdirectory(initialdir=self.ROOT_DIR, title="Select directory which has the TIF"
                                                                                   "images for processing..")
         self.set_input(filename, self.input_entry)
 
@@ -110,7 +113,7 @@ class FrameProcess(fh.Page):
         Implement file hierarchy browsing to find the output directory.
         :return: None
         """
-        filename = filedialog.askdirectory(initialdir=definitions.ROOT_DIR, title="Select directory which will hold the"
+        filename = filedialog.askdirectory(initialdir=self.ROOT_DIR, title="Select directory which will hold the"
                                                                                   "results from the processing")
         self.set_input(filename, self.output_entry)
 

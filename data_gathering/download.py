@@ -76,7 +76,7 @@ class Downloader:
                               str(float(row['lat']) - definitions.BBOX_SIZE),
                               str(float(row['lon']) + definitions.BBOX_SIZE),
                               str(float(row['lat']) + definitions.BBOX_SIZE),
-                              "-p", "eo:cloud_cover<" + definitions.DEFAULT_CLOUD_COVERAGE,
+                              "-q", "eo:cloud_cover<" + definitions.DEFAULT_CLOUD_COVERAGE,
                               "--save", json_query_filename]
         except KeyError:
             search_arglist = ["sat-search", "search", "--bbox",
@@ -84,7 +84,7 @@ class Downloader:
                               str(float(row[' lat']) - definitions.BBOX_SIZE),
                               str(float(row[' lon']) + definitions.BBOX_SIZE),
                               str(float(row[' lat']) + definitions.BBOX_SIZE),
-                              "-p", "eo:cloud_cover<" + definitions.DEFAULT_CLOUD_COVERAGE,
+                              "-q", "eo:cloud_cover<" + definitions.DEFAULT_CLOUD_COVERAGE,
                               "--save", json_query_filename]
 
         return search_arglist

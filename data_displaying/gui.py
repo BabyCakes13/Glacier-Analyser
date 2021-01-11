@@ -2,6 +2,7 @@
 Class which handles the main view of the GUI.
 """
 from tkinter import *
+import sys
 
 sys.path.append(sys.path[0] + '/..')
 from data_displaying import frame_process as fp, frame_download as fdw, frame_display as fds

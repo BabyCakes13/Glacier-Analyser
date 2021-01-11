@@ -9,6 +9,7 @@ from tkinter import *
 from tkinter import filedialog
 
 import definitions
+import sys
 
 sys.path.append(sys.path[0] + '/..')
 from data_displaying import page as fh  # noqa
@@ -18,6 +19,8 @@ class FrameDownload(fh.Page):
     """
     Class which holds the items for the download window.
     """
+
+    ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
     def __init__(self, *args, **kwargs):
         """
@@ -102,7 +105,7 @@ class FrameDownload(fh.Page):
         :return: The path to the csv glacier inventory.
         """
         filename = \
-            filedialog.askdirectory(initialdir=definitions.ROOT_DIR,
+            filedialog.askdirectory(initialdir=self.ROOT_DIR,
                                     title="Select directory for download output.")
         self.set_input(filename, self.download_dir_entry)
 

@@ -6,6 +6,7 @@ from tkinter import *
 from tkinter import filedialog
 
 import definitions
+import sys
 
 sys.path.append(sys.path[0] + '/..')
 from data_displaying import page as fh  # noqa

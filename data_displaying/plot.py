@@ -12,7 +12,7 @@ import subprocess
 # fixed the no background matplotlib bug
 import matplotlib
 
-matplotlib.use('gtk3cairo')
+# matplotlib.use('gtk3cairo')
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
 from pandas.plotting import register_matplotlib_converters

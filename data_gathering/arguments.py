@@ -26,10 +26,6 @@ class ArgsParser:
         self.add_display_arguments()
 
     def add_download_arguments(self) -> None:
-        """
-        Adds arguments to the download sub parser.
-        :return: None
-        """
         download_parser = self.subparsers.add_parser('download',
                                                      add_help=True)
         download_parser.add_argument('--csv',
@@ -50,10 +46,6 @@ class ArgsParser:
         download_parser.set_defaults(func=set_download_function)
 
     def add_process_arguments(self) -> None:
-        """
-        Adds arguments to the process sub parser.
-        :return: None
-        """
         process_parser = self.subparsers.add_parser('process',
                                                     add_help=True)
         process_parser.add_argument('--input',
@@ -79,10 +71,6 @@ class ArgsParser:
         process_parser.set_defaults(func=set_process_function)
 
     def add_display_arguments(self) -> None:
-        """
-        Adds display arguments to the parser.
-        :return: None
-        """
         process_parser = self.subparsers.add_parser('display',
                                                     add_help=True)
         process_parser.add_argument('--csv',
@@ -95,13 +83,14 @@ class ArgsParser:
 
 def activate_arguments() -> None:
     """
-    Instantiates an argument parser object and activates parsing.
-    :return: None
+    Parse the arguments and decide if the application will be started in GUI or CMD display mode.
+
+    GUI mode will be started if there are no arguments passed at the command line.
+    CMD mode will be started if arguments are passed at command line.
     """
     arguments = ArgsParser()
     args = arguments.parser.parse_args()
 
-    # start gui mode
     if check_no_arguments_passed(args):
         gui.start()
         return
@@ -113,9 +102,10 @@ def activate_arguments() -> None:
 def check_no_arguments_passed(args) -> bool:
     """
     Checks if no arguments have been passed to the application.
-    :param args: Arguments form the command line.
-    :return: True if there were to arguments found, aka all have values of none, False if at least one has a value which
-    is not None. Used for determining whether to start the application in GUI mode or not.
+
+    :param args: Start arguments passed at command line level.
+    :return: True if there were no arguments passed at command line.
+             False if we find at least one passed argument through command line.
     """
     for arg in vars(args):
         if getattr(args, arg) is not None:
